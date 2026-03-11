@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CrypView — Graphiques crypto en temps réel, indicateurs avancés et interface ultra fluide, connectés à Binance.">
+  <meta property="og:title"       content="CrypView — Marchés crypto en temps réel">
+  <meta property="og:description" content="Graphiques crypto temps réel, indicateurs techniques et interface de trading pensée pour la clarté et la vitesse.">
+  <meta property="og:type"        content="website">
+  <meta name="twitter:card"       content="summary_large_image">
+  <title>CrypView — Marchés en temps réel</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/index.css">
+</head>
+<body>
+
+<a href="#main-content" class="sr-only">Passer au contenu principal</a>
+
+<!-- ────────────── NAV ────────────── -->
+<nav id="nav" role="navigation" aria-label="Navigation principale">
+  <a class="nav-logo" href="#" aria-label="CrypView — Accueil">CRYP<span class="accent">VIEW</span></a>
+  <ul class="nav-links" role="list">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#preview">Aperçu</a></li>
+    <li><a href="#acces">Accès</a></li>
+  </ul>
+  <a class="nav-btn" href="page.html" aria-label="Lancer l'application CrypView">▶ Lancer l'app</a>
+</nav>
+
+<!-- ────────────── HERO ────────────── -->
+<section class="hero" id="main-content" aria-label="Présentation">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="hero-orb"  aria-hidden="true"></div>
+  <div class="hero-orb2" aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <div class="hero-badge" aria-label="Données live Binance — Accès gratuit">
+      <span class="badge-dot" aria-hidden="true"></span>
+      Données live Binance — Accès gratuit
+    </div>
+
+    <h1 class="hero-title">
+      Lire les<br>
+      <span class="line2">marchés</span><br>
+      <span class="hl">autrement.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Graphiques crypto en temps réel. Indicateurs professionnels.<br>
+      Interface pensée pour la clarté, la vitesse et la précision.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn-primary" href="page.html" aria-label="Accéder aux marchés crypto en temps réel">
+        ▶ &nbsp;Accéder aux marchés
+      </a>
+      <a class="btn-ghost" href="#features">Découvrir →</a>
+    </div>
+
+    <div class="hero-stats" aria-label="Chiffres clés">
+      <div class="hstat">
+        <div class="hstat-val">500<em>+</em></div>
+        <div class="hstat-label">Paires USDT</div>
+      </div>
+      <div class="hstat-sep" aria-hidden="true"></div>
+      <div class="hstat">
+        <div class="hstat-val">1<em>s</em></div>
+        <div class="hstat-label">Rafraîchissement</div>
+      </div>
+      <div class="hstat-sep" aria-hidden="true"></div>
+      <div class="hstat">
+        <div class="hstat-val">19<em>+</em></div>
+        <div class="hstat-label">Indicateurs</div>
+      </div>
+      <div class="hstat-sep" aria-hidden="true"></div>
+      <div class="hstat">
+        <div class="hstat-val">15<em>×</em></div>
+        <div class="hstat-label">Intervalles</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticker live -->
+  <div class="ticker-strip"
+       style="position:relative;margin-top:40px;width:100vw;margin-left:-40px;"
+       role="marquee" aria-label="Cours des cryptomonnaies en temps réel" aria-live="off">
+    <div class="ticker-track" id="ticker-track"></div>
+  </div>
+</section>
+
+<!-- ────────────── FEATURES ────────────── -->
+<section class="section" id="features" aria-labelledby="features-title">
+  <div class="section-label" aria-hidden="true">Fonctionnalités</div>
+  <h2 class="section-title" id="features-title">Tout ce qu'il faut.<br><span>Rien de superflu.</span></h2>
+
+  <div class="features-grid" role="list">
+    <article class="feat-card" role="listitem">
+      <div class="feat-num" aria-hidden="true">01</div>
+      <div class="feat-icon" aria-hidden="true">⚡</div>
+      <h3 class="feat-title">Temps réel à la seconde</h3>
+      <p class="feat-text">Flux WebSocket direct depuis Binance. Chandeliers, trades et ticker mis à jour en continu sans aucun délai.</p>
+      <div class="feat-tags" aria-label="Technologies">
+        <span class="feat-tag">WebSocket</span>
+        <span class="feat-tag">Live</span>
+        <span class="feat-tag">1s min</span>
+      </div>
+    </article>
+
+    <article class="feat-card" role="listitem">
+      <div class="feat-num" aria-hidden="true">02</div>
+      <div class="feat-icon" aria-hidden="true">📊</div>
+      <h3 class="feat-title">Indicateurs techniques</h3>
+      <p class="feat-text">RSI, MACD, Bollinger, Stochastique, ATR, Momentum, Ichimoku, SuperTrend… Accessibles en clic droit. Panneaux synchronisés.</p>
+      <div class="feat-tags" aria-label="Indicateurs">
+        <span class="feat-tag">RSI</span>
+        <span class="feat-tag">MACD</span>
+        <span class="feat-tag">Bollinger</span>
+        <span class="feat-tag">19 indicateurs</span>
+      </div>
+    </article>
+
+    <article class="feat-card" role="listitem">
+      <div class="feat-num" aria-hidden="true">03</div>
+      <div class="feat-icon" aria-hidden="true">🔍</div>
+      <h3 class="feat-title">Recherche universelle</h3>
+      <p class="feat-text">Toutes les paires USDT actives sur Binance. Recherche instantanée par nom ou ticker avec autocomplétion.</p>
+      <div class="feat-tags">
+        <span class="feat-tag">500+ Paires</span>
+        <span class="feat-tag">Autocomplete</span>
+      </div>
+    </article>
+
+    <article class="feat-card" role="listitem">
+      <div class="feat-num" aria-hidden="true">04</div>
+      <div class="feat-icon" aria-hidden="true">🔲</div>
+      <h3 class="feat-title">Multi-graphiques</h3>
+      <p class="feat-text">Comparez 2 ou 4 actifs simultanément dans une grille synchronisée. Chaque panneau est indépendant : symbole, TF, indicateurs.</p>
+      <div class="feat-tags">
+        <span class="feat-tag">2 Charts</span>
+        <span class="feat-tag">4 Charts</span>
+        <span class="feat-tag">Grille 2×2</span>
+      </div>
+    </article>
+
+    <article class="feat-card" role="listitem">
+      <div class="feat-num" aria-hidden="true">05</div>
+      <div class="feat-icon" aria-hidden="true">📋</div>
+      <h3 class="feat-title">Flux de trades en direct</h3>
+      <p class="feat-text">Chaque transaction affichée en temps réel dans la sidebar — prix, quantité, horodatage et sens (buy/sell).</p>
+      <div class="feat-tags">
+        <span class="feat-tag">Buy/Sell</span>
+        <span class="feat-tag">Sidebar</span>
+      </div>
+    </article>
+
+    <article class="feat-card" role="listitem">
+      <div class="feat-num" aria-hidden="true">06</div>
+      <div class="feat-icon" aria-hidden="true">✏️</div>
+      <h3 class="feat-title">Drawing Tools</h3>
+      <p class="feat-text">Trendline, Fibonacci, zones, rectangles, pitchfork — tracés persistants en localStorage, suppression en clic droit.</p>
+      <div class="feat-tags">
+        <span class="feat-tag">Trendline</span>
+        <span class="feat-tag">Fibonacci</span>
+        <span class="feat-tag">Pitchfork</span>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ────────────── PREVIEW ────────────── -->
+<div class="section-preview" id="preview">
+  <div class="preview-inner">
+    <div class="preview-copy">
+      <div class="section-label" aria-hidden="true">Aperçu</div>
+      <h2 class="section-title" style="margin-bottom:20px">Puissance<br><span>visuelle.</span></h2>
+      <p class="preview-desc">
+        Graphiques en chandeliers japonais propulsés par Lightweight Charts. Grille synchronisée,
+        crosshair précis, échelles automatiques. L'information essentielle, visible au premier regard.
+      </p>
+      <a class="preview-link" href="page.html" aria-label="Ouvrir l'interface complète CrypView">
+        Ouvrir l'interface complète <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <!-- Terminal mock -->
+    <div class="terminal-mock" id="terminal-mock" role="img" aria-label="Aperçu de l'interface de trading">
+      <div class="term-header" aria-hidden="true">
+        <div class="term-dot" style="background:#ff3d5a"></div>
+        <div class="term-dot" style="background:#ffb800"></div>
+        <div class="term-dot" style="background:#00ff88"></div>
+        <span style="margin-left:10px;font-size:10px;color:#4a5568;letter-spacing:.08em">BTC / USDT — 1m</span>
+        <span style="margin-left:auto;font-size:9px;color:#00ff88;letter-spacing:.1em">● EN DIRECT</span>
+      </div>
+
+      <div class="candles-preview" id="candles-preview" aria-hidden="true"></div>
+
+      <div class="term-body" aria-hidden="true">
+        <div class="term-row"><span class="k">Ouverture</span> <span class="v"     id="tm-open">—</span></div>
+        <div class="term-row"><span class="k">Haut 24h</span>  <span class="v up"  id="tm-high">—</span></div>
+        <div class="term-row"><span class="k">Bas 24h</span>   <span class="v down"id="tm-low">—</span></div>
+        <div class="term-row"><span class="k">Volume</span>    <span class="v"     id="tm-vol">—</span></div>
+        <div class="term-row"><span class="k">Variation</span> <span class="v"    id="tm-chg">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ────────────── CTA ────────────── -->
+<section class="section-cta" id="acces" aria-labelledby="cta-title">
+  <div class="cta-inner">
+    <div class="cta-label">Accès immédiat — Gratuit</div>
+    <h2 class="cta-title" id="cta-title">Prêt à <span>analyser</span> ?</h2>
+    <p class="cta-sub">
+      Aucune inscription. Aucun compte. Aucune limite.<br>
+      Lancez l'interface et commencez à lire le marché maintenant.
+    </p>
+    <a class="cta-btn" href="page.html" aria-label="Lancer CrypView">
+      ▶ &nbsp;Lancer CrypView
+      <span class="arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<!-- ────────────── DISCLAIMER ────────────── -->
+<aside class="disclaimer" aria-label="Avertissement légal">
+  <div class="disclaimer-inner">
+    <div class="disclaimer-icon" aria-hidden="true">⚠</div>
+    <div class="disclaimer-text">
+      <strong>AVERTISSEMENT — À lire avant utilisation.</strong>
+      Les informations, graphiques et données affichés sur CrypView sont fournis à titre
+      <strong>purement informatif</strong> et ne constituent en aucun cas un conseil en investissement,
+      une recommandation d'achat ou de vente, ni une incitation à réaliser toute opération financière.
+      Les marchés de cryptoactifs sont hautement volatils et comportent un
+      <strong>risque de perte totale du capital investi</strong>.
+      Les performances passées ne préjugent pas des performances futures.
+      CrypView n'est pas un prestataire de services d'investissement réglementé.
+      L'utilisateur est seul responsable de ses décisions financières.
+    </div>
+  </div>
+</aside>
+
+<!-- ────────────── FOOTER ────────────── -->
+<footer role="contentinfo">
+  <a class="footer-logo" href="#" aria-label="CrypView">CRYP<span class="accent">VIEW</span></a>
+  <ul class="footer-links" role="list">
+    <li><a href="#features">Fonctionnalités</a></li>
+    <li><a href="#acces">Accès</a></li>
+    <li><a href="page.html">Lancer l'app</a></li>
+  </ul>
+  <div class="footer-copy">© 2025 CrypView</div>
+</footer>
+
+<script type="module" src="src/pages/index.js"></script>
+</body>
+</html>
