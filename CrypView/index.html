@@ -1,20 +1,30 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CrypView — Graphiques crypto en temps réel, indicateurs avancés et interface ultra fluide, connectés à Binance.">
-  <meta property="og:title"       content="CrypView — Marchés crypto en temps réel">
-  <meta property="og:description" content="Graphiques crypto temps réel, indicateurs techniques et interface de trading pensée pour la clarté et la vitesse.">
-  <meta property="og:type"        content="website">
-  <meta name="twitter:card"       content="summary_large_image">
-  <title>CrypView — Marchés en temps réel</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles/index.css">
-</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+    <!-- ⚡ ANTI-FLASH : script synchrone, AVANT les feuilles de style -->
+    <!-- Ce script s'exécute immédiatement, avant le premier rendu du navigateur -->
+    <script>
+      (function () {
+        var saved = localStorage.getItem('crypview-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        // On pose la classe AVANT que le CSS ne soit parsé → aucun flash
+        if (saved === 'light' || (!saved && !prefersDark)) {
+          document.documentElement.classList.add('light-theme');
+        }
+      })();
+    </script>
+  
+    <!-- ENSUITE les CSS (ils liront la classe déjà présente sur <html>) -->
+    <link rel="stylesheet" href="../styles/base.css" />
+    <link rel="stylesheet" href="../styles/components.css" />
+    <!-- ... -->
+  
+    <!-- Tes modules ES6 en dernier (defer implicite sur type=module) -->
+    <script type="module" src="../src/pages/page.js"></script>
+  </head>
 <body>
 
 <a href="#main-content" class="sr-only">Passer au contenu principal</a>
