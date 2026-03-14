@@ -16,7 +16,7 @@
 //    - Gérer les drawings (→ ChartDrawing.js — Phase 3)
 // ============================================================
 
-import { COLORS, MAX_CANDLES_IN_MEMORY, baseChartOptions, TF_API_MAP } from '../config.js';
+import { COLORS, MAX_CANDLES_IN_MEMORY, baseChartOptions, TF_API_MAP, CHART_THEMES } from '../config.js';
 import { fetchKlines, parseKlines }           from '../api/binance.rest.js';
 import { createKlineStream, createTickerStream, createTradeStream } from '../api/binance.ws.js';
 import { showToast }                          from '../utils/toast.js';
@@ -49,6 +49,7 @@ export class TradingChart {
   #resizeObserver = null;
   #lastPrice      = null;
   #open24         = null;
+  #themeHandler   = null;
 
   /**
    * @param {HTMLElement} container  — Élément DOM qui accueille le graphique
@@ -114,6 +115,7 @@ export class TradingChart {
    * qui coupe les WebSockets et les ResizeObservers."
    */
   destroy() {
+    document.removeEventListener('crypview:theme:change', this.#themeHandler);
     this.#wsKline?.destroy();
     this.#wsTicker?.destroy();
     this.#wsTrades?.destroy();
@@ -171,6 +173,19 @@ export class TradingChart {
       });
     });
     this.#resizeObserver.observe(this.#container);
+
+    // Applique le thème courant dès la création du chart
+    const initTheme = localStorage.getItem('crypview-theme') ?? 'dark';
+    this.chart.applyOptions(CHART_THEMES[initTheme] ?? CHART_THEMES.dark);
+
+    // Écoute les changements de thème — retiré dans destroy()
+    if (this.#themeHandler) {
+      document.removeEventListener('crypview:theme:change', this.#themeHandler);
+    }
+    this.#themeHandler = ({ detail }) => {
+      this.chart?.applyOptions(CHART_THEMES[detail.theme] ?? CHART_THEMES.dark);
+    };
+    document.addEventListener('crypview:theme:change', this.#themeHandler);
   }
 
   // ══════════════════════════════════════════════════════════

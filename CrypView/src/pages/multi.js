@@ -14,7 +14,7 @@
 //    - Toast sur toutes les erreurs
 // ============================================================
 
-import { BINANCE, TF_TO_MS, RENDER_THROTTLE_MS, IND_META, IND_PANEL_HEIGHT, COLORS, baseChartOptions } from '../config.js';
+import { BINANCE, TF_TO_MS, RENDER_THROTTLE_MS, IND_META, IND_PANEL_HEIGHT, COLORS, baseChartOptions, CHART_THEMES } from '../config.js';
 import { fetchKlines, parseKlines, loadAllSymbols } from '../api/binance.rest.js';
 import { WSManager } from '../api/binance.ws.js';
 import { ChartIndicators }   from '../chart/ChartIndicators.js';
@@ -390,6 +390,7 @@ class MultiChartInstance {
   #resizeObs = null;
   #lastPrice = null;
   #open24    = null;
+  #themeHandler = null;
 
   // Callbacks vers MultiChartView
   #onActiveChange;
@@ -480,6 +481,7 @@ class MultiChartInstance {
 
   /** Libère toutes les ressources définitivement. */
   destroy() {
+    document.removeEventListener('crypview:theme:change', this.#themeHandler);
     this.pause();
     this.indicators?.destroy();
     this.vp?.deactivate();
@@ -554,6 +556,19 @@ class MultiChartInstance {
       this.chart?.applyOptions({ width: el.clientWidth, height: el.clientHeight });
     });
     this.#resizeObs.observe(el);
+
+    // Applique le thème courant dès la création du chart
+    const initTheme = localStorage.getItem('crypview-theme') ?? 'dark';
+    this.chart.applyOptions(CHART_THEMES[initTheme] ?? CHART_THEMES.dark);
+
+    // Écoute les changements de thème (re-lié car le chart est recréé à chaque #initChart)
+    if (this.#themeHandler) {
+      document.removeEventListener('crypview:theme:change', this.#themeHandler);
+    }
+    this.#themeHandler = ({ detail }) => {
+      this.chart?.applyOptions(CHART_THEMES[detail.theme] ?? CHART_THEMES.dark);
+    };
+    document.addEventListener('crypview:theme:change', this.#themeHandler);
   }
 
   #initComponents(allSymbols) {

@@ -97,6 +97,11 @@ export class ThemeToggle {
       requestAnimationFrame(() => { html.style.transition = ''; });
     }
 
+    // Notifie tous les charts de la page via un événement global
+    document.dispatchEvent(new CustomEvent('crypview:theme:change', {
+      detail: { theme: this.#current }
+    }));
+
     this.#updateButton();
   }
 

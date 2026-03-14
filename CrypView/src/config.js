@@ -141,6 +141,44 @@ export const MAX_CANDLES_IN_MEMORY = 800;
 /** Hauteur des panneaux d'indicateurs sous le chart principal */
 export const IND_PANEL_HEIGHT = 125;
 
+// ── Palettes LightweightCharts par thème ──────────────────────
+// Utilisé par ChartCore et MultiChartInstance pour applyOptions()
+// lors d'un changement de thème.
+export const CHART_THEMES = {
+  dark: {
+    layout: {
+      background: { color: '#070a0f' },
+      textColor:   '#8b949e',
+    },
+    grid: {
+      vertLines: { color: '#1c2333' },
+      horzLines: { color: '#1c2333' },
+    },
+    crosshair: {
+      vertLine: { color: '#00ff8855', labelBackgroundColor: '#0d1117' },
+      horzLine: { color: '#00ff8855', labelBackgroundColor: '#0d1117' },
+    },
+    rightPriceScale: { borderColor: '#1c2333' },
+    timeScale:       { borderColor: '#1c2333' },
+  },
+  light: {
+    layout: {
+      background: { color: '#f0f2f5' },
+      textColor:   '#57606a',
+    },
+    grid: {
+      vertLines: { color: '#d0d7e3' },
+      horzLines: { color: '#d0d7e3' },
+    },
+    crosshair: {
+      vertLine: { color: '#00a85a55', labelBackgroundColor: '#ffffff' },
+      horzLine: { color: '#00a85a55', labelBackgroundColor: '#ffffff' },
+    },
+    rightPriceScale: { borderColor: '#d0d7e3' },
+    timeScale:       { borderColor: '#d0d7e3' },
+  },
+};
+
 // ── Métadonnées des indicateurs ───────────────────────────────
 // Utilisé par IndicatorModal et la barre d'indicateurs actifs
 export const IND_META = {
