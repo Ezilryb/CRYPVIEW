@@ -6,6 +6,18 @@
   <meta name="description" content="Vue multi-graphiques (4 charts) — CrypView">
   <meta name="robots" content="noindex,follow">
   <title>Multi-Charts 4 — CrypView</title>
+
+  <!-- ⚡ ANTI-FLASH — même script que page.html -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('crypview-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'light' || (!saved && !prefersDark)) {
+        document.documentElement.classList.add('light-theme');
+      }
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">

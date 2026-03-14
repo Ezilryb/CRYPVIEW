@@ -30,6 +30,7 @@ import { Header }            from '../components/Header.js';
 import { showToast }         from '../utils/toast.js';
 import { fmtPrice }          from '../utils/format.js';
 import { ThemeToggle }       from '../components/ThemeToggle.js';
+import { SettingsModal }     from '../components/SettingsModal.js';
 
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -51,6 +52,8 @@ export class MultiChartView {
   #header;
   #ctxMenu;
   #indModal;
+  #themeToggle  = null;
+  #settingsModal = null;
 
   /**
    * @param {{
@@ -191,6 +194,7 @@ export class MultiChartView {
         onSetTool:       tool => this.#activeInst.setDrawingTool(tool),
         onClearDrawings: ()   => this.#activeInst.clearDrawings(),
         onNavigate:      href => { window.location.href = href; },
+        onOpenSettingsModal: () => this.#settingsModal?.open(),
       }
     );
 
@@ -208,6 +212,12 @@ export class MultiChartView {
         this.#activeInst.removeAllIndicators();
         this.#indModal.render([]);
       },
+    });
+
+    // Thème + Settings modal
+    this.#themeToggle  = new ThemeToggle();
+    this.#settingsModal = new SettingsModal({
+      onThemeChange: (theme) => this.#themeToggle.setTheme(theme),
     });
 
     // Fermeture TF dropdowns au clic en dehors
@@ -333,6 +343,9 @@ export class MultiChartView {
 
     window.addEventListener('beforeunload', () => {
       this.#instances.forEach(inst => inst.destroy());
+      this.#settingsModal?.destroy();
+      this.#settingsModal = null;
+      this.#themeToggle   = null;
     });
   }
 }
