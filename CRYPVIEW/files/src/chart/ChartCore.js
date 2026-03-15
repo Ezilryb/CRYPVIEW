@@ -1,31 +1,24 @@
 // ============================================================
-//  src/chart/ChartCore.js — CrypView V2.1.4 (FINAL)
+//  src/chart/ChartCore.js — CrypView V2.1.4 (FINAL v3)
 //
-//  Corrections (ligne plate / chandelles fantômes) :
+//  Corrections "chandelles au point mort" :
 //
-//  [Fix 1] Flag #historyLoaded
-//    Bloque tout appel à cSeries.update() tant que setData() n'a
-//    pas terminé. Sans ce garde, un WS qui se reconnecte très vite
-//    peut appeler update() AVANT setData(), ce qui insère un seul
-//    doji "flottant" suivi d'une ligne plate — LightweightCharts
-//    rejette ensuite silencieusement les updates dont le timestamp
-//    est antérieur au doji.
+//  [Fix A] scrollToRealTime() dans onOpen
+//    Le vrai problème : le REST charge des bougies 1m, mais le WS
+//    envoie des bougies 1s (60× plus étroites). L'axe temporel
+//    reste positionné sur l'échelle 1m, rendant les nouvelles
+//    bougies 1s invisibles (1 pixel). scrollToRealTime() force
+//    LightweightCharts à repositionner la vue sur les dernières
+//    données dès que le WS se connecte.
 //
-//  [Fix 2] Destroy des streams AVANT await #loadHistory()
-//    Empêche l'ancien stream (ex: BTCUSDT) d'envoyer des messages
-//    pendant le chargement REST du nouveau symbole (ex: ETHUSDT).
+//  [Fix B] Fallback setData si update() rate
+//    Si cSeries.update() échoue (problème d'ordre temporel),
+//    on re-sync le graphique complet via setData pour éviter
+//    le gel silencieux.
 //
-//  [Fix 3] Garde k.s / k.i dans onMessage
-//    Rejette les messages WS périmés (ancien symbole ou ancien TF).
-//
-//  [Fix 4] Préfixe CustomEvent corrigé : crypview: (pas chart:)
-//    Sans ce fix, page.js n'écoutait pas les events → hideOverlay()
-//    jamais appelé → overlay "⏳ Chargement…" permanent.
-//
-//  [Supprimé] #wsKlineConnectCount / reload on reconnect
-//    Ce mécanisme appelait #loadHistory() sans await pendant que le
-//    WS envoyait déjà des messages → setData() écrasait les updates
-//    WS à mi-vol → ligne plate. Supprimé au profit du flag [Fix 1].
+//  [Fix C] #historyLoaded + guards k.s/k.i (conservés des patches précédents)
+//  [Fix D] destroyAllStreams avant await (race condition changement symbole)
+//  [Fix E] Préfixe crypview: correct pour les CustomEvents
 // ============================================================
 
 import { COLORS, MAX_CANDLES_IN_MEMORY, baseChartOptions, TF_API_MAP } from '../config.js';
@@ -58,7 +51,7 @@ export class TradingChart {
   #open24         = null;
 
   /**
-   * [Fix 1] Verrou setData / update.
+   * [Fix C] Verrou setData / update.
    * false → #loadHistory() en cours, on ignore les messages WS.
    * true  → setData() terminé, les update() sont autorisés.
    */
@@ -77,19 +70,14 @@ export class TradingChart {
 
   async start() {
     this.#emit('status', { state: 'loading', symbol: this.symbol, timeframe: this.timeframe });
-    await this.#loadHistory();       // setData() → #historyLoaded = true
-    this.#connectKlineStream();      // maintenant seulement on ouvre le WS
+    await this.#loadHistory();
+    this.#connectKlineStream();
     this.#connectTickerStream();
     this.#connectTradeStream();
   }
 
-  /**
-   * Change le symbole.
-   * [Fix 2] : streams détruits AVANT le await pour stopper
-   * immédiatement les messages de l'ancien symbole.
-   */
   async changeSymbol(newSymbol) {
-    this.#destroyAllStreams();        // [Fix 2] — avant le await
+    this.#destroyAllStreams();
     this.symbol     = newSymbol.toLowerCase();
     this.candles    = [];
     this.#lastPrice = null;
@@ -97,12 +85,8 @@ export class TradingChart {
     await this.start();
   }
 
-  /**
-   * Change le timeframe.
-   * [Fix 2] : le stream kline est détruit avant le await.
-   */
   async changeTimeframe(newTf) {
-    this.#wsKline?.destroy();        // [Fix 2] — avant le await
+    this.#wsKline?.destroy();
     this.#wsKline  = null;
     this.timeframe = newTf;
     this.candles   = [];
@@ -163,9 +147,7 @@ export class TradingChart {
   // ══════════════════════════════════════════════════════════
 
   async #loadHistory() {
-    // [Fix 1] : verrouille les update() WS pendant tout le chargement
     this.#historyLoaded = false;
-
     try {
       const raw    = await fetchKlines(this.symbol, this.timeframe);
       this.candles = parseKlines(raw);
@@ -188,8 +170,6 @@ export class TradingChart {
       showToast(msg, 'error');
       this.candles = [];
     } finally {
-      // [Fix 1] : déverrouille toujours, même en cas d'erreur REST,
-      // pour que le WS puisse quand même alimenter le graphique.
       this.#historyLoaded = true;
     }
   }
@@ -203,6 +183,11 @@ export class TradingChart {
     this.#wsKline = createKlineStream(this.symbol, this.timeframe);
 
     this.#wsKline.onOpen = () => {
+      // [Fix A] : repositionne la vue sur les dernières bougies dès la connexion.
+      // Sans cela, le chart reste positionné sur l'échelle 1m (historique),
+      // rendant les nouvelles bougies 1s invisibles (1 pixel → "ligne plate").
+      try { this.chart?.timeScale().scrollToRealTime(); } catch (_) {}
+
       this.#emit('status', { state: 'live' });
     };
 
@@ -210,13 +195,12 @@ export class TradingChart {
       const k = data.k;
       if (!k) return;
 
-      // [Fix 1] : setData() pas encore terminé → on ignore
+      // [Fix C] : setData() pas encore terminé → on ignore
       if (!this.#historyLoaded) return;
 
-      // [Fix 3] : message d'un ancien symbole ou ancien TF → on ignore
-      // k.s = 'BTCUSDT' (majuscules Binance), this.symbol = 'btcusdt'
-      if (k.s?.toLowerCase() !== this.symbol)  return;
-      if (k.i                !== this.timeframe) return;
+      // Guards symbole + timeframe — rejette messages d'anciens streams
+      if (k.s?.toLowerCase() !== this.symbol)    return;
+      if (k.i                !== this.timeframe)  return;
 
       const candle = {
         time:   Math.floor(k.t / 1000),
@@ -227,12 +211,19 @@ export class TradingChart {
         volume: +k.v,
       };
 
+      // [Fix B] : si update() échoue (désynchronisation temporelle),
+      // on re-sync le graphique complet via setData.
+      this.#updateCandleBuffer(candle);
+
+      let updateFailed = false;
       try {
         this.cSeries.update({
           time: candle.time, open: candle.open,
           high: candle.high, low: candle.low, close: candle.close,
         });
-      } catch (_) {}
+      } catch (_) {
+        updateFailed = true;
+      }
 
       try {
         this.vSeries.update({
@@ -242,7 +233,21 @@ export class TradingChart {
         });
       } catch (_) {}
 
-      this.#updateCandleBuffer(candle);
+      // [Fix B] : fallback setData si update() a raté (ex: désordre temporel)
+      if (updateFailed && this.candles.length) {
+        try {
+          this.cSeries.setData(this.candles.map((c) => ({
+            time: c.time, open: c.open, high: c.high, low: c.low, close: c.close,
+          })));
+          this.vSeries.setData(this.candles.map((c) => ({
+            time:  c.time,
+            value: c.volume,
+            color: c.close >= c.open ? COLORS.GREEN_ALPHA : COLORS.RED_ALPHA,
+          })));
+          // Re-scroll après setData forcé
+          try { this.chart?.timeScale().scrollToRealTime(); } catch (_) {}
+        } catch (_) {}
+      }
 
       if (k.x) {
         this.#emit('candle:closed', { candle, candles: this.candles });
@@ -299,7 +304,6 @@ export class TradingChart {
   //  HELPERS
   // ══════════════════════════════════════════════════════════
 
-  /** Détruit proprement les 3 streams. Appelé dans changeSymbol et destroy. */
   #destroyAllStreams() {
     this.#wsKline?.destroy();
     this.#wsTicker?.destroy();
@@ -344,10 +348,6 @@ export class TradingChart {
     });
   }
 
-  /**
-   * [Fix 4] Préfixe correct : crypview: (était chart: dans le patch précédent).
-   * page.js écoute 'crypview:status' → hideOverlay() → overlay disparaît.
-   */
   #emit(name, detail = {}) {
     this.#container?.dispatchEvent(
       new CustomEvent(`crypview:${name}`, { bubbles: true, detail })

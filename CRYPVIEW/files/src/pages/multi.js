@@ -375,6 +375,7 @@ class MultiChartInstance {
   #resizeObs = null;
   #lastPrice = null;
   #open24    = null;
+  #historyLoaded = false;
 
   // Callbacks vers MultiChartView
   #onActiveChange;
@@ -639,6 +640,8 @@ class MultiChartInstance {
   // ── Interne — données ────────────────────────────────────
 
   async #load() {
+    // [Fix B] : verrouille les update() WS pendant le chargement REST
+    this.#historyLoaded = false;
     try {
       const raw = await fetchKlines(this.sym, this.tf);
       this.candles = parseKlines(raw);
@@ -654,6 +657,9 @@ class MultiChartInstance {
       if (this.vp?.isActive()) this.vp.redraw(this.candles);
     } catch (err) {
       showToast(`Historique ${symBase(this.sym)} indisponible`, 'error');
+    } finally {
+      // [Fix B] : déverrouille même en cas d'erreur REST
+      this.#historyLoaded = true;
     }
   }
 
@@ -664,6 +670,12 @@ class MultiChartInstance {
       msg => this.#onKline(msg),
       { label: `kline-${this.idx}` }
     );
+
+    // [Fix A] : repositionne la vue dès la connexion WS
+    // (les bougies live peuvent être bien plus étroites que l'historique)
+    this.#wsKline.onOpen = () => {
+      try { this.chart?.timeScale().scrollToRealTime(); } catch (_) {}
+    };
   }
 
   #connectTicker() {
@@ -681,42 +693,55 @@ class MultiChartInstance {
   #onKline(msg) {
     const k = msg.k;
     if (!k) return;
- 
-    // [Fix 2] — Garde symbole + timeframe
-    // k.s = symbole Binance en majuscules, ex: 'BTCUSDT'
-    // k.i = intervalle, ex: '1m', '1s', '4h'
-    if (k.s?.toLowerCase() !== this.sym)  return;
-    if (k.i                !== this.tf)   return;
- 
+
+    // [Fix B] : historique pas encore chargé → on ignore
+    if (!this.#historyLoaded) return;
+
+    // [Fix D] : guards symbole + timeframe
+    if (k.s?.toLowerCase() !== this.sym) return;
+    if (k.i                !== this.tf)  return;
+
     const c = {
       time:   Math.floor(k.t / 1000),
       open:   +k.o, high:  +k.h,
       low:    +k.l, close: +k.c,
       volume: +k.v,
     };
- 
-    try { this.cSeries.update({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close }); } catch (_) {}
-    try {
-      this.vSeries.update({
-        time:  c.time,
-        value: c.volume,
-        color: c.close >= c.open ? COLORS.GREEN_ALPHA : COLORS.RED_ALPHA,
-      });
-    } catch (_) {}
- 
-    // Mise à jour du buffer en mémoire
+
+    // Met à jour le buffer AVANT d'appeler update() — permet le fallback setData
     if (this.candles.length && this.candles.at(-1).time === c.time) {
       this.candles[this.candles.length - 1] = c;
     } else {
       this.candles.push(c);
+      if (this.candles.length > 800) this.candles.shift();
     }
- 
-    // Actualisation des indicateurs sur la bougie courante
+
+    // [Fix C] : si update() échoue (désordre temporel), fallback setData
+    let updateFailed = false;
+    try { this.cSeries.update({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close }); }
+    catch (_) { updateFailed = true; }
+
+    try { this.vSeries.update({ time: c.time, value: c.volume, color: c.close >= c.open ? COLORS.GREEN_ALPHA : COLORS.RED_ALPHA }); }
+    catch (_) {}
+
+    if (updateFailed && this.candles.length) {
+      try {
+        this.cSeries.setData(this.candles.map(x => ({
+          time: x.time, open: x.open, high: x.high, low: x.low, close: x.close,
+        })));
+        this.vSeries.setData(this.candles.map(x => ({
+          time: x.time, value: x.volume,
+          color: x.close >= x.open ? COLORS.GREEN_ALPHA : COLORS.RED_ALPHA,
+        })));
+        try { this.chart?.timeScale().scrollToRealTime(); } catch (_) {}
+      } catch (_) {}
+    }
+
     if (k.x) {
       this.indicators?.refresh(this.candles);
       if (this.vp?.isActive()) this.vp.redraw(this.candles);
     }
- 
+
     this.#updatePrice(c.close);
   }
 
