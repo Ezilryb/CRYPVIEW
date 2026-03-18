@@ -6,13 +6,6 @@
 //  Persistance : clé configurable (storageKey) — une par panneau en multi.
 //  Multi-instances : une seule instance peut être "active" à la fois.
 //   L'activation d'un outil sur un panneau annule silencieusement l'autre.
-//
-//  ── Couches & Clipping ──────────────────────────────────────
-//  Le clipping de la right price scale est géré en CSS uniquement :
-//    .draw-canvas { width: calc(100% - 65px); overflow: hidden; }
-//  Le z-index est abaissé à 2 (< Footprint z:3 < VolumeProfile z:4).
-//  Aucun ResizeObserver ni MutationObserver : LightweightCharts fire
-//  subscribeVisibleLogicalRangeChange sur tout redimensionnement.
 // ============================================================
 
 // ── Singleton "instance active" — partagé entre tous les panneaux ─
@@ -20,20 +13,19 @@ let _activeDrawingInstance = null;
 
 // ── Couleurs par outil ─────────────────────────────────────────
 const STROKE = {
-  trendline:  '#00ff88',
-  fibonacci:  '#00c8ff',
-  zone:       '#00c8ff',
-  rectangle:  '#ff6eb4',
-  pitchfork:  '#ff9900',
+  trendline: '#00ff88',
+  fibonacci: '#00c8ff',
+  zone:      '#00c8ff',
+  rectangle: '#ff6eb4',
+  pitchfork: '#ff9900',
 };
 
 const FILL = {
-  trendline:  'none',
-  fibonacci:  'none',
-  // Opacités abaissées à 0.10 (était 0.15 / 0.13) pour ne pas masquer les bougies
-  zone:       'rgba(0,200,255,0.10)',
-  rectangle:  'rgba(255,110,180,0.09)',
-  pitchfork:  'none',
+  trendline: 'none',
+  fibonacci: 'none',
+  zone:      'rgba(0,200,255,0.10)',
+  rectangle: 'rgba(255,110,180,0.09)',
+  pitchfork: 'none',
 };
 
 const TOOL_POINTS = {
@@ -52,11 +44,8 @@ const TOOL_LABELS = {
   pitchfork: 'PITCHFORK — 3 points',
 };
 
-// ── Opacités ──────────────────────────────────────────────────
-// Réduites pour laisser les bougies (Klines) au premier plan visuel.
-// Avant : 0.85 (final) / 0.50 (preview)
-const ALPHA_FINAL   = 0.65;  // trait final posé — lisible sans être agressif
-const ALPHA_PREVIEW = 0.40;  // trait en cours de placement — indicatif
+const ALPHA_FINAL   = 0.65;
+const ALPHA_PREVIEW = 0.40;
 
 export class ChartDrawing {
   #chart;
@@ -69,6 +58,9 @@ export class ChartDrawing {
   #mousePixel  = { x: 0, y: 0 };
   #storageKey;
 
+  // ── Observers — stockés pour pouvoir les déconnecter ─────
+  #resizeObs = null;   // ResizeObserver créé dans #subscribeChartRedraws()
+  #mutObs    = null;   // MutationObserver créé dans #subscribeChartRedraws()
 
   constructor(chart, cSeries, drawCanvas, drawSvg, storageKey = 'crypview_drawings_v2') {
     this.#chart      = chart;
@@ -79,7 +71,7 @@ export class ChartDrawing {
     this.#load();
     this.#bindEvents();
     this.#subscribeChartRedraws();
-    this.#redraw(); // syncCanvasBounds est appelé dedans
+    this.#redraw();
   }
 
   setTool(tool) {
@@ -116,6 +108,13 @@ export class ChartDrawing {
 
   destroy() {
     this.cancel();
+
+    // ── Nettoyage des observers ───────────────────────────
+    this.#resizeObs?.disconnect();
+    this.#resizeObs = null;
+    this.#mutObs?.disconnect();
+    this.#mutObs = null;
+
     // Nettoyage du SVG
     while (this.#svg.firstChild) this.#svg.removeChild(this.#svg.firstChild);
   }
@@ -130,7 +129,6 @@ export class ChartDrawing {
   }
 
   // ── Privé — synchronisation bounds ───────────────────────
-  /** Exclut la colonne du price scale ET la ligne du time scale. */
   #syncCanvasBounds() {
     try {
       const psWidth  = this.#chart.priceScale('right').width();
@@ -201,32 +199,37 @@ export class ChartDrawing {
     this.#chart.subscribeCrosshairMove(() => {
       if (this.#currentTool && this.#tempAnchors.length > 0) this.#redraw();
     });
-    new ResizeObserver(redraw).observe(this.#canvas);
+
+    // ── ResizeObserver — stocké pour disconnect() dans destroy() ──
+    this.#resizeObs = new ResizeObserver(redraw);
+    this.#resizeObs.observe(this.#canvas);
 
     const root = this.#canvas.closest('.chart-panel') ??
                  this.#canvas.closest('#chart-container') ??
                  this.#canvas;
+
+    // ── MutationObserver — stocké pour disconnect() dans destroy() ──
     let raf = false;
-    new MutationObserver(() => {
+    this.#mutObs = new MutationObserver(() => {
       if (raf) return;
       raf = true;
       requestAnimationFrame(() => { raf = false; this.#redraw(); });
-    }).observe(root, { attributes: true, attributeFilter: ['style'], subtree: true });
+    });
+    this.#mutObs.observe(root, {
+      attributes:      true,
+      attributeFilter: ['style'],
+      subtree:         true,
+    });
   }
 
   // ── Privé — rendu SVG ─────────────────────────────────────
-  // chartW est passé depuis offsetWidth du canvas, qui est déjà limité
-  // à la zone plot par CSS (width: calc(100% - 65px) dans charts.css).
-  // Pas de clipPath JS — le clipping est entièrement géré en CSS.
   #redraw() {
-    // ── Mise à jour des bornes à chaque redraw ──
     this.#syncCanvasBounds();
 
     while (this.#svg.firstChild) this.#svg.removeChild(this.#svg.firstChild);
 
     const W = this.#canvas.offsetWidth || 800;
 
-    // Dessins finalisés
     for (const d of this.#drawings) {
       const pxPts = d.anchors.map(a => this.#anchorToPixel(a)).filter(Boolean);
       if (pxPts.length < TOOL_POINTS[d.type]) continue;
@@ -241,7 +244,6 @@ export class ChartDrawing {
       this.#svg.appendChild(el);
     }
 
-    // Dessin en cours (preview)
     if (this.#currentTool && this.#tempAnchors.length > 0) {
       const pxTemp = this.#tempAnchors.map(a => this.#anchorToPixel(a)).filter(Boolean);
       this.#svg.appendChild(
@@ -250,28 +252,9 @@ export class ChartDrawing {
     }
   }
 
-  /**
-   * Construit le fragment SVG d'une forme donnée.
-   *
-   * @param {string}   type      — Nom de l'outil
-   * @param {Array}    pts       — Points en pixels [{x, y}, ...]
-   * @param {boolean}  isPreview — true pendant le placement (avant confirmation)
-   * @param {number}   chartW    — Largeur disponible (hors price scale)
-   * @returns {SVGGElement}
-   *
-   * ── Opacité ───────────────────────────────────────────────
-   * ALPHA_FINAL   = 0.65 : dessins posés, lisibles sans masquer les bougies
-   * ALPHA_PREVIEW = 0.40 : indicatif pendant le placement, très discret
-   *
-   * ── Clipping horizontal ───────────────────────────────────
-   * Toutes les extensions horizontales (x2: ext, width: W) sont bornées
-   * à chartW. Le <clipPath> parent garantit un second niveau de sécurité,
-   * mais borner ici évite des artefacts graphiques sur certains moteurs SVG.
-   */
   #renderShape(type, pts, isPreview, chartW = 800) {
     const stroke = STROKE[type] ?? '#00ff88';
     const fill   = FILL[type]   ?? 'none';
-    // Opacité réduite : dessins en arrière-plan par rapport aux bougies
     const alpha  = isPreview ? ALPHA_PREVIEW : ALPHA_FINAL;
     const g      = this.#svgEl('g', {
       class:   'draw-shape' + (isPreview ? ' draw-preview' : ''),
@@ -284,12 +267,9 @@ export class ChartDrawing {
       const len = Math.sqrt(dx * dx + dy * dy) || 1;
       const ext = 5000;
       g.appendChild(this.#svgEl('line', {
-        x1: p1.x - dx / len * ext,
-        y1: p1.y - dy / len * ext,
-        x2: p2.x + dx / len * ext,
-        y2: p2.y + dy / len * ext,
-        stroke,
-        'stroke-width': 1.5,
+        x1: p1.x - dx / len * ext, y1: p1.y - dy / len * ext,
+        x2: p2.x + dx / len * ext, y2: p2.y + dy / len * ext,
+        stroke, 'stroke-width': 1.5,
       }));
       [p1, p2].forEach(p => g.appendChild(
         this.#svgEl('circle', { cx: p.x, cy: p.y, r: 4, fill: stroke })
@@ -304,16 +284,8 @@ export class ChartDrawing {
       levels.forEach((lvl, i) => {
         const y = p2.y - H * lvl;
         const c = colors[i];
-        g.appendChild(this.#svgEl('line', {
-          x1: 0, y1: y, x2: chartW, y2: y,
-          stroke: c, 'stroke-width': 1,
-        }));
-        const t = this.#svgEl('text', {
-          x: 10, y: y - 3,
-          fill: c,
-          'font-size': 9,
-          'font-family': 'Space Mono,monospace',
-        });
+        g.appendChild(this.#svgEl('line', { x1: 0, y1: y, x2: chartW, y2: y, stroke: c, 'stroke-width': 1 }));
+        const t = this.#svgEl('text', { x: 10, y: y - 3, fill: c, 'font-size': 9, 'font-family': 'Space Mono,monospace' });
         t.textContent = (lvl * 100).toFixed(1) + '%';
         g.appendChild(t);
       });
@@ -330,28 +302,17 @@ export class ChartDrawing {
       const [p1, p2] = pts;
       const y = Math.min(p1.y, p2.y);
       const h = Math.abs(p2.y - p1.y);
-      g.appendChild(this.#svgEl('rect', {
-        x: 0, y,
-        width: chartW, height: Math.max(h, 2),
-        fill, stroke, 'stroke-width': 1,
-      }));
+      g.appendChild(this.#svgEl('rect', { x: 0, y, width: chartW, height: Math.max(h, 2), fill, stroke, 'stroke-width': 1 }));
       [p1.y, p2.y].forEach(yl => g.appendChild(this.#svgEl('line', {
-        x1: 0, y1: yl, x2: chartW, y2: yl,
-        stroke, 'stroke-width': 1, 'stroke-dasharray': '6 3',
+        x1: 0, y1: yl, x2: chartW, y2: yl, stroke, 'stroke-width': 1, 'stroke-dasharray': '6 3',
       })));
     }
 
     if (type === 'rectangle' && pts.length >= 2) {
       const [p1, p2] = pts;
-      const x = Math.min(p1.x, p2.x);
-      const y = Math.min(p1.y, p2.y);
-      const w = Math.abs(p2.x - p1.x);
-      const h = Math.abs(p2.y - p1.y);
-      g.appendChild(this.#svgEl('rect', {
-        x, y,
-        width: Math.max(w, 2), height: Math.max(h, 2),
-        fill, stroke, 'stroke-width': 1.5, rx: 1,
-      }));
+      const x = Math.min(p1.x, p2.x), y = Math.min(p1.y, p2.y);
+      const w = Math.abs(p2.x - p1.x),   h = Math.abs(p2.y - p1.y);
+      g.appendChild(this.#svgEl('rect', { x, y, width: Math.max(w, 2), height: Math.max(h, 2), fill, stroke, 'stroke-width': 1.5, rx: 1 }));
       [p1, p2, { x: p1.x, y: p2.y }, { x: p2.x, y: p1.y }].forEach(p =>
         g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 3, fill: stroke }))
       );
@@ -359,14 +320,12 @@ export class ChartDrawing {
 
     if (type === 'pitchfork' && pts.length >= 3) {
       const [p1, p2, p3] = pts;
-      const mx  = (p2.x + p3.x) / 2;
-      const my  = (p2.y + p3.y) / 2;
-      const dx  = mx - p1.x, dy = my - p1.y;
+      const mx  = (p2.x + p3.x) / 2, my  = (p2.y + p3.y) / 2;
+      const dx  = mx - p1.x,          dy  = my - p1.y;
       const len = Math.sqrt(dx * dx + dy * dy) || 1;
       const ext = 5000;
       g.appendChild(this.#svgEl('line', {
-        x1: p1.x, y1: p1.y,
-        x2: p1.x + dx / len * ext, y2: p1.y + dy / len * ext,
+        x1: p1.x, y1: p1.y, x2: p1.x + dx / len * ext, y2: p1.y + dy / len * ext,
         stroke, 'stroke-width': 1.5,
       }));
       [p2, p3].forEach(pp => {
@@ -374,8 +333,7 @@ export class ChartDrawing {
         const dy2 = pp.y - p1.y + (dy / len) * 200;
         const ll  = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 1;
         g.appendChild(this.#svgEl('line', {
-          x1: pp.x, y1: pp.y,
-          x2: pp.x + dx2 / ll * ext, y2: pp.y + dy2 / ll * ext,
+          x1: pp.x, y1: pp.y, x2: pp.x + dx2 / ll * ext, y2: pp.y + dy2 / ll * ext,
           stroke, 'stroke-width': 1, 'stroke-dasharray': '5 3',
         }));
       });
@@ -419,7 +377,7 @@ export class ChartDrawing {
 
   // ── Privé — toolbar ───────────────────────────────────────
   #showToolbar(label) {
-    const tb = document.getElementById('draw-toolbar');
+    const tb  = document.getElementById('draw-toolbar');
     const lbl = document.getElementById('draw-toolbar-label');
     if (tb)  tb.classList.add('visible');
     if (lbl) lbl.textContent = label;

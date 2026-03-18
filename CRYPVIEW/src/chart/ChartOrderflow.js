@@ -26,6 +26,10 @@ export class ChartOrderflow {
   #redrawPending = false;
   #redrawSubs    = false;
 
+  // ── Observers — stockés pour pouvoir les déconnecter ─────
+  #resizeObs2 = null;   // ResizeObserver créé dans #subscribeRedraws()
+  #mutObs     = null;   // MutationObserver créé dans #subscribeRedraws()
+
   /**
    * @param {IChartApi}   chart
    * @param {ISeriesApi}  cSeries
@@ -43,11 +47,8 @@ export class ChartOrderflow {
 
   /**
    * Active l'Orderflow.
-   * Le sous-graphique LW est déjà monté par ChartIndicators ;
-   * on reçoit ses séries pour les alimenter en live.
-   *
    * @param {Candle[]}   candles
-   * @param {IndState}   indState  — état de l'indicateur 'of' (ind.s.deltaHist, ind.s.cvdLine)
+   * @param {IndState}   indState  — état de l'indicateur 'of'
    */
   activate(candles, indState) {
     if (this.#active) return;
@@ -63,9 +64,16 @@ export class ChartOrderflow {
     if (!this.#active) return;
     this.#active     = false;
     this.#redrawSubs = false;
+
     this.#ws?.destroy();
     this.#ws = null;
     this.#data.clear();
+
+    // ── Nettoyage des observers ───────────────────────────
+    this.#resizeObs2?.disconnect();
+    this.#resizeObs2 = null;
+    this.#mutObs?.disconnect();
+    this.#mutObs = null;
 
     if (this.#canvas) {
       this.#canvas.getContext('2d').clearRect(0, 0, this.#canvas.width, this.#canvas.height);
@@ -77,6 +85,13 @@ export class ChartOrderflow {
   reconnect(candles, indState) {
     this.#data.clear();
     this.#redrawSubs = false;
+
+    // Déconnecte les anciens observers avant de les recréer
+    this.#resizeObs2?.disconnect();
+    this.#resizeObs2 = null;
+    this.#mutObs?.disconnect();
+    this.#mutObs = null;
+
     this.#ws?.destroy();
     this.#ws = null;
     this.#seed(candles);
@@ -87,14 +102,13 @@ export class ChartOrderflow {
 
   /**
    * Réalimente le sous-graphique LW avec les données de la Map courante.
-   * Appeler après un chargement d'historique ou refresh.
    * @param {Candle[]} candles
    * @param {IndState} indState
    */
   pushToChart(candles, indState) {
     if (!indState?.s) return;
     const { cvdLine, deltaHist } = this.#buildCVDSeries(candles);
-    try { indState.s.cvdLine?.setData(cvdLine); }   catch (_) {}
+    try { indState.s.cvdLine?.setData(cvdLine); }    catch (_) {}
     try { indState.s.deltaHist?.setData(deltaHist); } catch (_) {}
   }
 
@@ -105,7 +119,7 @@ export class ChartOrderflow {
   isActive() { return this.#active; }
 
   destroy() {
-    this.deactivate();
+    this.deactivate();      // déconnecte WS + observers + efface canvas
     this.#canvas?.remove();
     this.#canvas = null;
   }
@@ -136,13 +150,15 @@ export class ChartOrderflow {
       if (!this.#active) return;
       this.#addTrade(parseFloat(data.p), parseFloat(data.q), !data.m, data.T);
 
-      // Mise à jour live du sous-graphique LW
       if (indState?.s && candles.length) {
         const last = candles.at(-1);
         const d    = this.#data.get(last.time);
         if (d) {
           try {
-            indState.s.deltaHist?.update({ time: last.time, value: d.delta, color: d.delta >= 0 ? 'rgba(0,255,136,0.65)' : 'rgba(255,61,90,0.65)' });
+            indState.s.deltaHist?.update({
+              time: last.time, value: d.delta,
+              color: d.delta >= 0 ? 'rgba(0,255,136,0.65)' : 'rgba(255,61,90,0.65)',
+            });
           } catch (_) {}
           try {
             let cvd = 0;
@@ -162,7 +178,9 @@ export class ChartOrderflow {
     const tfMs       = TF_TO_MS[timeframe] ?? 60_000;
     const candleTime = Math.floor(tradeTimeMs / tfMs) * (tfMs / 1000);
 
-    if (!this.#data.has(candleTime)) this.#data.set(candleTime, { askVol: 0, bidVol: 0, delta: 0, trades: 0 });
+    if (!this.#data.has(candleTime)) {
+      this.#data.set(candleTime, { askVol: 0, bidVol: 0, delta: 0, trades: 0 });
+    }
     const d = this.#data.get(candleTime);
     if (isBuy) d.askVol += qty; else d.bidVol += qty;
     d.delta  = d.askVol - d.bidVol;
@@ -180,7 +198,10 @@ export class ChartOrderflow {
       const delta = d?.delta ?? 0;
       cvd += delta;
       cvdLine.push({ time: c.time, value: cvd });
-      deltaHist.push({ time: c.time, value: delta, color: delta >= 0 ? 'rgba(0,255,136,0.65)' : 'rgba(255,61,90,0.65)' });
+      deltaHist.push({
+        time: c.time, value: delta,
+        color: delta >= 0 ? 'rgba(0,255,136,0.65)' : 'rgba(255,61,90,0.65)',
+      });
     }
     return { cvdLine, deltaHist };
   }
@@ -218,12 +239,12 @@ export class ChartOrderflow {
       const candleH = Math.abs(yLow - yHigh);
       if (candleH < 4) continue;
 
-      const halfW    = Math.min(barWidthPx * 0.38, 22);
-      const total    = d.askVol + d.bidVol || 1;
-      const askH     = candleH * (d.askVol / total);
-      const bidH     = candleH * (d.bidVol / total);
-      const barX     = xCenter + halfW * 0.1;
-      const barW     = Math.max(3, halfW * 0.6);
+      const halfW = Math.min(barWidthPx * 0.38, 22);
+      const total = d.askVol + d.bidVol || 1;
+      const askH  = candleH * (d.askVol / total);
+      const bidH  = candleH * (d.bidVol / total);
+      const barX  = xCenter + halfW * 0.1;
+      const barW  = Math.max(3, halfW * 0.6);
 
       ctx.fillStyle = 'rgba(255,61,90,0.30)';
       ctx.fillRect(barX, yLow - bidH, barW, bidH);
@@ -240,9 +261,8 @@ export class ChartOrderflow {
         ctx.fillText((d.delta >= 0 ? '+' : '-') + txt, xCenter, yText);
       }
 
-      // Absorption : pression contraire à la direction de la bougie
-      const ratio   = (d.askVol - d.bidVol) / total;
-      const isBull  = c.close >= c.open;
+      const ratio  = (d.askVol - d.bidVol) / total;
+      const isBull = c.close >= c.open;
       if ((ratio < -0.35 && isBull) || (ratio > 0.35 && !isBull)) {
         ctx.strokeStyle = 'rgba(255,200,0,0.55)';
         ctx.lineWidth   = 1;
@@ -264,15 +284,24 @@ export class ChartOrderflow {
     this.#chart.timeScale().subscribeVisibleLogicalRangeChange(redraw);
     this.#chart.subscribeCrosshairMove(redraw);
 
-    new ResizeObserver(() => { if (this.#active) { this.#canvas.width = 0; this.#draw(candles); } })
-      .observe(this.#container);
+    // ── ResizeObserver — stocké pour disconnect() dans deactivate() ──
+    this.#resizeObs2 = new ResizeObserver(() => {
+      if (this.#active) { this.#canvas.width = 0; this.#draw(candles); }
+    });
+    this.#resizeObs2.observe(this.#container);
 
+    // ── MutationObserver — stocké pour disconnect() dans deactivate() ──
     let raf = false;
-    new MutationObserver(() => {
+    this.#mutObs = new MutationObserver(() => {
       if (raf || !this.#active) return;
       raf = true;
       requestAnimationFrame(() => { raf = false; this.#draw(candles); });
-    }).observe(this.#container, { attributes: true, attributeFilter: ['style'], subtree: true });
+    });
+    this.#mutObs.observe(this.#container, {
+      attributes:      true,
+      attributeFilter: ['style'],
+      subtree:         true,
+    });
   }
 
   #schedRedraw() {

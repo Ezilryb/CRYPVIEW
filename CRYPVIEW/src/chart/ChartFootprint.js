@@ -5,7 +5,7 @@
 //  Cycle de vie :
 //    new ChartFootprint(chart, cSeries, container, getSymTf)
 //    .activate(candles)   → seed historique + WS + canvas
-//    .deactivate()        → coupe WS + efface canvas
+//    .deactivate()        → coupe WS + efface canvas + observers
 //    .redraw(candles)     → redessine sur demande
 //    .destroy()           → libère tout
 // ============================================================
@@ -25,6 +25,10 @@ export class ChartFootprint {
   #active   = false;
   #redrawPending = false;
   #redrawSubs    = false;
+
+  // ── Observers — stockés pour pouvoir les déconnecter ─────
+  #resizeObs2 = null;   // ResizeObserver créé dans #subscribeRedraws()
+  #mutObs     = null;   // MutationObserver créé dans #subscribeRedraws()
 
   /**
    * @param {IChartApi}   chart
@@ -55,12 +59,18 @@ export class ChartFootprint {
 
   deactivate() {
     if (!this.#active) return;
-    this.#active       = false;
-    this.#redrawSubs   = false;
+    this.#active     = false;
+    this.#redrawSubs = false;
 
     this.#ws?.destroy();
     this.#ws = null;
     this.#data.clear();
+
+    // ── Nettoyage des observers ───────────────────────────
+    this.#resizeObs2?.disconnect();
+    this.#resizeObs2 = null;
+    this.#mutObs?.disconnect();
+    this.#mutObs = null;
 
     document.getElementById('fp-legend')?.classList.remove('visible');
     if (this.#canvas) {
@@ -77,6 +87,13 @@ export class ChartFootprint {
   reconnect(candles) {
     this.#data.clear();
     this.#redrawSubs = false;
+
+    // Déconnecte les anciens observers avant de les recréer
+    this.#resizeObs2?.disconnect();
+    this.#resizeObs2 = null;
+    this.#mutObs?.disconnect();
+    this.#mutObs = null;
+
     this.#ws?.destroy();
     this.#ws = null;
     this.#seed(candles);
@@ -88,7 +105,7 @@ export class ChartFootprint {
   isActive() { return this.#active; }
 
   destroy() {
-    this.deactivate();
+    this.deactivate();      // déconnecte WS + observers + efface canvas
     this.#canvas?.remove();
     this.#canvas = null;
   }
@@ -142,10 +159,10 @@ export class ChartFootprint {
 
   #addTrade(price, qty, isBuy, tradeTimeMs) {
     const { timeframe } = this.#getSymTf();
-    const tfMs      = TF_TO_MS[timeframe] ?? 60_000;
+    const tfMs       = TF_TO_MS[timeframe] ?? 60_000;
     const candleTime = Math.floor(tradeTimeMs / tfMs) * (tfMs / 1000);
-    const tick      = this.#tickSize(price);
-    const bucketKey = parseFloat((Math.floor(price / tick) * tick).toFixed(10));
+    const tick       = this.#tickSize(price);
+    const bucketKey  = parseFloat((Math.floor(price / tick) * tick).toFixed(10));
 
     if (!this.#data.has(candleTime)) this.#data.set(candleTime, new Map());
     const buckets = this.#data.get(candleTime);
@@ -210,13 +227,11 @@ export class ChartFootprint {
         const delta = b.askVol - b.bidVol;
         const ratio = total > 0 ? delta / total : 0;
 
-        // Fond delta coloré
         ctx.fillStyle = ratio > 0
           ? `rgba(0,255,136,${Math.min(0.35, ratio * 0.35)})`
           : `rgba(255,61,90,${Math.min(0.35, -ratio * 0.35)})`;
         ctx.fillRect(xCenter - halfBar, y, halfBar * 2, h);
 
-        // Imbalance ≥ 3:1
         const isImb = (b.bidVol > 0 && b.askVol / b.bidVol >= 3) || (b.askVol > 0 && b.bidVol / b.askVol >= 3);
         if (isImb) {
           ctx.strokeStyle = '#ffd700';
@@ -254,15 +269,24 @@ export class ChartFootprint {
     this.#chart.timeScale().subscribeVisibleLogicalRangeChange(redraw);
     this.#chart.subscribeCrosshairMove(redraw);
 
-    new ResizeObserver(() => { if (this.#active) { this.#canvas.width = 0; this.#draw(candles); } })
-      .observe(this.#container);
+    // ── ResizeObserver — stocké pour disconnect() dans deactivate() ──
+    this.#resizeObs2 = new ResizeObserver(() => {
+      if (this.#active) { this.#canvas.width = 0; this.#draw(candles); }
+    });
+    this.#resizeObs2.observe(this.#container);
 
+    // ── MutationObserver — stocké pour disconnect() dans deactivate() ──
     let raf = false;
-    new MutationObserver(() => {
+    this.#mutObs = new MutationObserver(() => {
       if (raf || !this.#active) return;
       raf = true;
       requestAnimationFrame(() => { raf = false; this.#draw(candles); });
-    }).observe(this.#container, { attributes: true, attributeFilter: ['style'], subtree: true });
+    });
+    this.#mutObs.observe(this.#container, {
+      attributes:      true,
+      attributeFilter: ['style'],
+      subtree:         true,
+    });
   }
 
   #schedRedraw() {
@@ -270,8 +294,6 @@ export class ChartFootprint {
     this.#redrawPending = true;
     setTimeout(() => {
       this.#redrawPending = false;
-      // Les candles courantes sont passées depuis l'extérieur — on ne peut pas les stocker
-      // à l'avance sans créer une référence stale. On émet un CustomEvent à la place.
       this.#container.dispatchEvent(new CustomEvent('crypview:fp:redraw', { bubbles: true }));
     }, RENDER_THROTTLE_MS);
   }
