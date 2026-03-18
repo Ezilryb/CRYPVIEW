@@ -22,14 +22,27 @@ export function fmtPrice(p) {
 }
 
 /**
- * Formate un volume avec suffixe K/M.
+ * Formate un volume avec suffixe B / M / K.
+ *
+ * ── Échelles ──────────────────────────────────────────────
+ * ≥ 1 000 000 000 → milliards  (ex: 1.23B)
+ * ≥ 1 000 000     → millions   (ex: 45.67M)
+ * ≥ 1 000         → milliers   (ex: 123.4K)
+ * < 1 000         → valeur brute à 2 décimales
+ *
+ * Utilisateurs :
+ *   - Sidebar.js (stats 24h)
+ *   - src/pages/index.js (ticker landing page)
+ *
  * @param {number|string} v
  * @returns {string}
  */
 export function fmtVol(v) {
   v = parseFloat(v);
-  if (v > 1e6) return (v / 1e6).toFixed(2) + 'M';
-  if (v > 1e3) return (v / 1e3).toFixed(1) + 'K';
+  if (!isFinite(v)) return '—';
+  if (v >= 1e9) return (v / 1e9).toFixed(2) + 'B';
+  if (v >= 1e6) return (v / 1e6).toFixed(2) + 'M';
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + 'K';
   return v.toFixed(2);
 }
 
