@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <!-- ⚡ ANTI-FLASH : AVANT tout CSS -->
+    <script>
+      (function () {
+        var saved = localStorage.getItem('crypview-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'light' || (!saved && !prefersDark)) {
+          document.documentElement.classList.add('light-theme');
+        }
+      })();
+    </script>
+  
+    <title>CrypView — Vue Unique</title>
+    <meta name="description"
+          content="Graphiques crypto en temps réel (1s à 1M) avec 19 indicateurs avancés, Footprint, Orderflow et Drawing Tools. Données live Binance WebSocket.">
+    <meta name="robots" content="noindex, follow">
+  
+    <meta property="og:type"        content="website">
+    <meta property="og:url"         content="https://crypview.betacapital.enterprise/page.html">
+    <meta property="og:title"       content="CrypView — Analyse Technique Crypto">
+    <meta property="og:description" content="19 indicateurs, Footprint, Orderflow & Drawing Tools. Données live Binance. Gratuit, sans inscription.">
+    <meta property="og:image"       content="/og-image.svg">
+    <meta property="og:image:type"  content="image/svg+xml">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt"   content="CrypView — interface de trading avec chandeliers et indicateurs">
+    <meta property="og:locale"      content="fr_FR">
+    <meta property="og:site_name"   content="CrypView">
+  
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:site"        content="@BetaCapital">
+    <meta name="twitter:title"       content="CrypView — Analyse Technique Crypto">
+    <meta name="twitter:description" content="19 indicateurs, Footprint, Orderflow. Données live Binance.">
+    <meta name="twitter:image"       content="/og-image.svg">
+    <meta name="twitter:image:alt"   content="CrypView — interface de trading">
+  
+    <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+    <link rel="apple-touch-icon"             href="public/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="public/favicon.svg">
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+    <meta name="mobile-web-app-capable"            content="yes">
+    <meta name="apple-mobile-web-app-capable"      content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title"        content="CrypView">
+    <meta name="msapplication-TileImage"           content="public/favicon.svg">
+    <meta name="msapplication-TileColor"           content="#070a0f">
+    <meta name="msapplication-config"              content="public/browserconfig.xml">
+  
+    <!-- ── Import map (navigateur sans bundler) ─────────────── -->
+    <script type="importmap">
+    {
+      "imports": {
+        "lightweight-charts": "https://esm.sh/lightweight-charts@4.1.3"
+      }
+    }
+    </script>
+  
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/charts.css">
+  </head>
+<body>
+
+  <a href="#main-content" class="sr-only">Aller au contenu principal</a>
+
+  <header role="banner">
+    <a class="logo" href="index.html" aria-label="CrypView — Accueil"><span>CRYP</span>VIEW</a>
+    <div class="sym-search-wrap">
+      <input id="sym-input" type="text" placeholder="Rechercher BTC..."
+             autocomplete="off" spellcheck="false" aria-label="Recherche de symbole">
+      <span class="sym-search-icon" aria-hidden="true">⌕</span>
+      <div id="sym-dropdown" role="listbox" aria-label="Résultats de recherche"></div>
+    </div>
+    <div class="tf-scroll-wrapper" role="group" aria-label="Sélection du timeframe">
+      <div class="tf-scroll" id="tf-scroll"></div>
+    </div>
+    <div class="price-display">
+      <div id="live-price" aria-live="polite" aria-label="Prix actuel">—</div>
+      <div id="price-change" aria-live="polite"></div>
+    </div>
+    <div class="status" role="status" aria-live="polite">
+      <div class="dot" id="dot" aria-hidden="true"></div>
+      <span id="status-text">Connexion…</span>
+    </div>
+  </header>
+
+  <div class="err-banner" id="err-banner" role="alert" aria-live="assertive"></div>
+  <div id="ind-bar" aria-label="Indicateurs actifs"></div>
+
+  <main class="main" id="main-content">
+    <div class="charts-col" id="charts-col">
+      <div id="chart-container" style="position:relative;">
+        <div id="overlay">
+          <div id="overlay-msg">⏳ Chargement…</div>
+          <div id="overlay-sub">Connexion à Binance</div>
+        </div>
+        <div id="fp-legend" aria-hidden="true">
+          <div><span class="fp-l-ask">▪ Ask (achat)</span> &nbsp; <span class="fp-l-bid">▪ Bid (vente)</span></div>
+          <div><span class="fp-l-imb">★ Imbalance ≥ 3×</span></div>
+        </div>
+        <div id="draw-canvas" class="draw-canvas" aria-hidden="true">
+          <svg id="draw-svg"></svg>
+        </div>
+      </div>
+    </div>
+    <aside class="sidebar" aria-label="Informations du marché">
+      <div class="sidebar-title">Stats 24h</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Ouverture</div><div class="stat-value" id="s-open">—</div></div>
+        <div class="stat"><div class="stat-label">Haut</div><div class="stat-value" id="s-high" style="color:var(--green)">—</div></div>
+        <div class="stat"><div class="stat-label">Bas</div><div class="stat-value"  id="s-low"  style="color:var(--red)">—</div></div>
+        <div class="stat"><div class="stat-label">Volume</div><div class="stat-value" id="s-vol">—</div></div>
+        <div class="stat"><div class="stat-label">Trades</div><div class="stat-value" id="s-tr">—</div></div>
+      </div>
+      <div class="sidebar-title">Trades récents</div>
+      <div class="trades-header">
+        <span>Prix</span>
+        <span style="text-align:right">Qté</span>
+        <span style="text-align:right">H.</span>
+      </div>
+      <div class="trades-list" id="trades" aria-live="polite" aria-label="Derniers trades"></div>
+    </aside>
+  </main>
+
+  <!-- ── Menu contextuel ───────────────────────────────────── -->
+  <nav id="ctx-menu" role="menu" aria-label="Menu du graphique">
+    <div class="ctx-cat" id="cat-ind" role="menuitem" aria-haspopup="true">
+      <div class="ctx-cat-left"><span class="ctx-cat-icon" aria-hidden="true">📈</span> Indicators</div>
+      <span class="ctx-cat-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-cat" id="cat-multi" role="menuitem" aria-haspopup="true">
+      <div class="ctx-cat-left"><span class="ctx-cat-icon" aria-hidden="true">🔲</span> Multi-Charts</div>
+      <span class="ctx-cat-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-cat" id="cat-draw" role="menuitem" aria-haspopup="true">
+      <div class="ctx-cat-left"><span class="ctx-cat-icon" aria-hidden="true">✏️</span> Drawing Tools</div>
+      <span class="ctx-cat-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-cat" id="cat-alerts" role="menuitem" aria-haspopup="true">
+      <div class="ctx-cat-left"><span class="ctx-cat-icon" aria-hidden="true">🔔</span> Alerts</div>
+      <span class="ctx-cat-arrow" aria-hidden="true">▶</span>
+    </div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-item" id="ctx-open-settings" role="menuitem">
+      <span style="font-size:13px">⚙️</span>
+      <span style="width:6px"></span>Settings
+    </div>
+  </nav>
+
+  <div class="ctx-sub" id="sub-ind" role="menu" aria-label="Indicateurs">
+    <div class="ctx-sub-title">📈 Indicateurs</div>
+    <div class="ctx-item" id="ctx-open-ind-modal" role="menuitem">
+      <div style="width:14px;text-align:center;font-size:12px">⊞</div>
+      <div style="width:8px"></div>Choisir les indicateurs…
+    </div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-item ctx-danger" id="ctx-remove-all" role="menuitem">
+      <div style="width:14px"></div><div style="width:8px"></div>Retirer tous les indicateurs
+    </div>
+  </div>
+
+  <div class="ctx-sub" id="sub-multi" role="menu" aria-label="Vues multi-graphiques">
+    <div class="ctx-sub-title">🔲 Multi-graphiques</div>
+    <div class="ctx-item" id="ctx-multi2" role="menuitem">
+      <div style="width:14px"></div>
+      <div class="ctx-color-dot" style="background:#00c8ff"></div>
+      2 Charts &nbsp;<span style="color:var(--muted);font-size:9px">5m / 1h</span>
+    </div>
+    <div class="ctx-item" id="ctx-multi4" role="menuitem">
+      <div style="width:14px"></div>
+      <div class="ctx-color-dot" style="background:#ff6eb4"></div>
+      4 Charts &nbsp;<span style="color:var(--muted);font-size:9px">1m / 15m / 1h / 4h</span>
+    </div>
+  </div>
+
+  <div class="ctx-sub" id="sub-draw" role="menu" aria-label="Outils de dessin">
+    <div class="ctx-sub-title">✏️ Drawing Tools</div>
+    <div class="ctx-item" data-tool="trendline" role="menuitem"><div class="ctx-check"></div><span>📏</span> Trendline</div>
+    <div class="ctx-item" data-tool="fibonacci" role="menuitem"><div class="ctx-check"></div><span>🌀</span> Fibonacci</div>
+    <div class="ctx-item" data-tool="zone"      role="menuitem"><div class="ctx-check"></div><span>🟦</span> Zone horizontale</div>
+    <div class="ctx-item" data-tool="rectangle" role="menuitem"><div class="ctx-check"></div><span>▭</span>  Rectangle</div>
+    <div class="ctx-item" data-tool="pitchfork" role="menuitem"><div class="ctx-check"></div><span>⑂</span>  Pitchfork</div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-item ctx-danger" id="ctx-clear-draws" role="menuitem">
+      <div style="width:14px"></div><span>🗑</span> Effacer tous les tracés
+    </div>
+  </div>
+
+  <!-- Modales & toolbar injectées par templates.js -->
+  <div class="ctx-sub" id="sub-alerts" role="menu" aria-label="Alertes de prix">
+    <div class="ctx-sub-title">🔔 Price Alerts</div>
+    <div class="ctx-item" id="ctx-add-alert" role="menuitem">
+      <div style="width:14px;text-align:center">🎯</div>
+      <div style="width:8px"></div>Set Alert at cursor
+    </div>
+    <div class="ctx-sep" role="separator"></div>
+    <div class="ctx-item" id="ctx-manage-alerts" role="menuitem">
+      <div style="width:14px;text-align:center">📋</div>
+      <div style="width:8px"></div>Manage Alerts
+    </div>
+  </div>
+
+  <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <script type="module" src="src/pages/page.js"></script>
+
+</body>
+</html>
