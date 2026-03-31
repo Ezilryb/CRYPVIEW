@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00ff88" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="70%" cy="30%" r="40%">
+      <stop offset="0%" stop-color="#00c8ff" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#00c8ff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#00ff88" stroke-opacity="0.04" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Fond -->
+  <rect width="1200" height="630" fill="#070a0f"/>
+  <!-- Grille -->
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <!-- Halos -->
+  <ellipse cx="600" cy="315" rx="520" ry="340" fill="url(#glow1)"/>
+  <ellipse cx="840" cy="189" rx="380" ry="252" fill="url(#glow2)"/>
+
+  <!-- Ligne de scan -->
+  <rect x="0" y="314" width="1200" height="2" fill="url(#scanGrad)" opacity="0.1"/>
+  <defs>
+    <linearGradient id="scanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="50%" stop-color="#00ff88"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mini chandeliers décoratifs à droite -->
+  <!-- Série de bougies -->
+  <g transform="translate(780, 120)" opacity="0.35">
+    <!-- Bougie 1 baissier -->
+    <rect x="0" y="60" width="2" height="20" fill="#ff3d5a" rx="1"/>
+    <rect x="-8" y="70" width="20" height="40" fill="#ff3d5a" rx="3"/>
+    <rect x="0" y="110" width="2" height="15" fill="#ff3d5a" rx="1"/>
+    <!-- Bougie 2 haussier -->
+    <rect x="36" y="30" width="2" height="20" fill="#00ff88" rx="1"/>
+    <rect x="28" y="40" width="20" height="70" fill="#00ff88" rx="3"/>
+    <rect x="36" y="110" width="2" height="20" fill="#00ff88" rx="1"/>
+    <!-- Bougie 3 haussier -->
+    <rect x="72" y="10" width="2" height="25" fill="#00ff88" rx="1"/>
+    <rect x="64" y="20" width="20" height="90" fill="#00ff88" rx="3"/>
+    <rect x="72" y="110" width="2" height="20" fill="#00ff88" rx="1"/>
+    <!-- Bougie 4 baissier -->
+    <rect x="108" y="40" width="2" height="20" fill="#ff3d5a" rx="1"/>
+    <rect x="100" y="50" width="20" height="50" fill="#ff3d5a" rx="3"/>
+    <rect x="108" y="100" width="2" height="30" fill="#ff3d5a" rx="1"/>
+    <!-- Bougie 5 haussier grand -->
+    <rect x="144" y="0" width="2" height="30" fill="#00ff88" rx="1"/>
+    <rect x="136" y="20" width="20" height="100" fill="#00ff88" rx="3"/>
+    <rect x="144" y="120" width="2" height="20" fill="#00ff88" rx="1"/>
+    <!-- Bougie 6 haussier -->
+    <rect x="180" y="15" width="2" height="20" fill="#00ff88" rx="1"/>
+    <rect x="172" y="25" width="20" height="80" fill="#00ff88" rx="3"/>
+    <rect x="180" y="105" width="2" height="25" fill="#00ff88" rx="1"/>
+    <!-- Ligne de base -->
+    <line x1="-20" y1="145" x2="210" y2="145" stroke="#1c2333" stroke-width="1.5"/>
+    <!-- Ligne EMA verte -->
+    <path d="M -20,95 Q 40,65 90,45 T 210,30" stroke="#00ff88" stroke-width="2" fill="none" opacity="0.6"/>
+    <!-- Ligne RSI cyan -->
+    <path d="M -20,120 Q 40,110 90,105 T 210,90" stroke="#00c8ff" stroke-width="1.5" fill="none" opacity="0.45"/>
+  </g>
+
+  <!-- LOGO / TITRE -->
+  <text x="100" y="280" font-family="'Syne', Arial Black, sans-serif" font-weight="800"
+        font-size="96" letter-spacing="-2" fill="#e6edf3">CRYP</text>
+  <text x="430" y="280" font-family="'Syne', Arial Black, sans-serif" font-weight="800"
+        font-size="96" letter-spacing="-2" fill="#00ff88">VIEW</text>
+
+  <!-- Trait décoratif sous le logo -->
+  <rect x="100" y="298" width="540" height="2" fill="#1c2333"/>
+  <rect x="100" y="298" width="180" height="2" fill="#00ff88" opacity="0.6"/>
+
+  <!-- Sous-titre -->
+  <text x="100" y="360" font-family="'Space Mono', monospace" font-size="22"
+        fill="#8b949e" letter-spacing="2">Graphiques crypto en temps réel</text>
+
+  <!-- Tags / Features -->
+  <g transform="translate(100, 400)">
+    <!-- Tag 1 -->
+    <rect x="0" y="0" width="158" height="32" rx="4" fill="#00ff8812" stroke="#00ff8830" stroke-width="1"/>
+    <text x="14" y="21" font-family="'Space Mono', monospace" font-size="11"
+          fill="#00ff88" letter-spacing="1">⚡ LIVE BINANCE</text>
+    <!-- Tag 2 -->
+    <rect x="174" y="0" width="148" height="32" rx="4" fill="#00c8ff12" stroke="#00c8ff30" stroke-width="1"/>
+    <text x="188" y="21" font-family="'Space Mono', monospace" font-size="11"
+          fill="#00c8ff" letter-spacing="1">📊 19 INDICATEURS</text>
+    <!-- Tag 3 -->
+    <rect x="338" y="0" width="160" height="32" rx="4" fill="#e040fb12" stroke="#e040fb30" stroke-width="1"/>
+    <text x="352" y="21" font-family="'Space Mono', monospace" font-size="11"
+          fill="#e040fb" letter-spacing="1">🔲 MULTI-CHARTS</text>
+  </g>
+
+  <!-- Point live en bas à droite -->
+  <circle cx="1100" cy="580" r="6" fill="#00ff88" opacity="0.9"/>
+  <circle cx="1100" cy="580" r="14" fill="#00ff88" opacity="0.15"/>
+  <text x="1116" y="585" font-family="'Space Mono', monospace" font-size="13"
+        fill="#00ff88" letter-spacing="1">EN DIRECT</text>
+
+  <!-- Version -->
+  <text x="100" y="590" font-family="'Space Mono', monospace" font-size="11"
+        fill="#2d3748" letter-spacing="1">V2 — betacapital.enterprise</text>
+</svg>
