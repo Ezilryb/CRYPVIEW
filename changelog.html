@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();
+  </script>
+  <title>Changelog — CrypView</title>
+  <meta name="description" content="Historique des versions de CrypView : nouvelles fonctionnalités, corrections et améliorations.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+  <link rel="manifest" href="public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:     #070a0f;
+      --bg2:    #0b0f17;
+      --panel:  #0d1117;
+      --border: #1a2235;
+      --accent: #00ff88;
+      --cyan:   #00c8ff;
+      --orange: #ff9900;
+      --purple: #e040fb;
+      --red:    #ff3d5a;
+      --yellow: #f7c948;
+      --text:   #e2e8f0;
+      --muted:  #4a5568;
+      --dim:    #2d3748;
+    }
+    .light-theme {
+      --bg: #f0f2f5; --bg2: #e8eaf0; --panel: #ffffff;
+      --border: #d0d7e3; --accent: #00a85a;
+      --text: #0d1117; --muted: #57606a; --dim: #c5ccd8;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Mono', monospace; font-weight: 300; line-height: 1.7;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 56px;
+      background: rgba(7,10,15,.92); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+    .light-theme nav { background: rgba(240,242,245,.92); }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: var(--text); text-decoration: none; }
+    .nav-logo .accent { color: var(--accent); }
+    .nav-back { font-size: 11px; letter-spacing: .08em; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+    .nav-back:hover { color: var(--text); }
+
+    /* LAYOUT */
+    .page-wrap { max-width: 860px; margin: 0 auto; padding: 64px 40px 100px; }
+    @media(max-width: 600px) { .page-wrap { padding: 40px 20px 80px; } nav { padding: 0 20px; } }
+
+    /* HERO */
+    .page-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .page-tag::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+    h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px,5vw,44px); letter-spacing: -.01em; line-height: 1.15; margin-bottom: 10px; }
+    .page-meta { font-size: 11px; color: var(--muted); letter-spacing: .06em; margin-bottom: 12px; }
+    .page-sub { font-size: 12px; color: var(--muted); line-height: 1.8; margin-bottom: 56px; max-width: 560px; }
+
+    /* VERSION BADGE */
+    .version-latest {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 14px; border: 1px solid rgba(0,255,136,.3);
+      background: rgba(0,255,136,.06); font-size: 11px;
+      letter-spacing: .08em; color: var(--accent); margin-bottom: 56px;
+      border-radius: 2px;
+    }
+    .version-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 1.5s ease-in-out infinite; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.2; } }
+
+    /* TIMELINE */
+    .timeline { position: relative; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 1px; background: var(--border);
+    }
+
+    .version-block { position: relative; padding: 0 0 48px 40px; }
+    .version-block::before {
+      content: ''; position: absolute; left: -5px; top: 8px;
+      width: 11px; height: 11px; border-radius: 50%;
+      background: var(--panel); border: 1px solid var(--border);
+      transition: border-color .2s, background .2s;
+    }
+    .version-block:hover::before { border-color: var(--accent); background: var(--accent); }
+    .version-block.major::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(0,255,136,.4); }
+
+    /* VERSION HEADER */
+    .version-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+    .version-num {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px;
+      color: var(--text); letter-spacing: -.01em;
+    }
+    .version-block.major .version-num { color: var(--accent); }
+
+    .version-label {
+      font-size: 9px; padding: 2px 8px; border-radius: 2px;
+      text-transform: uppercase; letter-spacing: .1em; font-weight: 400;
+    }
+    .label-major { background: rgba(0,255,136,.1); border: 1px solid rgba(0,255,136,.3); color: var(--accent); }
+    .label-minor { background: rgba(0,200,255,.08); border: 1px solid rgba(0,200,255,.2); color: var(--cyan); }
+    .label-patch { background: rgba(139,148,158,.08); border: 1px solid rgba(139,148,158,.2); color: var(--muted); }
+
+    .version-date { font-size: 10px; color: var(--muted); letter-spacing: .08em; margin-left: auto; }
+
+    /* CHANGE GROUPS */
+    .change-group { margin-top: 16px; }
+    .change-group-title {
+      font-size: 9px; text-transform: uppercase; letter-spacing: .14em;
+      color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 7px;
+    }
+    .change-group-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .change-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .change-item { display: flex; align-items: flex-start; gap: 10px; font-size: 11px; color: var(--muted); letter-spacing: .03em; line-height: 1.65; }
+    .change-icon { flex-shrink: 0; margin-top: 1px; font-size: 12px; }
+    .change-item strong { color: var(--text); font-weight: 400; }
+    .change-item code { font-family: 'DM Mono', monospace; font-size: 10px; background: rgba(0,255,136,.08); color: var(--accent); padding: 1px 5px; border-radius: 2px; }
+
+    /* SEPARATOR */
+    .timeline-end { display: flex; align-items: center; gap: 12px; padding-left: 40px; font-size: 10px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; margin-top: 8px; }
+    .timeline-end::before { content: ''; width: 9px; height: 9px; border: 1px solid var(--dim); border-radius: 50%; margin-left: -44px; flex-shrink: 0; }
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--muted); flex-wrap: wrap; gap: 12px; }
+    footer a { color: var(--muted); text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--accent); }
+    @media(max-width:600px) { footer { padding: 20px; flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">CRYP<span class="accent">VIEW</span></a>
+  <a class="nav-back" href="index.html" data-i18n="navBack">← Retour à l'accueil</a>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-tag" data-i18n="pageTag">Historique</div>
+  <h1 data-i18n="h1">Changelog</h1>
+  <p class="page-meta" data-i18n="pageMeta">Historique complet des versions — du plus récent au plus ancien.</p>
+  <p class="page-sub" data-i18n="pageSub">Chaque version documente les nouvelles fonctionnalités, corrections de bugs et améliorations de performance. Les versions majeures sont marquées en vert.</p>
+
+  <div class="version-latest">
+    <span class="version-dot"></span>
+    <span data-i18n="versionBadge">Version actuelle : v4.0 — Avril 2026</span>
+  </div>
+
+  <div class="timeline">
+
+    <!-- v4.0 -->
+    <div class="version-block major">
+      <div class="version-header">
+        <span class="version-num">v4.0</span>
+        <span class="version-label label-major" data-i18n="v40_label">Majeure</span>
+        <span class="version-date" data-i18n="v40_date">Avril 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v40_g1_title">🌍 Internationalisation (i18n)</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g1_i1">Moteur i18n complet avec <strong>4 langues</strong> : Français, English, 中文, العربية — support RTL natif pour l'arabe</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g1_i2">Chargement dynamique des locales par <code>import()</code> — zéro bundle inutile</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g1_i3">Formatage localisé des prix, volumes, dates et pourcentages via <code>Intl.NumberFormat</code></span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g1_i4">Sélecteur de langue dans les Paramètres — persistance <code>localStorage</code></span></li>
+        </ul>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v40_g2_title">📊 Multi-Exchange & DEX</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g2_i1">Barre premium <strong>Bybit + OKX</strong> vs Binance en temps réel (polling REST 5s)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g2_i2">Intégration <strong>GeckoTerminal</strong> — recherche et graphiques OHLCV pour les pools DEX (Ethereum, BSC, Solana, Arbitrum, Base…)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g2_i3"><code>TradingChartDEX</code> — adaptateur isolé avec polling 60s et badge réseau/DEX</span></li>
+        </ul>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v40_g3_title">🔥 Liquidation Heatmap</div>
+        <ul class="change-list">
+          <li class="change-icon change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g3_i1">Stream <code>@forceOrder</code> Binance Futures — canvas overlay temps réel sans clé API</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g3_i2">Barres rouges (longs liquidés) / vertes (shorts liquidés) par niveau de prix</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g3_i3">Panneau flux live des 8 dernières liquidations avec montants USD</span></li>
+        </ul>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v40_g4_title">♿ Accessibilité (WCAG 2.1)</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g4_i1"><code>FocusTrap</code> sur toutes les modales — navigation clavier complète</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g4_i2"><code>ArrowKeyNav</code> sur les menus contextuels et les listes</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g4_i3">Skip link, rôles ARIA, live regions et <code>aria-label</code> exhaustifs</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v40_g4_i4">Support RTL complet via injection CSS dynamique <code>rtl.js</code></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3.7 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v3.7</span>
+        <span class="version-label label-minor" data-i18n="v37_label">Mineure</span>
+        <span class="version-date" data-i18n="v37_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v37_g1_title">🔧 Corrections & améliorations</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n-html="v37_g1_i1">Correction <strong>Bug #11</strong> : <code>#resyncChartSeries()</code> émet maintenant <code>crypview:series:resynced</code> pour maintenir les indicateurs synchronisés après éviction FIFO</span></li>
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n-html="v37_g1_i2">Fix multi.js <strong>Bug #BUG CRITIQUE</strong> : <code>this.#setActive = fn</code> illégal → remplacé par champ privé <code>#_objectTreeCallback</code></span></li>
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n-html="v37_g1_i3"><code>ChartLiquidations</code> correctement intégré dans les hooks multi-panneaux (était absent → <code>liq</code> cassé en mode multi)</span></li>
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n-html="v37_g1_i4">DEX Search : <code>wrap.addEventListener('click', e => e.stopPropagation())</code> pour éviter la fermeture intempestive du dropdown</span></li>
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n-html="v37_g1_i5"><code>#bindMTFDrawingSync</code> : REPLACE (pas wrap) — élimine l'empilement de callbacks à chaque <code>#saveState()</code></span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3.5 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v3.5</span>
+        <span class="version-label label-minor" data-i18n="v35_label">Mineure</span>
+        <span class="version-date" data-i18n="v35_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v35_g1_title">🗂 Workspaces & Object Tree</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v35_g1_i1"><strong>WorkspaceManager</strong> — sauvegarde/restauration de l'état complet multi-panneaux (symboles, TF, indicateurs, sync)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v35_g1_i2"><strong>ObjectTreePanel</strong> — gestionnaire d'objets latéral : tracés + indicateurs avec masquage, verrouillage et suppression</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v35_g1_i3">Raccourci <code>O</code> pour toggle le panneau d'objets, <code>W</code> pour les workspaces</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v35_g1_i4">Navigation inter-layouts avec restauration du workspace en attente (<code>localStorage</code>)</span></li>
+        </ul>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v35_g2_title">📐 MTF Drawing Sync</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n="v35_g2_i1">Synchronisation automatique des tracés entre panneaux du même symbole</span></li>
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n-html="v35_g2_i2">Clé de dessin sym-based : <code>drawKey_btcusdt</code> partagée entre tous les TF</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3.4 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v3.4</span>
+        <span class="version-label label-minor" data-i18n="v34_label">Mineure</span>
+        <span class="version-date" data-i18n="v34_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v34_g1_title">📈 Paper Trading & Backtesting</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v34_g1_i1"><strong>PaperTradingEngine</strong> — simulation long/short avec SL, TP, frais 0.1%, courbe equity</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v34_g1_i2"><strong>Backtester</strong> — moteur de backtesting sur historique OHLCV avec 12 signaux combinables (AND/OR)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v34_g1_i3"><strong>PaperTradingOverlay</strong> — markers LightweightCharts (▲ BUY, ▼ SELL, ⛔ SL, 🎯 TP)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v34_g1_i4">Métriques Sharpe, Max Drawdown, Profit Factor, Win Rate</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3.3 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v3.3</span>
+        <span class="version-label label-minor" data-i18n="v33_label">Mineure</span>
+        <span class="version-date" data-i18n="v33_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v33_g1_title">⌨️ Command Palette & Sync</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v33_g1_i1"><strong>CommandPalette</strong> — recherche globale <code>Ctrl+K</code> ou <code>/</code> : symboles, indicateurs, TF, actions</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v33_g1_i2"><strong>ChartSync</strong> — synchronisation crosshair + zoom entre N graphiques (toggle indépendants)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v33_g1_i3"><strong>RecentSymbols</strong> — historique des 12 dernières paires consultées</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3.2 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v3.2</span>
+        <span class="version-label label-minor" data-i18n="v32_label">Mineure</span>
+        <span class="version-date" data-i18n="v32_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v32_g1_title">📤 Export & Profils</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v32_g1_i1"><strong>ExportModal</strong> — capture PNG (canvas composite), CSV, JSON structuré + URL de partage</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v32_g1_i2"><strong>ProfileManager</strong> — 6 presets intégrés + 20 profils custom (indicateurs + TF)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v32_g1_i3">Header export riche : logo, symbole, badge TF, prix courant, dot live, date/heure</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3.1 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v3.1</span>
+        <span class="version-label label-minor" data-i18n="v31_label">Mineure</span>
+        <span class="version-date" data-i18n="v31_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v31_g1_title">🔍 Market Screener</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v31_g1_i1"><strong>ScreenerModal</strong> — 7 onglets (Gainers, Losers, Volume, Breakout, Extrêmes, Volatilité)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v31_g1_i2">Métriques : <code>posInRange</code>, <code>rangePct</code>, <code>distHighPct</code> pour chaque paire USDT</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v31_g1_i3">Table triable par colonne — filtrage live avec debounce 120ms</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v3.0 -->
+    <div class="version-block major">
+      <div class="version-header">
+        <span class="version-num">v3.0</span>
+        <span class="version-label label-major" data-i18n="v30_label">Majeure</span>
+        <span class="version-date" data-i18n="v30_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v30_g1_title">🔔 Alertes V2 multi-conditions</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v30_g1_i1"><strong>AlertManagerV2</strong> — conditions combinables AND/OR : prix, %, RSI, MACD, volume spike, breakout N-bougies, croisement trendline</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v30_g1_i2">Répétition avec cooldown configurable, expiration par timestamp, snooze individuel</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v30_g1_i3">Synchronisation cross-onglets via <code>BroadcastChannel</code></span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v30_g1_i4">Centre d'alertes avec onglets Actives / Historique (50 entrées)</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v2.9 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v2.9</span>
+        <span class="version-label label-minor" data-i18n="v29_label">Mineure</span>
+        <span class="version-date" data-i18n="v29_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v29_g1_title">✏️ Drawing Tools — Drag & Drop</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n="v29_g1_i1">Ancres déplaçables par glisser-déposer sur tous les outils (trendline, fib, zones, rectangle…)</span></li>
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n-html="v29_g1_i2">Fix v2.9.1 : préservation de la propriété <code>text</code> des ancres lors du drag</span></li>
+          <li class="change-item"><span class="change-icon">▸</span><span data-i18n="v29_g1_i3">Menu contextuel clic-droit sur trendline/fibonacci : alertes de croisement ↑↓, suppression</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v2.7 -->
+    <div class="version-block">
+      <div class="version-header">
+        <span class="version-num">v2.7</span>
+        <span class="version-label label-minor" data-i18n="v27_label">Mineure</span>
+        <span class="version-date" data-i18n="v27_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v27_g1_title">🔔 Alertes V1</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v27_g1_i1"><strong>AlertPriceModal</strong> — placement depuis le chart, pré-rempli avec le prix du curseur</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v27_g1_i2">Notification native OS + double-ton audio via Web Audio API</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v27_g1_i3">Persistance <code>localStorage</code> — survive au rechargement de page</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v2.1 -->
+    <div class="version-block major">
+      <div class="version-header">
+        <span class="version-num">v2.0</span>
+        <span class="version-label label-major" data-i18n="v20_label">Majeure</span>
+        <span class="version-date" data-i18n="v20_date">Mars 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v20_g1_title">🏗️ Refonte architecture</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v20_g1_i1">Migration vers <strong>Vite + ES modules</strong> — fin du mode CDN global</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v20_g1_i2"><strong>WSPool</strong> — pool WebSocket avec déduplication (jusqu'à 200 streams / connexion, 5 connexions max)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v20_g1_i3"><strong>Multi-Charts</strong> générique — N panneaux indépendants (2, 4, 9, V2, V3, 1+2, 1+3)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n-html="v20_g1_i4"><strong>Web Worker</strong> pour les calculs lourds (Ichimoku, ADX, SuperTrend, MACD)</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v20_g1_i5">19 indicateurs + Volume Profile, Footprint, Orderflow</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v20_g1_i6">Thème clair / sombre avec anti-flash synchrone</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v20_g1_i7">PWA complète avec Service Worker, manifest, raccourcis</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- v1.0 -->
+    <div class="version-block major">
+      <div class="version-header">
+        <span class="version-num">v1.0</span>
+        <span class="version-label label-major" data-i18n="v10_label">Initial</span>
+        <span class="version-date" data-i18n="v10_date">Fevrier 2026</span>
+      </div>
+
+      <div class="change-group">
+        <div class="change-group-title" data-i18n="v10_g1_title">🚀 Lancement</div>
+        <ul class="change-list">
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v10_g1_i1">Graphiques en chandeliers japonais — Binance WebSocket live</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v10_g1_i2">Recherche de paires USDT + timeframes 1s à 1M</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v10_g1_i3">Sidebar trades en temps réel</span></li>
+          <li class="change-item"><span class="change-icon">✦</span><span data-i18n="v10_g1_i4">10 indicateurs (RSI, MACD, Bollinger, MA, VWAP…)</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-end" data-i18n="timelineEnd">Origine du projet</div>
+
+  </div><!-- /timeline -->
+
+</div><!-- /page-wrap -->
+
+<footer>
+  <span data-i18n="footerCopy">© 2026 CrypView — Beta Capital Enterprise</span>
+  <nav style="display:flex;gap:16px">
+    <a href="faq.html" data-i18n="footFaq">FAQ</a>
+    <a href="cookies.html" data-i18n="footCookies">Cookies</a>
+    <a href="privacy.html" data-i18n="footPrivacy">Confidentialité</a>
+    <a href="risks.html" data-i18n="footRisks">Risques</a>
+    <a href="index.html" data-i18n="footHome">Accueil</a>
+  </nav>
+</footer>
+
+<script src="public/changelog.i18n.js"></script>
+<script>
+  (function () {
+    var locale = localStorage.getItem('crypview_locale') || 'fr';
+    var T = CHANGELOG_I18N[locale] || CHANGELOG_I18N.en;
+
+    if (T.pageTitle) document.title = T.pageTitle;
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && T.metaDesc) metaDesc.setAttribute('content', T.metaDesc);
+
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.dataset.i18n;
+      if (T[key] !== undefined) el.textContent = T[key];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      var key = el.dataset.i18nHtml;
+      if (T[key] !== undefined) el.innerHTML = T[key];
+    });
+  })();
+</script>
+
+</body>
+</html>

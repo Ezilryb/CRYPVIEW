@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();
+  </script>
+  <title>Politique de cookies — CrypView</title>
+  <meta name="description" content="Politique de cookies de CrypView : uniquement des cookies techniques de session, sans publicité ni profilage.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+  <link rel="manifest" href="public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:     #070a0f;
+      --bg2:    #0b0f17;
+      --panel:  #0d1117;
+      --border: #1a2235;
+      --accent: #00ff88;
+      --red:    #ff3d5a;
+      --text:   #e2e8f0;
+      --muted:  #4a5568;
+      --dim:    #2d3748;
+    }
+    .light-theme {
+      --bg:#f0f2f5; --bg2:#e8eaf0; --panel:#ffffff;
+      --border:#d0d7e3; --accent:#00a85a; --text:#0d1117; --muted:#57606a;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-weight:300;line-height:1.7}
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-thumb{background:var(--border)}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:56px;background:rgba(7,10,15,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(16px)}
+    .light-theme nav{background:rgba(240,242,245,.92)}
+    .nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--text);text-decoration:none;letter-spacing:.02em}
+    .nav-logo .accent{color:var(--accent)}
+    .nav-back{font-size:11px;letter-spacing:.08em;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s}
+    .nav-back:hover{color:var(--text)}
+
+    /* LAYOUT */
+    .page-wrap{max-width:760px;margin:0 auto;padding:64px 40px 100px}
+    @media(max-width:600px){.page-wrap{padding:40px 20px 80px};nav{padding:0 20px}}
+
+    /* HERO */
+    .page-hero{margin-bottom:56px}
+    .page-tag{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+    .page-tag::before{content:'';width:20px;height:1px;background:var(--accent)}
+    h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(28px,5vw,44px);letter-spacing:-.01em;color:var(--text);line-height:1.15;margin-bottom:16px}
+    .page-meta{font-size:11px;color:var(--muted);letter-spacing:.06em}
+
+    /* NOTICE */
+    .notice{display:flex;gap:14px;padding:16px 20px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);border-radius:4px;margin-bottom:48px;font-size:12px;color:var(--text);line-height:1.7}
+    .notice-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+
+    /* SECTION */
+    .legal-section{margin-bottom:44px}
+    .legal-section h2{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:var(--text);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+    .legal-section p{font-size:12px;color:var(--muted);margin-bottom:12px;letter-spacing:.03em}
+    .legal-section ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted)}
+    .legal-section ul li{display:flex;align-items:flex-start;gap:10px;letter-spacing:.03em}
+    .legal-section ul li::before{content:'→';color:var(--accent);flex-shrink:0;margin-top:1px}
+
+    /* TABLE */
+    .cookie-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px}
+    .cookie-table th{text-align:left;padding:8px 12px;background:var(--panel);border:1px solid var(--border);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:400}
+    .cookie-table td{padding:9px 12px;border:1px solid var(--border);color:var(--muted);vertical-align:top;line-height:1.6}
+    .cookie-table td:first-child{font-family:'Syne',sans-serif;font-weight:700;color:var(--text);font-size:10px}
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:3px;font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+    .badge-tech{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);color:#00ff88}
+    .badge-no{background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:#ff3d5a}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--muted);flex-wrap:wrap;gap:12px}
+    footer a{color:var(--muted);text-decoration:none;transition:color .2s}
+    footer a:hover{color:var(--accent)}
+    @media(max-width:600px){footer{padding:20px;flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">CRYP<span class="accent">VIEW</span></a>
+  <a class="nav-back" href="index.html" data-i18n="navBack">← Retour à l'accueil</a>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-hero">
+    <div class="page-tag" data-i18n="pageTag">Légal</div>
+    <h1 data-i18n="h1">Politique de cookies</h1>
+    <p class="page-meta" data-i18n="pageMeta">Dernière mise à jour : Avril 2026 · CrypView — Beta Capital Enterprise</p>
+  </div>
+
+  <div class="notice">
+    <span class="notice-icon">🍪</span>
+    <span data-i18n-html="noticeTxt">CrypView n'utilise <strong>aucun cookie publicitaire ni de traçage</strong>. Seuls des cookies techniques strictement nécessaires au fonctionnement de l'application sont déposés.</span>
+  </div>
+
+  <div class="legal-section">
+    <h2 data-i18n="s1_title">Qu'est-ce qu'un cookie ?</h2>
+    <p data-i18n="s1_p1">Un cookie est un petit fichier texte déposé sur votre appareil lors de la visite d'un site web. Il peut stocker des préférences, un état de session ou des données techniques. Les cookies peuvent être de session (supprimés à la fermeture du navigateur) ou persistants (conservés pour une durée définie).</p>
+  </div>
+
+  <div class="legal-section">
+    <h2 data-i18n="s2_title">Cookies utilisés par CrypView</h2>
+    <p data-i18n-html="s2_p1">CrypView utilise exclusivement le stockage local du navigateur (<code>localStorage</code>) et des cookies techniques. Voici le détail :</p>
+
+    <table class="cookie-table">
+      <thead>
+        <tr>
+          <th data-i18n="s2_th1">Nom</th>
+          <th data-i18n="s2_th2">Type</th>
+          <th data-i18n="s2_th3">Durée</th>
+          <th data-i18n="s2_th4">Finalité</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-i18n="s2_r1_name">crypview-theme</td>
+          <td><span class="badge badge-tech" data-i18n="s2_r1_type">Technique</span></td>
+          <td data-i18n="s2_r1_dur">Persistant</td>
+          <td data-i18n="s2_r1_desc">Mémorisation du thème choisi (sombre/clair) pour éviter le flash au rechargement.</td>
+        </tr>
+        <tr>
+          <td data-i18n="s2_r2_name">crypview_locale</td>
+          <td><span class="badge badge-tech" data-i18n="s2_r2_type">Technique</span></td>
+          <td data-i18n="s2_r2_dur">Persistant</td>
+          <td data-i18n="s2_r2_desc">Langue d'interface sélectionnée par l'utilisateur (EN, FR, ZH, AR).</td>
+        </tr>
+        <tr>
+          <td data-i18n="s2_r3_name">crypview_alerts_v3</td>
+          <td><span class="badge badge-tech" data-i18n="s2_r3_type">Technique</span></td>
+          <td data-i18n="s2_r3_dur">Persistant</td>
+          <td data-i18n="s2_r3_desc">Alertes de prix configurées par l'utilisateur (stockage local uniquement).</td>
+        </tr>
+        <tr>
+          <td data-i18n="s2_r4_name">crypview_multi*_state_v1</td>
+          <td><span class="badge badge-tech" data-i18n="s2_r4_type">Technique</span></td>
+          <td data-i18n="s2_r4_dur">Persistant</td>
+          <td data-i18n="s2_r4_desc">État des panneaux multi-graphiques (symboles, timeframes, indicateurs actifs).</td>
+        </tr>
+        <tr>
+          <td data-i18n="s2_r5_name">crypview_paper_v1</td>
+          <td><span class="badge badge-tech" data-i18n="s2_r5_type">Technique</span></td>
+          <td data-i18n="s2_r5_dur">Persistant</td>
+          <td data-i18n="s2_r5_desc">Compte de Paper Trading simulé (solde, positions, historique).</td>
+        </tr>
+        <tr>
+          <td data-i18n="s2_r6_name">Cookies analytiques</td>
+          <td><span class="badge badge-no" data-i18n="s2_r6_type">Absent</span></td>
+          <td data-i18n="s2_r6_dur">—</td>
+          <td data-i18n="s2_r6_desc">Aucun outil d'analyse (Google Analytics, Hotjar, etc.) n'est intégré.</td>
+        </tr>
+        <tr>
+          <td data-i18n="s2_r7_name">Cookies publicitaires</td>
+          <td><span class="badge badge-no" data-i18n="s2_r7_type">Absent</span></td>
+          <td data-i18n="s2_r7_dur">—</td>
+          <td data-i18n="s2_r7_desc">Aucune régie publicitaire. Aucun pixel de ciblage.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="legal-section">
+    <h2 data-i18n="s3_title">Gestion et suppression</h2>
+    <p data-i18n-html="s3_p1">Toutes les données sont stockées localement dans votre navigateur via <code>localStorage</code>. Elles ne quittent jamais votre appareil et ne sont transmises à aucun tiers.</p>
+    <p data-i18n="s3_p2">Pour supprimer ces données, vous pouvez :</p>
+    <ul>
+      <li data-i18n-html="s3_li1">Ouvrir les DevTools de votre navigateur → Application → Local Storage → effacer les clés <code>crypview_*</code></li>
+      <li data-i18n="s3_li2">Vider le cache et les données de navigation de votre navigateur (Paramètres → Confidentialité)</li>
+      <li data-i18n="s3_li3">Utiliser la fonction de réinitialisation dans le Paper Trading (⚙ → Réinitialiser le compte)</li>
+    </ul>
+  </div>
+
+  <div class="legal-section">
+    <h2 data-i18n="s4_title">Services tiers</h2>
+    <p data-i18n="s4_p1">CrypView charge des ressources depuis les services suivants, qui peuvent déposer leurs propres cookies :</p>
+    <ul>
+      <li data-i18n-html="s4_li1"><strong>Google Fonts</strong> — chargement des polices DM Mono et Syne. Consulter la <a href="https://policies.google.com/privacy" target="_blank" rel="noopener" style="color:var(--accent)">politique Google</a>.</li>
+      <li data-i18n-html="s4_li2"><strong>Binance API</strong> — données de marché en temps réel. Aucun cookie déposé côté CrypView.</li>
+      <li data-i18n-html="s4_li3"><strong>GeckoTerminal API</strong> — données DEX (si activé). Aucun cookie déposé côté CrypView.</li>
+      <li data-i18n-html="s4_li4"><strong>GitHub Pages</strong> — hébergement du site. Consulter la <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener" style="color:var(--accent)">politique GitHub</a>.</li>
+    </ul>
+  </div>
+
+  <div class="legal-section">
+    <h2 data-i18n="s5_title">Base légale</h2>
+    <p data-i18n="s5_p1">Les cookies strictement techniques ne nécessitent pas de consentement préalable au sens du RGPD et de la directive ePrivacy, dans la mesure où ils sont indispensables au fonctionnement du service demandé par l'utilisateur.</p>
+    <p data-i18n="s5_p2">CrypView ne traite aucune donnée personnelle identifiable. Aucun compte utilisateur n'est requis.</p>
+  </div>
+
+  <div class="legal-section">
+    <h2 data-i18n="s6_title">Contact</h2>
+    <p data-i18n-html="s6_p1">Pour toute question relative à cette politique, contactez-nous à : <a href="/cdn-cgi/l/email-protection#e7858293868486978e93868bc9838e9484889583a7808a868e8bc984888a" style="color:var(--accent)"><span class="__cf_email__" data-cfemail="f89a9d8c999b9988918c9994d69c918b9b978a9cb89f95999194d69b9795">[email&#160;protected]</span></a></p>
+  </div>
+
+</div>
+
+<footer>
+  <span data-i18n="footerCopy">© 2026 CrypView — Beta Capital Enterprise</span>
+  <nav aria-label="Liens légaux" style="display:flex;gap:16px">
+    <a href="privacy.html" data-i18n="footPrivacy">Confidentialité</a>
+    <a href="terms.html" data-i18n="footTerms">Conditions</a>
+    <a href="risks.html" data-i18n="footRisks">Risques</a>
+    <a href="index.html" data-i18n="footHome">Accueil</a>
+  </nav>
+</footer>
+
+
+<script src="public/cookies.i18n.js"></script>
+<script>
+  (function () {
+    var locale = localStorage.getItem('crypview_locale') || 'fr';
+    var T = COOKIES_I18N[locale] || COOKIES_I18N.en;
+
+    if (T.pageTitle) document.title = T.pageTitle;
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && T.metaDesc) metaDesc.setAttribute('content', T.metaDesc);
+
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.dataset.i18n;
+      if (T[key] !== undefined) el.textContent = T[key];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      var key = el.dataset.i18nHtml;
+      if (T[key] !== undefined) el.innerHTML = T[key];
+    });
+  })();
+</script>
+
+</body>
+</html>
