@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();
+  </script>
+  <title>FAQ — CrypView</title>
+  <meta name="description" content="Questions fréquentes sur CrypView : données, indicateurs, alertes, Paper Trading, confidentialité et plus.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+  <link rel="manifest" href="public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:     #070a0f;
+      --bg2:    #0b0f17;
+      --panel:  #0d1117;
+      --border: #1a2235;
+      --accent: #00ff88;
+      --cyan:   #00c8ff;
+      --orange: #ff9900;
+      --red:    #ff3d5a;
+      --text:   #e2e8f0;
+      --muted:  #4a5568;
+      --dim:    #2d3748;
+    }
+    .light-theme {
+      --bg: #f0f2f5; --bg2: #e8eaf0; --panel: #ffffff;
+      --border: #d0d7e3; --accent: #00a85a;
+      --text: #0d1117; --muted: #57606a; --dim: #c5ccd8;
+    }
+
+    /* RTL */
+    :root[dir="rtl"] .nav-back { flex-direction: row-reverse; }
+    :root[dir="rtl"] .page-tag::before { margin-left: 7px; margin-right: 0; }
+    :root[dir="rtl"] .faq-item-icon { transform: scaleX(-1); }
+    :root[dir="rtl"] .search-icon { right: auto; left: 14px; }
+    :root[dir="rtl"] .search-input { padding-left: 12px; padding-right: 36px; }
+    :root[dir="rtl"] .cat-link { border-left: none; border-right: 2px solid transparent; }
+    :root[dir="rtl"] .cat-link.active { border-right-color: var(--accent); }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'DM Mono', monospace; font-weight: 300; line-height: 1.7;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── NAV ─────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 56px;
+      background: rgba(7,10,15,.92); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+    .light-theme nav { background: rgba(240,242,245,.92); }
+    .nav-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: var(--text); text-decoration: none; }
+    .nav-logo .accent { color: var(--accent); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-back { font-size: 11px; letter-spacing: .08em; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+    .nav-back:hover { color: var(--text); }
+    .lang-switcher button:hover { border-color: var(--accent) !important; color: var(--accent) !important; }
+
+    /* ── LAYOUT ──────────────────────────────────────────── */
+    .page-wrap { max-width: 900px; margin: 0 auto; padding: 64px 40px 100px; }
+    @media(max-width: 700px) { .page-wrap { padding: 40px 20px 80px; } nav { padding: 0 20px; } }
+
+    /* ── HERO ────────────────────────────────────────────── */
+    .page-tag { display: inline-flex; align-items: center; gap: 7px; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .page-tag::before { content: ''; width: 20px; height: 1px; background: var(--accent); }
+    h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px,5vw,44px); letter-spacing: -.01em; line-height: 1.15; margin-bottom: 10px; }
+    .page-meta { font-size: 11px; color: var(--muted); letter-spacing: .06em; margin-bottom: 8px; }
+    .page-sub { font-size: 12px; color: var(--muted); line-height: 1.8; margin-bottom: 40px; }
+    .page-sub a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,200,255,.25); transition: border-color .15s; }
+    .page-sub a:hover { border-color: var(--cyan); }
+
+    /* ── SEARCH ──────────────────────────────────────────── */
+    .search-wrap { position: relative; margin-bottom: 40px; }
+    .search-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+    .search-input {
+      width: 100%; padding: 11px 38px 11px 16px; border-radius: 3px;
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px;
+      letter-spacing: .04em; outline: none; transition: border-color .2s;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: rgba(0,255,136,.4); }
+    .search-no-result { display: none; font-size: 12px; color: var(--muted); text-align: center; padding: 32px 0; letter-spacing: .04em; }
+
+    /* ── CATEGORY TABS ───────────────────────────────────── */
+    .cat-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 40px; }
+    .cat-link {
+      font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+      padding: 6px 14px; border: 1px solid var(--border); border-left: 2px solid transparent;
+      color: var(--muted); text-decoration: none; border-radius: 2px;
+      cursor: pointer; background: none; font-family: inherit;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .cat-link:hover { border-color: var(--accent); color: var(--accent); }
+    .cat-link.active { border-color: var(--accent); color: var(--accent); background: rgba(0,255,136,.05); }
+
+    /* ── FAQ CATEGORY ────────────────────────────────────── */
+    .faq-category { margin-bottom: 48px; }
+    .faq-category[data-hidden="true"] { display: none; }
+    .faq-category-title {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+      color: var(--text); text-transform: uppercase; letter-spacing: .1em;
+      margin-bottom: 16px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .faq-category-icon { font-size: 15px; }
+
+    /* ── FAQ ITEM ────────────────────────────────────────── */
+    .faq-item {
+      border: 1px solid var(--border); border-radius: 2px;
+      margin-bottom: 6px; overflow: hidden;
+      transition: border-color .15s;
+    }
+    .faq-item[data-hidden="true"] { display: none; }
+    .faq-item:hover { border-color: rgba(0,255,136,.25); }
+    .faq-item.open { border-color: rgba(0,255,136,.35); }
+
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 14px 18px; cursor: pointer;
+      font-size: 12px; color: var(--text); letter-spacing: .04em;
+      user-select: none; background: var(--panel);
+      transition: background .15s;
+    }
+    .faq-question:hover { background: rgba(0,255,136,.03); }
+    .faq-item.open .faq-question { background: rgba(0,255,136,.04); }
+    .faq-question-text { flex: 1; }
+    .faq-item-icon {
+      width: 20px; height: 20px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border); border-radius: 2px;
+      color: var(--muted); font-size: 11px; transition: transform .2s, color .15s, border-color .15s;
+    }
+    .faq-item.open .faq-item-icon { color: var(--accent); border-color: rgba(0,255,136,.4); transform: rotate(45deg); }
+
+    .faq-answer {
+      max-height: 0; overflow: hidden;
+      transition: max-height .28s ease, padding .28s ease;
+    }
+    .faq-item.open .faq-answer { max-height: 600px; }
+    .faq-answer-inner {
+      padding: 0 18px 16px;
+      font-size: 11px; color: var(--muted); line-height: 1.85; letter-spacing: .03em;
+      border-top: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .faq-answer-inner a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(0,200,255,.25); transition: border-color .15s; }
+    .faq-answer-inner a:hover { border-color: var(--cyan); }
+    .faq-answer-inner code { font-family: 'DM Mono', monospace; background: rgba(0,255,136,.08); color: var(--accent); padding: 1px 5px; border-radius: 2px; font-size: 10px; }
+    .faq-answer-inner strong { color: var(--text); font-weight: 400; }
+    .faq-answer-inner p { margin-top: 12px; }
+
+    /* ── FOOTER ──────────────────────────────────────────── */
+    footer { border-top: 1px solid var(--border); padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: var(--muted); flex-wrap: wrap; gap: 12px; }
+    footer a { color: var(--muted); text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--accent); }
+    @media(max-width: 700px) { .page-wrap { padding: 40px 20px 80px; } nav { padding: 0 20px; } }
+  </style>
+  <link rel="stylesheet" href="public/mobile-static.css">
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">CRYP<span class="accent">VIEW</span></a>
+  <div class="nav-right">
+    <!-- lang switcher injected here by JS -->
+    <a class="nav-back" href="index.html" data-i18n="navBack">← Retour à l'accueil</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-tag" data-i18n="pageTag">Aide</div>
+  <h1 data-i18n="h1">Questions fréquentes</h1>
+  <p class="page-meta" data-i18n="pageMeta">Dernière mise à jour : Avril 2026 &nbsp;·&nbsp; CrypView — Beta Capital Enterprise</p>
+  <p class="page-sub" data-i18n-html="pageSub">Vous ne trouvez pas votre réponse ? Consultez le <a href="wiki.html">Wiki</a> pour la documentation complète.</p>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" id="faqSearch" data-i18n-placeholder="searchPlaceholder" placeholder="Rechercher une question…" autocomplete="off" spellcheck="false">
+  </div>
+
+  <!-- Category tabs -->
+  <div class="cat-tabs" id="catTabs">
+    <button class="cat-link active" data-cat="all">✦ All</button>
+    <button class="cat-link" data-cat="general"    data-i18n="cat_general">Général</button>
+    <button class="cat-link" data-cat="data"       data-i18n="cat_data">Données & Graphiques</button>
+    <button class="cat-link" data-cat="indicators" data-i18n="cat_indicators">Indicateurs</button>
+    <button class="cat-link" data-cat="alerts"     data-i18n="cat_alerts">Alertes</button>
+    <button class="cat-link" data-cat="trading"    data-i18n="cat_trading">Paper Trading & Backtesting</button>
+    <button class="cat-link" data-cat="technical"  data-i18n="cat_technical">Technique & Confidentialité</button>
+  </div>
+
+  <p class="search-no-result" id="noResult" data-i18n="searchNoResult">Aucune question ne correspond à votre recherche.</p>
+
+  <!-- ── GENERAL ─────────────────────────────────────────── -->
+  <div class="faq-category" data-cat="general">
+    <div class="faq-category-title"><span class="faq-category-icon">🗺</span> <span data-i18n="cat_general">Général</span></div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_what_is_crypview">Qu'est-ce que CrypView ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_what_is_crypview">CrypView est une application web gratuite, 100% côté client…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_is_free">CrypView est-il gratuit ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_is_free">Oui, entièrement.</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_registration">Dois-je créer un compte ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_registration">Non. CrypView ne requiert aucune inscription…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_install">Puis-je installer CrypView sur mon appareil ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_install">Oui. CrypView est une Progressive Web App (PWA)…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_mobile">CrypView fonctionne-t-il sur mobile ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_mobile">Oui. CrypView est entièrement responsive…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_languages">Quelles langues sont disponibles ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_languages">CrypView supporte 4 langues…</div></div>
+    </div>
+  </div>
+
+  <!-- ── DATA & CHARTS ──────────────────────────────────── -->
+  <div class="faq-category" data-cat="data">
+    <div class="faq-category-title"><span class="faq-category-icon">📊</span> <span data-i18n="cat_data">Données & Graphiques</span></div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_data_source">D'où proviennent les données de marché ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_data_source">Les données de prix proviennent directement de l'API publique Binance…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_data_delay">Les données sont-elles en temps réel ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_data_delay">Oui. Les données de chandeliers arrivent via WebSocket…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_pairs">Quelles paires de trading sont disponibles ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_pairs">Toutes les paires USDT actives listées sur Binance Spot…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_timeframes">Quels timeframes sont supportés ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_timeframes">15 timeframes : 1s · 1m · 3m · 5m…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_chart_types">Quels types de graphiques sont disponibles ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_chart_types">Chandeliers japonais, Heikin-Ashi, Ligne et Barres…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_dex">Comment accéder aux graphiques DEX ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_dex">Clic droit → DEX, ou cliquez sur le bouton 🔗 DEX…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_multi">Comment ouvrir plusieurs graphiques en même temps ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_multi">Clic droit → Multi-Charts, ou utilisez les liens de layout…</div></div>
+    </div>
+  </div>
+
+  <!-- ── INDICATORS ─────────────────────────────────────── -->
+  <div class="faq-category" data-cat="indicators">
+    <div class="faq-category-title"><span class="faq-category-icon">📈</span> <span data-i18n="cat_indicators">Indicateurs</span></div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_how_add_indicator">Comment ajouter un indicateur ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_how_add_indicator">Clic droit → Indicateurs → Choisir des indicateurs…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_how_many_indicators">Combien d'indicateurs sont disponibles ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_how_many_indicators">Plus de 19 : MA, EMA, DEMA, HMA, VWAP, Ichimoku…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_heavy_indicators">Certains indicateurs sont lents à charger — est-ce normal ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_heavy_indicators">Oui. Les indicateurs lourds sont calculés dans un Web Worker…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_profiles">Qu'est-ce que les profils d'indicateurs ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_profiles">Les profils sauvegardent une combinaison d'indicateurs actifs…</div></div>
+    </div>
+  </div>
+
+  <!-- ── ALERTS ─────────────────────────────────────────── -->
+  <div class="faq-category" data-cat="alerts">
+    <div class="faq-category-title"><span class="faq-category-icon">🔔</span> <span data-i18n="cat_alerts">Alertes</span></div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_create_alert">Comment créer une alerte de prix ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_create_alert">Clic droit sur le graphique → Alertes → Nouvelle alerte…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_alert_notify">Comment suis-je notifié quand une alerte se déclenche ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_alert_notify">De deux façons simultanément…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_alert_conditions">Quelles conditions puis-je définir sur les alertes ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_alert_conditions">Prix au-dessus/en dessous, hausse/baisse ≥ %…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_alert_background">Les alertes fonctionnent-elles avec l'onglet en arrière-plan ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_alert_background">Oui, tant que l'onglet reste ouvert…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_alert_persist">Les alertes sont-elles sauvegardées si je ferme le navigateur ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_alert_persist">Oui. Les alertes sont sauvegardées dans le localStorage…</div></div>
+    </div>
+  </div>
+
+  <!-- ── PAPER TRADING & BACKTESTING ───────────────────── -->
+  <div class="faq-category" data-cat="trading">
+    <div class="faq-category-title"><span class="faq-category-icon">⚗️</span> <span data-i18n="cat_trading">Paper Trading & Backtesting</span></div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_paper_what">Qu'est-ce que le Paper Trading ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_paper_what">Le Paper Trading est un moteur de simulation sans risque…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_paper_real">Les résultats du Paper Trading peuvent-ils prédire le trading réel ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_paper_real">Non. Le Paper Trading ne modélise pas le slippage…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_backtest_what">Qu'est-ce que le Backtesting ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_backtest_what">Le Backtesting exécute une stratégie sur des bougies OHLCV historiques…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_backtest_reliable">Les résultats de backtest sont-ils fiables ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_backtest_reliable">Les backtests sont indicatifs seulement…</div></div>
+    </div>
+  </div>
+
+  <!-- ── TECHNICAL & PRIVACY ────────────────────────────── -->
+  <div class="faq-category" data-cat="technical">
+    <div class="faq-category-title"><span class="faq-category-icon">🔒</span> <span data-i18n="cat_technical">Technique & Confidentialité</span></div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_data_collection">CrypView collecte-t-il mes données personnelles ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_data_collection">Non. CrypView est 100% côté client…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_local_storage">Qu'est-ce qui est stocké dans mon navigateur ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_local_storage">Préférence de thème, langue, alertes de prix…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_delete_data">Comment supprimer mes données ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_delete_data">Ouvrez les DevTools → Application → Local Storage…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_offline">CrypView fonctionne-t-il hors ligne ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_offline">Partiellement. Les ressources statiques sont mises en cache…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_api_key">Ai-je besoin d'une clé API Binance ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_api_key">Non. CrypView utilise uniquement les endpoints publics de l'API Binance…</div></div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question"><span class="faq-question-text" data-i18n="q_investment_advice">CrypView donne-t-il des conseils en investissement ?</span><span class="faq-item-icon">+</span></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_investment_advice">Non. CrypView est uniquement un outil d'analyse…</div></div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<footer>
+  <span data-i18n="footerCopy">© 6 CrypView — Beta Capital Enterprise</span>
+  <nav aria-label="Liens légaux" style="display:flex;gap:16px">
+    <a href="cookies.html"  data-i18n="footCookies">Cookies</a>
+    <a href="privacy.html"  data-i18n="footPrivacy">Confidentialité</a>
+    <a href="terms.html"    data-i18n="footTerms">Conditions</a>
+    <a href="risks.html"    data-i18n="footRisks">Risques</a>
+    <a href="index.html"    data-i18n="footHome">Accueil</a>
+  </nav>
+</footer>
+
+<script src="public/faq.i18n.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var STORAGE_KEY    = 'crypview_locale';
+  var SUPPORTED      = ['en', 'fr', 'zh', 'ar'];
+  var DEFAULT_LOCALE = 'fr';
+  var RTL_LOCALES    = ['ar'];
+
+  /* ── Locale detection ──────────────────────────────────── */
+  function detectLocale() {
+    try {
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if (stored && SUPPORTED.indexOf(stored) !== -1) return stored;
+    } catch (_) {}
+    var candidates = (navigator.languages || [navigator.language]).filter(Boolean);
+    for (var i = 0; i < candidates.length; i++) {
+      var l = candidates[i];
+      if (/^zh/i.test(l)) return 'zh';
+      if (/^ar/i.test(l)) return 'ar';
+      var base = l.split('-')[0].toLowerCase();
+      if (SUPPORTED.indexOf(base) !== -1) return base;
+    }
+    return DEFAULT_LOCALE;
+  }
+
+  /* ── Apply RTL / lang ──────────────────────────────────── */
+  function applyDirection(locale) {
+    var isRTL = RTL_LOCALES.indexOf(locale) !== -1;
+    document.documentElement.setAttribute('lang', locale);
+    document.documentElement.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+  }
+
+  /* ── Language switcher ─────────────────────────────────── */
+  function buildLangSwitcher(currentLocale) {
+    var labels = { en: '🇬🇧 EN', fr: '🇫🇷 FR', zh: '🇨🇳 ZH', ar: '🇸🇦 AR' };
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;gap:6px;align-items:center';
+    SUPPORTED.forEach(function (loc) {
+      var btn = document.createElement('button');
+      btn.textContent = labels[loc] || loc.toUpperCase();
+      btn.style.cssText =
+        'font-family:inherit;font-size:10px;letter-spacing:.06em;cursor:pointer;' +
+        'border:1px solid ' + (loc === currentLocale ? 'var(--accent)' : 'var(--border)') + ';' +
+        'color:' + (loc === currentLocale ? 'var(--accent)' : 'var(--muted)') + ';' +
+        'background:transparent;padding:3px 8px;border-radius:3px;transition:border-color .15s,color .15s;';
+      btn.addEventListener('click', function () {
+        try { localStorage.setItem(STORAGE_KEY, loc); } catch (_) {}
+        window.location.reload();
+      });
+      wrap.appendChild(btn);
+    });
+    return wrap;
+  }
+
+  /* ── Apply translations ────────────────────────────────── */
+  function applyTranslations(T) {
+    // <title>
+    if (T.pageTitle) document.title = T.pageTitle;
+    var metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && T.metaDesc) metaDesc.setAttribute('content', T.metaDesc);
+
+    // data-i18n → textContent
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var key = el.dataset.i18n;
+      if (T[key] !== undefined) el.textContent = T[key];
+    });
+
+    // data-i18n-html → innerHTML
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      var key = el.dataset.i18nHtml;
+      if (T[key] !== undefined) el.innerHTML = T[key];
+    });
+
+    // data-i18n-placeholder → placeholder
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function (el) {
+      var key = el.dataset.i18nPlaceholder;
+      if (T[key] !== undefined) el.setAttribute('placeholder', T[key]);
+    });
+
+    // "All" tab label
+    var allTab = document.querySelector('[data-cat="all"]');
+    if (allTab) allTab.textContent = '✦ All';
+  }
+
+  /* ── Accordion ─────────────────────────────────────────── */
+  function initAccordion() {
+    document.querySelectorAll('.faq-question').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = btn.closest('.faq-item');
+        var isOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.faq-item.open').forEach(function (el) {
+          el.classList.remove('open');
+        });
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+  }
+
+  /* ── Category filter ───────────────────────────────────── */
+  function initCategoryFilter() {
+    var tabs = document.querySelectorAll('.cat-link');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var cat = tab.dataset.cat;
+        document.querySelectorAll('.faq-category').forEach(function (sec) {
+          sec.dataset.hidden = (cat !== 'all' && sec.dataset.cat !== cat) ? 'true' : '';
+        });
+        // Re-run search with current filter
+        runSearch();
+      });
+    });
+  }
+
+  /* ── Search ────────────────────────────────────────────── */
+  function runSearch() {
+    var q = document.getElementById('faqSearch').value.toLowerCase().trim();
+    var noResult = document.getElementById('noResult');
+    var visibleCount = 0;
+
+    document.querySelectorAll('.faq-item').forEach(function (item) {
+      // Skip if parent category is hidden by filter
+      var parent = item.closest('.faq-category');
+      if (parent && parent.dataset.hidden === 'true') {
+        item.dataset.hidden = '';
+        return;
+      }
+      if (!q) {
+        item.dataset.hidden = '';
+        visibleCount++;
+        return;
+      }
+      var text = item.textContent.toLowerCase();
+      var match = text.indexOf(q) !== -1;
+      item.dataset.hidden = match ? '' : 'true';
+      if (match) visibleCount++;
+    });
+
+    noResult.style.display = (q && visibleCount === 0) ? 'block' : 'none';
+  }
+
+  function initSearch() {
+    document.getElementById('faqSearch').addEventListener('input', runSearch);
+  }
+
+  /* ── Init ───────────────────────────────────────────────── */
+  var locale = detectLocale();
+  var T = FAQ_I18N[locale] || FAQ_I18N[DEFAULT_LOCALE];
+
+  applyDirection(locale);
+  applyTranslations(T);
+
+  // Language switcher in nav
+  var navRight = document.querySelector('.nav-right');
+  if (navRight) {
+    var switcher = buildLangSwitcher(locale);
+    var back = navRight.querySelector('.nav-back');
+    if (back) navRight.insertBefore(switcher, back);
+    else navRight.appendChild(switcher);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initAccordion();
+    initCategoryFilter();
+    initSearch();
+  });
+
+})();
+</script>
+
+</body>
+</html>
