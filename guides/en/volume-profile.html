@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();</script>
+  <title>Crypto Volume Profile: POC, VAH, VAL Explained — Guide 2026 | CrypView</title>
+  <meta name="description" content="Understanding and using Volume Profile in crypto trading: Point of Control (POC), Value Area High, Value Area Low, high-volume zones. Trading strategies on Bitcoin and altcoins.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/guides/en/volume-profile.html">
+  <link rel="alternate" hreflang="fr" href="https://ezilryb.github.io/CRYPVIEW/guides/volume-profile.html">
+  <link rel="alternate" hreflang="en" href="https://ezilryb.github.io/CRYPVIEW/guides/en/volume-profile.html">
+  <link rel="alternate" hreflang="x-default" href="https://ezilryb.github.io/CRYPVIEW/guides/en/volume-profile.html">
+  <meta property="og:title" content="Crypto Volume Profile: POC, VAH, VAL Explained | CrypView">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/svg+xml" href="../../public/favicon.svg">
+  <link rel="manifest" href="../../public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../guide-shared.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Crypto Volume Profile: POC, VAH, VAL Explained","author":{"@type":"Organization","name":"CrypView"},"datePublished":"2026-04-12"}</script>
+</head>
+<body>
+
+<nav id="gnav">
+  <a class="gnav-logo" href="../../index.html">CRYP<span class="accent">VIEW</span></a>
+  <div class="gnav-right">
+    <a class="gnav-back" href="../../index.html">← Home</a>
+    <a class="gnav-cta" href="../../page.html">▶ Launch app</a>
+  </div>
+</nav>
+
+<div class="guide-layout">
+
+  <aside class="guide-toc">
+    <div class="toc-section">
+      <span class="toc-label">In this guide</span>
+      <a class="toc-link" href="#intro">Introduction</a>
+      <a class="toc-link" href="#poc">Point of Control</a>
+      <a class="toc-link" href="#value-area">Value Area</a>
+      <a class="toc-link" href="#zones-vides">Low volume zones</a>
+      <a class="toc-link" href="#lecture">Reading a Volume Profile</a>
+      <a class="toc-link" href="#strategies">Practical strategies</a>
+      <a class="toc-link" href="#types">Volume Profile types</a>
+      <a class="toc-link" href="#crypview">Volume Profile on CrypView</a>
+    </div>
+    <div class="toc-section">
+      <span class="toc-label">Related guides</span>
+      <a class="toc-link" href="footprint-chart.html">Footprint Chart</a>
+      <a class="toc-link" href="orderflow-delta.html">Orderflow Delta</a>
+      <a class="toc-link" href="multi-charts.html">Multi-Charts</a>
+    </div>
+    <div class="toc-section">
+      <span class="toc-label">🌐 Language</span>
+      <a class="toc-link" href="../volume-profile.html">🇫🇷 Français</a>
+    </div>
+  </aside>
+
+  <main class="guide-body">
+
+    <div class="guide-hero">
+      <div class="guide-tag">Advanced volume analysis</div>
+      <h1 class="guide-title">Volume Profile<br><span class="hl">POC · VAH · VAL</span> explained</h1>
+      <p class="guide-intro">The Volume Profile reorganises volume information in a radically different way from classic indicators: instead of showing volume per period (candle), it shows volume per <em>price level</em>. This representation reveals where the market spent the most time and traded the most volume — crucial information for identifying supports, resistances, and equilibrium zones.</p>
+      <div class="guide-meta">
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Reading time: 10 min</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Updated: April 2026</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Level: Intermediate–Advanced</span>
+      </div>
+    </div>
+
+    <section class="guide-section" id="intro">
+      <h2><span class="s-icon">📊</span> Volume Profile in 30 seconds</h2>
+      <p>Imagine superimposing a horizontal histogram on your chart. Each bar represents the total volume traded at a given price level over a selected period. The longer the bar, the more volume was traded at that price. This visualisation instantly reveals <strong>acceptance levels</strong> (where the market spends time) and <strong>rejection zones</strong> (where it passes through quickly).</p>
+      <p>The Volume Profile has been used by institutional traders, market makers, and algorithmic traders for decades. Its adoption in retail crypto trading exploded with the availability of real-time aggTrade data.</p>
+      <div class="info-box info-box--note">
+        <span class="info-box-icon">ℹ</span>
+        <span>The Volume Profile is calculated from all visible candles on the chart and dynamically recalculates on scroll or zoom.</span>
+      </div>
+    </section>
+
+    <section class="guide-section" id="poc">
+      <h2><span class="s-icon">📍</span> Point of Control (POC)</h2>
+      <p>The <strong>Point of Control</strong> is the price level where total volume is highest over the analysed period. It's the price at which the market traded the most — the equilibrium point between buyers and sellers for that period.</p>
+      <p>The POC has remarkable properties:</p>
+      <ul>
+        <li><strong>Price magnet</strong> — The market tends to return to the POC after price extensions, like a gravitational equilibrium point.</li>
+        <li><strong>Strong support/resistance</strong> — On a return to the POC, there is often a significant reaction because many players have open positions at this level.</li>
+        <li><strong>Fair value zone</strong> — The POC represents the "fair price" perceived by the market for the given period.</li>
+      </ul>
+      <p>A price that moves significantly away from the POC is often in "price discovery" — seeking a new equilibrium point. These phases can be violent and rapid in crypto markets.</p>
+    </section>
+
+    <section class="guide-section" id="value-area">
+      <h2><span class="s-icon">📐</span> Value Area: VAH & VAL</h2>
+      <p>The <strong>Value Area (VA)</strong> is the price zone containing <strong>70% of total volume</strong> traded over the period. This proportion (70%) is not arbitrary — it corresponds to one standard deviation around the mean in a normal distribution, and the market tends to return to this zone the majority of the time.</p>
+
+      <div class="level-cards">
+        <div class="level-card">
+          <div class="level-card-num">VAH</div>
+          <div class="level-card-title">Value Area High</div>
+          <div class="level-card-desc">The upper boundary of the value zone. Often resistance on first returns from above. A convincing break of the VAH is bullish.</div>
+        </div>
+        <div class="level-card">
+          <div class="level-card-num">VAL</div>
+          <div class="level-card-title">Value Area Low</div>
+          <div class="level-card-desc">The lower boundary of the value zone. Often support on pullbacks. A break below the VAL is a weakness signal.</div>
+        </div>
+      </div>
+
+      <h3>The 80% Rule (Value Area Rule)</h3>
+      <p>An empirical rule used by futures traders: if price opens outside the Value Area and returns inside, there's approximately 80% probability it will reach the other end of the VA. For example, if price opens below the VAL and rallies back into the VA, there's an 80% chance it will reach the VAH. This rule is particularly effective on sessions after an opening gap.</p>
+    </section>
+
+    <section class="guide-section" id="zones-vides">
+      <h2><span class="s-icon">🕳</span> Low volume zones (LVN)</h2>
+      <p><strong>Low Volume Nodes (LVN)</strong> are zones where very little volume was traded — the very short bars of the Volume Profile. These zones have particular significance:</p>
+      <ul>
+        <li><strong>Quick traversal</strong> — Price crosses LVNs rapidly because there is little interest at these levels. Low resistance at these prices.</li>
+        <li><strong>Fragile support/resistance</strong> — An LVN does not constitute a solid level. If price breaks through it, it will often continue until the next HVN (High Volume Node).</li>
+        <li><strong>"Empty space" zones</strong> — On a chart, these are the empty spaces between two volume blocks. Price crosses them like a marble on an inclined plane.</li>
+      </ul>
+      <p>The classic strategy: identify LVNs and adjacent HVNs (high-volume zones). When price breaks through an HVN and enters an LVN, it tends to accelerate to the next HVN.</p>
+    </section>
+
+    <section class="guide-section" id="lecture">
+      <h2><span class="s-icon">👁</span> Reading a Volume Profile</h2>
+      <p>A "healthy" Volume Profile in an uptrend shows volume concentrated in the upper part of the range, with the POC in the upper half. A "D"-shaped profile (centred normal distribution) indicates a balanced consolidation phase. A "P"-shaped profile (volume at bottom) suggests potential accumulation. A "b"-shaped profile (volume at top) suggests potential distribution.</p>
+
+      <table class="signal-table">
+        <thead><tr><th>Profile shape</th><th>Volume concentrated</th><th>Interpretation</th></tr></thead>
+        <tbody>
+          <tr><td>D shape</td><td>Range centre</td><td><span class="badge-neutral">Balanced consolidation</span></td></tr>
+          <tr><td>P shape</td><td>Upper part</td><td><span class="badge-bull">Accumulation / Uptrend</span></td></tr>
+          <tr><td>b shape</td><td>Lower part</td><td><span class="badge-bear">Distribution / Downtrend</span></td></tr>
+          <tr><td>Bimodal profile</td><td>Two distinct zones</td><td><span class="badge-neutral">Contention zone — potential volatility</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="guide-section" id="strategies">
+      <h2><span class="s-icon">🎯</span> Practical strategies</h2>
+
+      <h3>Strategy 1 — POC bounce</h3>
+      <p>Identify the POC of a previous session or consolidation phase. In an uptrend, returns to the POC are buying opportunities. Enter on the bounce off the POC with a stop below the VAL. Target: the VAH or previous high.</p>
+
+      <h3>Strategy 2 — HVN breakout with LVN</h3>
+      <p>When price exits an HVN zone and enters an LVN, there is little resistance to stop it. Enter in the breakout direction with a tight stop below the broken HVN level. The target is the next HVN in the direction of the move. These moves can be fast and extended in crypto.</p>
+
+      <h3>Strategy 3 — Volume Profile + Footprint</h3>
+      <p>Combine the Volume Profile to identify key levels with the <a href="footprint-chart.html">Footprint Chart</a> to validate directional pressure. A return to the POC accompanied by absorption (strong Bid volume without price decline) is a high-quality buying signal.</p>
+    </section>
+
+    <section class="guide-section" id="types">
+      <h2><span class="s-icon">🔢</span> Volume Profile types</h2>
+      <p>There are several ways to calculate a Volume Profile, depending on the period analysed:</p>
+      <ul>
+        <li><strong>Session Volume Profile</strong> — Calculated over a trading session (day). Useful for identifying important intraday levels.</li>
+        <li><strong>Visible Range Volume Profile (VRVP)</strong> — Calculated from all visible candles on screen. Recalculates in real time based on zoom. This is what CrypView offers.</li>
+        <li><strong>Fixed Range Volume Profile</strong> — Calculated over a manually selected candle range. Useful for analysing specific phases.</li>
+        <li><strong>Composite Volume Profile</strong> — Cumulative across multiple sessions or weeks. Provides a macro view of interest levels.</li>
+      </ul>
+    </section>
+
+    <section class="guide-section" id="crypview">
+      <h2><span class="s-icon">⚡</span> Volume Profile on CrypView</h2>
+      <p>CrypView offers real-time Volume Profile (Visible Range Volume Profile), dynamically calculated from the visible candlesticks. It displays as horizontal bars on the right side of the chart, with POC, VAH, and VAL clearly indicated.</p>
+      <ol>
+        <li>Right-click → <strong>Indicators → Volume Profile</strong></li>
+        <li>The profile displays immediately and updates with each new candle</li>
+        <li>Zoom or scroll to recalculate over a different range</li>
+        <li>Combine with the Footprint (<code>Shift+F</code>) for confluence</li>
+      </ol>
+      <p>The POC, VAH, and VAL levels are also documented in the <a href="../../wiki.html#volume-profile">CrypView Wiki</a>.</p>
+    </section>
+
+    <div class="guide-cta">
+      <div class="guide-cta-title">Identify key levels with the Volume Profile</div>
+      <div class="guide-cta-sub">Volume Profile, Footprint Chart and Orderflow Delta on all Binance pairs. Real-time, no registration.</div>
+      <a class="guide-cta-btn" href="../../page.html">▶ Launch CrypView</a>
+      <div class="guide-cta-links">
+        <a href="footprint-chart.html">Footprint guide</a> — <a href="orderflow-delta.html">Orderflow guide</a> — <a href="../../wiki.html#volume-profile">Volume Profile Wiki</a>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="guide-aside">
+    <div class="aside-card">
+      <div class="aside-card-title">Other guides</div>
+      <a class="aside-link" href="rsi-crypto.html">RSI crypto</a>
+      <a class="aside-link" href="macd-trading.html">MACD crypto</a>
+      <a class="aside-link" href="ichimoku-crypto.html">Ichimoku Cloud</a>
+      <a class="aside-link" href="footprint-chart.html">Footprint Chart</a>
+      <a class="aside-link" href="orderflow-delta.html">Orderflow Delta</a>
+      <a class="aside-link" href="multi-charts.html">Multi-Charts</a>
+    </div>
+    <div class="aside-card">
+      <div class="aside-card-title">🌐 Language</div>
+      <a class="aside-link" href="../volume-profile.html">🇫🇷 Version française</a>
+    </div>
+  </aside>
+</div>
+
+<footer class="guide-footer">
+  <span>© 2026 CrypView — Beta Capital Enterprise · <a href="../../risks.html">Risk disclaimer</a></span>
+  <nav style="display:flex;gap:16px"><a href="../../faq.html">FAQ</a><a href="../../wiki.html">Wiki</a><a href="../../index.html">Home</a></nav>
+</footer>
+
+<script>(function(){var links=document.querySelectorAll('.toc-link[href^="#"]');var sections=Array.from(document.querySelectorAll('.guide-section'));function onScroll(){var y=window.scrollY+80;var cur='';sections.forEach(function(s){if(s.offsetTop<=y)cur=s.id;});links.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+cur);});}window.addEventListener('scroll',onScroll,{passive:true});onScroll();})();</script>
+</body>
+</html>

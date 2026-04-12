@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();</script>
+  <title>Ichimoku Cloud crypto : lecture et stratégies 2026 | CrypView</title>
+  <meta name="description" content="Guide complet sur l'Ichimoku Cloud en trading crypto : Tenkan, Kijun, Senkou A/B, Chikou. Lecture du nuage, signaux d'entrée, stratégies et exemples pratiques sur Bitcoin et altcoins.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/guides/ichimoku-crypto.html">
+  <link rel="alternate" hreflang="fr" href="https://ezilryb.github.io/CRYPVIEW/guides/ichimoku-crypto.html">
+  <link rel="alternate" hreflang="en" href="https://ezilryb.github.io/CRYPVIEW/guides/en/ichimoku-crypto.html">
+  <link rel="alternate" hreflang="x-default" href="https://ezilryb.github.io/CRYPVIEW/guides/en/ichimoku-crypto.html">
+  <meta property="og:title" content="Ichimoku Cloud crypto : lecture et stratégies | CrypView">
+  <meta property="og:description" content="Maîtrisez l'Ichimoku Kinko Hyo en trading de cryptomonnaies. Lecture des 5 composantes, signaux TK Cross, Cloud Breakout et stratégies avancées.">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/svg+xml" href="../public/favicon.svg">
+  <link rel="manifest" href="../public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="guide-shared.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Ichimoku Cloud crypto : lecture et stratégies 2026","author":{"@type":"Organization","name":"CrypView"},"datePublished":"2026-04-12"}</script>
+</head>
+<body>
+
+<nav id="gnav">
+  <a class="gnav-logo" href="../index.html">CRYP<span class="accent">VIEW</span></a>
+  <div class="gnav-right">
+    <a class="gnav-back" href="../index.html">← Accueil</a>
+    <a class="gnav-cta" href="../page.html">▶ Lancer l'app</a>
+  </div>
+</nav>
+
+<div class="guide-layout">
+
+  <aside class="guide-toc">
+    <div class="toc-section">
+      <span class="toc-label">Dans ce guide</span>
+      <a class="toc-link" href="#intro">Introduction</a>
+      <a class="toc-link" href="#composantes">Les 5 composantes</a>
+      <a class="toc-link" href="#nuage">Lire le Nuage (Kumo)</a>
+      <a class="toc-link" href="#signaux">Signaux principaux</a>
+      <a class="toc-link" href="#crypto">Adaptation au crypto</a>
+      <a class="toc-link" href="#strategies">Stratégies pratiques</a>
+      <a class="toc-link" href="#crypview">Ichimoku sur CrypView</a>
+    </div>
+    <div class="toc-section">
+      <span class="toc-label">Guides liés</span>
+      <a class="toc-link" href="rsi-crypto.html">RSI crypto</a>
+      <a class="toc-link" href="macd-trading.html">MACD crypto</a>
+      <a class="toc-link" href="volume-profile.html">Volume Profile</a>
+    </div>
+  </aside>
+
+  <main class="guide-body">
+
+    <div class="guide-hero">
+      <div class="guide-tag">Indicateur de tendance</div>
+      <h1 class="guide-title"><span class="hl">Ichimoku Cloud</span><br>Lecture & stratégies crypto</h1>
+      <p class="guide-intro">L'Ichimoku Kinko Hyo — "graphique d'équilibre en un coup d'œil" — est un système d'analyse technique complet développé au Japon dans les années 1930. Ses cinq composantes fournissent simultanément des informations sur la tendance, le momentum, le support, la résistance et la direction probable du prix.</p>
+      <div class="guide-meta">
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Lecture : 12 min</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Mis à jour : Avril 2026</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Niveau : Intermédiaire–Avancé</span>
+      </div>
+    </div>
+
+    <section class="guide-section" id="intro">
+      <h2><span class="s-icon">☁</span> L'Ichimoku en 30 secondes</h2>
+      <p>L'Ichimoku est l'un des rares indicateurs qui intègre à la fois la <strong>dimension temporelle passée</strong> (Chikou Span, projeté 26 périodes en arrière), la <strong>dimension présente</strong> (Tenkan et Kijun) et la <strong>dimension future</strong> (Senkou A et B, projetés 26 périodes en avant). Cette vision temporelle étendue en fait un outil de tendance particulièrement puissant sur les marchés crypto.</p>
+      <p>Son apparente complexité visuelle cache une logique cohérente : chaque composante est un milieu de range calculé sur une période différente. Les croisements entre ces milieux génèrent des signaux, et le nuage (Kumo) constitue une zone dynamique de support/résistance.</p>
+      <div class="info-box info-box--tip">
+        <span class="info-box-icon">💡</span>
+        <span>L'Ichimoku est un indicateur <strong>de tendance</strong>, pas d'oscillateur. Il excelle dans les marchés directionnels et génère des faux signaux en phases de consolidation. Identifiez d'abord la tendance avant d'interpréter ses signaux.</span>
+      </div>
+    </section>
+
+    <section class="guide-section" id="composantes">
+      <h2><span class="s-icon">🧩</span> Les 5 composantes</h2>
+
+      <h3>Tenkan-Sen (période 9) — Ligne de conversion</h3>
+      <p>Calculé comme le milieu du range (plus haut + plus bas) sur les 9 dernières périodes. La Tenkan est la ligne la plus réactive de l'Ichimoku — elle suit le prix de près et sert de premier niveau de support/résistance dynamique. Son inclinaison indique la direction du momentum à court terme.</p>
+
+      <div class="formula-box">
+        <div class="formula-label">Tenkan-Sen</div>
+        <div class="formula-expr">(Plus haut 9 + Plus bas 9) / 2</div>
+        <div class="formula-note">Même logique appliquée aux 4 autres composantes, sur des périodes différentes.</div>
+      </div>
+
+      <h3>Kijun-Sen (période 26) — Ligne de base</h3>
+      <p>Milieu du range sur 26 périodes. La Kijun est le "centre de gravité" de l'Ichimoku — le marché tend à y revenir régulièrement. Elle sert de référence pour les entrées en pullback dans la tendance principale. Un prix qui clôture au-dessus de la Kijun est globalement haussier.</p>
+
+      <h3>Senkou Span A — Premier bord du nuage</h3>
+      <p>Moyenne de la Tenkan et de la Kijun, projetée 26 périodes en avant. Constitue le premier bord du Kumo (nuage). En tendance haussière, le Senkou A est souvent au-dessus du Senkou B.</p>
+
+      <h3>Senkou Span B (période 52) — Second bord du nuage</h3>
+      <p>Milieu du range sur 52 périodes, projeté 26 périodes en avant. C'est le bord le plus lent du nuage, souvent le support/résistance le plus fort. Un nuage épais (grande distance entre A et B) signifie une zone de support/résistance robuste.</p>
+
+      <h3>Chikou Span — Ligne de retard</h3>
+      <p>Le cours de clôture actuel, tracé 26 périodes en arrière. Cette ligne unique permet de comparer le prix actuel au comportement du marché il y a 26 périodes. Quand le Chikou est au-dessus des cours passés, c'est un signal haussier supplémentaire.</p>
+    </section>
+
+    <section class="guide-section" id="nuage">
+      <h2><span class="s-icon">☁</span> Lire le Nuage (Kumo)</h2>
+      <p>Le Kumo est l'élément visuellement le plus distinctif de l'Ichimoku. C'est la zone ombrée comprise entre le Senkou A et le Senkou B. Son interprétation est straightforward :</p>
+      <ul>
+        <li><strong>Prix au-dessus du Kumo</strong> — Tendance haussière. Le nuage devient support.</li>
+        <li><strong>Prix en dessous du Kumo</strong> — Tendance baissière. Le nuage devient résistance.</li>
+        <li><strong>Prix dans le Kumo</strong> — Zone de consolidation ou d'indécision. Évitez les entrées.</li>
+        <li><strong>Nuage épais</strong> — Support/résistance fort, difficile à traverser.</li>
+        <li><strong>Nuage fin</strong> — Zone fragile, une percée est probable.</li>
+      </ul>
+
+      <h3>Kumo Twist (croisement des bords)</h3>
+      <p>Quand le Senkou A croise le Senkou B — visible dans le futur projeté — c'est un <strong>Kumo Twist</strong>. Si A passe au-dessus de B, le nuage devient haussier (vert) ; si B passe au-dessus de A, il devient baissier (rouge). Ce changement de couleur prévisible à 26 périodes est un signal d'anticipation de changement de tendance.</p>
+    </section>
+
+    <section class="guide-section" id="signaux">
+      <h2><span class="s-icon">📡</span> Les signaux principaux</h2>
+
+      <table class="signal-table">
+        <thead><tr><th>Signal</th><th>Condition</th><th>Force</th><th>Biais</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>TK Cross haussier</td>
+            <td>Tenkan croise Kijun vers le haut</td>
+            <td>Fort si au-dessus du Kumo</td>
+            <td><span class="badge-bull">Haussier</span></td>
+          </tr>
+          <tr>
+            <td>TK Cross baissier</td>
+            <td>Tenkan croise Kijun vers le bas</td>
+            <td>Fort si en dessous du Kumo</td>
+            <td><span class="badge-bear">Baissier</span></td>
+          </tr>
+          <tr>
+            <td>Cloud Breakout haussier</td>
+            <td>Prix clôture au-dessus du Kumo</td>
+            <td>Signal majeur</td>
+            <td><span class="badge-bull">Très haussier</span></td>
+          </tr>
+          <tr>
+            <td>Cloud Breakout baissier</td>
+            <td>Prix clôture en dessous du Kumo</td>
+            <td>Signal majeur</td>
+            <td><span class="badge-bear">Très baissier</span></td>
+          </tr>
+          <tr>
+            <td>Chikou au-dessus des cours</td>
+            <td>Ligne de retard dépasse les cours passés</td>
+            <td>Confirmation</td>
+            <td><span class="badge-bull">Haussier</span></td>
+          </tr>
+          <tr>
+            <td>Pullback sur Kijun</td>
+            <td>Prix reteste la Kijun en tendance haussière</td>
+            <td>Signal d'entrée</td>
+            <td><span class="badge-bull">Achat pullback</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Les trois classifications du TK Cross</h3>
+      <p>Ichimoku lui-même classifiait les TK Cross en trois catégories selon leur position par rapport au Kumo : <strong>Bull Cross au-dessus du Kumo</strong> (signal le plus fort), <strong>Neutral Cross dans le Kumo</strong> (signal faible, haute prudence), <strong>Weak Cross en dessous du Kumo</strong> (signal à contre-tendance, très risqué).</p>
+    </section>
+
+    <section class="guide-section" id="crypto">
+      <h2><span class="s-icon">₿</span> Adaptation aux marchés crypto</h2>
+      <p>L'Ichimoku a été développé pour les marchés japonais qui, contrairement aux crypto, ferment le week-end. Cela crée une controverse sur les paramètres à utiliser en crypto :</p>
+      <ul>
+        <li><strong>Paramètres originaux (9-26-52)</strong> — Conçus pour 6 jours de trading par semaine. Certains adaptent au 7/7 des crypto en utilisant (10-30-60).</li>
+        <li><strong>Timeframes recommandés</strong> — L'Ichimoku fonctionne mieux sur les TF H4, journalier et hebdomadaire. Évitez les TF inférieurs à 1h.</li>
+        <li><strong>Adaptations pour altcoins</strong> — Les altcoins étant plus volatils, le nuage est souvent traversé plus facilement. Renforcez la confirmation avec le RSI ou le volume.</li>
+      </ul>
+    </section>
+
+    <section class="guide-section" id="strategies">
+      <h2><span class="s-icon">🎯</span> Stratégies pratiques</h2>
+
+      <h3>Stratégie Cloud Bounce (en tendance)</h3>
+      <p>En tendance haussière (prix au-dessus du Kumo), attendez un pullback vers le bord supérieur du nuage. L'entrée se fait au rebond sur ce support, avec un stop sous le bord inférieur du Kumo. Le target initial est le précédent sommet. C'est l'une des stratégies les plus propres de l'Ichimoku.</p>
+
+      <h3>Stratégie TK Cross + Chikou</h3>
+      <p>N'entrez qu'un TK Cross haussier si le Chikou Span est également au-dessus des cours passés correspondants. Cette double confirmation réduit significativement les faux signaux. Placez votre stop sous la Kijun et ciblez le prochain niveau de résistance ou le bord du Kumo futur.</p>
+
+      <h3>Ichimoku + RSI (filtrage)</h3>
+      <p>Combinez l'Ichimoku avec le RSI pour filtrer les entrées : TK Cross haussier + RSI entre 40 et 60 (ni en surachat, ni en survente) donne les meilleures probabilités d'un mouvement prolongé. Un TK Cross avec RSI déjà à 75+ a beaucoup moins de potentiel.</p>
+    </section>
+
+    <section class="guide-section" id="crypview">
+      <h2><span class="s-icon">⚡</span> Ichimoku sur CrypView</h2>
+      <p>CrypView intègre l'Ichimoku complet (Tenkan 9, Kijun 26, Senkou A, Senkou B 52, Chikou) avec nuage coloré dynamique. Les calculs s'effectuent via Web Worker pour ne pas ralentir l'interface sur de grands historiques.</p>
+      <ol>
+        <li>Clic droit → <strong>Indicateurs → Ichimoku Cloud</strong></li>
+        <li>Le nuage apparaît directement sur le graphique principal</li>
+        <li>Choisissez de préférence un timeframe H4, Journalier ou Hebdomadaire</li>
+        <li>Combinez avec le RSI pour filtrer les entrées (raccourci <code>Shift+R</code>)</li>
+      </ol>
+      <p>Consultez la <a href="../wiki.html#trend">documentation Wiki</a> pour plus de détails sur les paramètres.</p>
+    </section>
+
+    <div class="guide-cta">
+      <div class="guide-cta-title">Analysez les tendances avec l'Ichimoku en direct</div>
+      <div class="guide-cta-sub">Ichimoku Cloud + 18 autres indicateurs sur toutes les paires Binance. En temps réel, sans inscription.</div>
+      <a class="guide-cta-btn" href="../page.html">▶ Lancer CrypView</a>
+      <div class="guide-cta-links">
+        <a href="rsi-crypto.html">Guide RSI</a> — <a href="macd-trading.html">Guide MACD</a> — <a href="../wiki.html">Wiki complet</a>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="guide-aside">
+    <div class="aside-card">
+      <div class="aside-card-title">Autres guides</div>
+      <a class="aside-link" href="rsi-crypto.html">RSI crypto</a>
+      <a class="aside-link" href="macd-trading.html">MACD crypto</a>
+      <a class="aside-link" href="footprint-chart.html">Footprint Chart</a>
+      <a class="aside-link" href="volume-profile.html">Volume Profile</a>
+      <a class="aside-link" href="orderflow-delta.html">Orderflow Delta</a>
+      <a class="aside-link" href="multi-charts.html">Multi-Charts</a>
+    </div>
+    <div class="aside-card">
+      <div class="aside-card-title">Documentation</div>
+      <a class="aside-link" href="../wiki.html#trend">Wiki Tendance</a>
+      <a class="aside-link" href="../faq.html">FAQ CrypView</a>
+    </div>
+  </aside>
+</div>
+
+<footer class="guide-footer">
+  <span>© 2026 CrypView — Beta Capital Enterprise · <a href="../risks.html">Avertissement risques</a></span>
+  <nav style="display:flex;gap:16px"><a href="../faq.html">FAQ</a><a href="../wiki.html">Wiki</a><a href="../index.html">Accueil</a></nav>
+</footer>
+
+<script>(function(){var links=document.querySelectorAll('.toc-link[href^="#"]');var sections=Array.from(document.querySelectorAll('.guide-section'));function onScroll(){var y=window.scrollY+80;var cur='';sections.forEach(function(s){if(s.offsetTop<=y)cur=s.id;});links.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+cur);});}window.addEventListener('scroll',onScroll,{passive:true});onScroll();})();</script>
+</body>
+</html>

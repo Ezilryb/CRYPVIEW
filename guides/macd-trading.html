@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();</script>
+  <title>MACD crypto : divergences et croisements — Guide 2026 | CrypView</title>
+  <meta name="description" content="Maîtrisez le MACD en trading de cryptomonnaies : calcul des lignes, croisements, divergences haussières et baissières, histogramme. Stratégies pratiques avec exemples sur Bitcoin et altcoins.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/guides/macd-trading.html">
+  <link rel="alternate" hreflang="fr" href="https://ezilryb.github.io/CRYPVIEW/guides/macd-trading.html">
+  <link rel="alternate" hreflang="en" href="https://ezilryb.github.io/CRYPVIEW/guides/en/macd-trading.html">
+  <link rel="alternate" hreflang="x-default" href="https://ezilryb.github.io/CRYPVIEW/guides/en/macd-trading.html">
+  <meta property="og:title" content="MACD crypto : divergences et croisements — CrypView">
+  <meta property="og:description" content="Guide complet MACD en crypto : calcul, croisements bullish/bearish, divergences, histogramme. Appliquez-le sur CrypView avec données Binance live.">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/svg+xml" href="../public/favicon.svg">
+  <link rel="manifest" href="../public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="guide-shared.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"MACD crypto : divergences et croisements","author":{"@type":"Organization","name":"CrypView"},"datePublished":"2026-04-12"}</script>
+</head>
+<body>
+
+<nav id="gnav">
+  <a class="gnav-logo" href="../index.html">CRYP<span class="accent">VIEW</span></a>
+  <div class="gnav-right">
+    <a class="gnav-back" href="../index.html">← Accueil</a>
+    <a class="gnav-cta" href="../page.html">▶ Lancer l'app</a>
+  </div>
+</nav>
+
+<div class="guide-layout">
+
+  <aside class="guide-toc">
+    <div class="toc-section">
+      <span class="toc-label">Dans ce guide</span>
+      <a class="toc-link" href="#intro">Introduction</a>
+      <a class="toc-link" href="#calcul">Calcul & composantes</a>
+      <a class="toc-link" href="#histogramme">L'histogramme</a>
+      <a class="toc-link" href="#croisements">Croisements de lignes</a>
+      <a class="toc-link" href="#divergences">Divergences MACD</a>
+      <a class="toc-link" href="#strategies">Stratégies pratiques</a>
+      <a class="toc-link" href="#limites">Limites & pièges</a>
+      <a class="toc-link" href="#crypview">MACD sur CrypView</a>
+    </div>
+    <div class="toc-section">
+      <span class="toc-label">Guides liés</span>
+      <a class="toc-link" href="rsi-crypto.html">RSI crypto</a>
+      <a class="toc-link" href="ichimoku-crypto.html">Ichimoku Cloud</a>
+      <a class="toc-link" href="volume-profile.html">Volume Profile</a>
+    </div>
+  </aside>
+
+  <main class="guide-body">
+
+    <div class="guide-hero">
+      <div class="guide-tag">Indicateur de momentum</div>
+      <h1 class="guide-title"><span class="hl">MACD</span> crypto<br>Divergences & croisements</h1>
+      <p class="guide-intro">Le MACD (Moving Average Convergence Divergence) est l'indicateur de momentum le plus utilisé en trading. Développé par Gerald Appel à la fin des années 1970, il mesure la relation entre deux moyennes mobiles exponentielles pour identifier le momentum, la direction et la durée des tendances.</p>
+      <div class="guide-meta">
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Lecture : 9 min</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Mis à jour : Avril 2026</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Niveau : Intermédiaire</span>
+      </div>
+    </div>
+
+    <section class="guide-section" id="intro">
+      <h2><span class="s-icon">📊</span> Le MACD en bref</h2>
+      <p>Le MACD est un <strong>indicateur de tendance et de momentum</strong> qui n'oscille pas dans des limites fixes (contrairement au RSI). Il se compose de trois éléments : la ligne MACD, la ligne Signal et l'histogramme. Ensemble, ils permettent d'identifier les changements de momentum avant qu'ils ne se reflètent pleinement dans le prix.</p>
+      <p>Sa popularité tient à sa polyvalence : il fonctionne sur tous les timeframes, toutes les paires, et peut être utilisé seul ou en complément d'autres indicateurs. En crypto, il est particulièrement efficace sur des timeframes H1 à journalier.</p>
+    </section>
+
+    <section class="guide-section" id="calcul">
+      <h2><span class="s-icon">🧮</span> Calcul & composantes</h2>
+
+      <div class="formula-box">
+        <div class="formula-label">Ligne MACD</div>
+        <div class="formula-expr">MACD = EMA(12) − EMA(26)</div>
+        <div class="formula-note">Mesure l'écart entre les EMA courte et longue. Positif = momentum haussier. Négatif = momentum baissier.</div>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-label">Ligne Signal</div>
+        <div class="formula-expr">Signal = EMA(9) de la ligne MACD</div>
+        <div class="formula-note">Moyenne lissée de la ligne MACD. Les croisements MACD/Signal génèrent les signaux d'achat/vente.</div>
+      </div>
+
+      <div class="formula-box">
+        <div class="formula-label">Histogramme</div>
+        <div class="formula-expr">Histogramme = MACD − Signal</div>
+        <div class="formula-note">Représente visuellement l'écart entre les deux lignes. Son changement de direction précède souvent les croisements.</div>
+      </div>
+
+      <h3>Pourquoi ces périodes (12-26-9) ?</h3>
+      <p>Les paramètres 12-26-9 correspondent historiquement aux périodes de 2 semaines, 1 mois et un peu moins de 2 semaines sur des marchés qui fonctionnaient 6 jours par semaine. Ils restent les paramètres standard car ils offrent le meilleur équilibre entre réactivité et fiabilité sur la plupart des marchés, y compris crypto.</p>
+    </section>
+
+    <section class="guide-section" id="histogramme">
+      <h2><span class="s-icon">📊</span> Lire l'histogramme</h2>
+      <p>L'histogramme est souvent la partie la plus informative du MACD car il change de comportement <strong>avant</strong> les croisements de lignes. Voici comment l'interpréter :</p>
+      <ul>
+        <li><strong>Barres positives qui grandissent</strong> — Le momentum haussier s'accélère. La ligne MACD s'éloigne de la ligne Signal vers le haut.</li>
+        <li><strong>Barres positives qui rétrécissent</strong> — Le momentum haussier ralentit. Signal d'attention, un croisement baissier est possible.</li>
+        <li><strong>Barres négatives qui grandissent (en valeur absolue)</strong> — Le momentum baissier s'accélère.</li>
+        <li><strong>Barres négatives qui rétrécissent</strong> — Le momentum baissier perd de la force. Potentiel retournement haussier.</li>
+      </ul>
+      <p>Le changement de direction de l'histogramme est un <strong>signal précoce</strong> : il annonce souvent le croisement des lignes avec 1 à 3 bougies d'avance. C'est pourquoi de nombreux traders surveillent l'histogramme en priorité.</p>
+    </section>
+
+    <section class="guide-section" id="croisements">
+      <h2><span class="s-icon">✂</span> Croisements de lignes</h2>
+      <p>Les croisements entre la ligne MACD et la ligne Signal sont les signaux les plus classiques de l'indicateur.</p>
+
+      <table class="signal-table">
+        <thead><tr><th>Croisement</th><th>Condition</th><th>Validité</th><th>Signal</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Bullish Cross</td>
+            <td>MACD passe au-dessus du Signal</td>
+            <td>Meilleure en zone négative (sous le 0)</td>
+            <td><span class="badge-bull">Achat potentiel</span></td>
+          </tr>
+          <tr>
+            <td>Bearish Cross</td>
+            <td>MACD passe en dessous du Signal</td>
+            <td>Meilleure en zone positive (au-dessus du 0)</td>
+            <td><span class="badge-bear">Vente potentielle</span></td>
+          </tr>
+          <tr>
+            <td>Zero Line Cross haussier</td>
+            <td>MACD passe au-dessus de 0</td>
+            <td>Signal de tendance intermédiaire</td>
+            <td><span class="badge-bull">Momentum haussier</span></td>
+          </tr>
+          <tr>
+            <td>Zero Line Cross baissier</td>
+            <td>MACD passe en dessous de 0</td>
+            <td>Signal de tendance intermédiaire</td>
+            <td><span class="badge-bear">Momentum baissier</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>La règle des zones</h3>
+      <p>Un Bullish Cross qui se produit au-dessus de la ligne zéro a moins de valeur qu'un qui se produit en zone négative, car le momentum haussier est déjà établi. Inversement, un Bullish Cross en zone très négative peut annoncer un rebond important. La <strong>position par rapport à zéro</strong> est le contexte clé d'interprétation.</p>
+    </section>
+
+    <section class="guide-section" id="divergences">
+      <h2><span class="s-icon">↗</span> Divergences MACD</h2>
+      <p>Comme pour le RSI, les divergences entre le prix et la ligne MACD sont considérées comme les signaux les plus fiables. Une divergence révèle un désalignement entre le mouvement de prix et son momentum sous-jacent.</p>
+
+      <h3>Divergence haussière classique</h3>
+      <p>Le prix fait un plus bas plus bas alors que le MACD fait un plus bas plus haut. Signal : le momentum baissier s'affaiblit malgré la poursuite de la baisse de prix. Un retournement haussier est probable. Ce signal est particulièrement puissant sur des timeframes H4 ou journalier, et quand il apparaît dans une zone de support clé.</p>
+
+      <h3>Divergence baissière classique</h3>
+      <p>Le prix fait un plus haut plus haut alors que le MACD fait un plus haut plus bas. Le momentum s'essouffle : les acheteurs poussent le prix plus haut mais avec moins de force. C'est souvent un signal précurseur de retournement baissier, particulièrement notable sur les sommets de marché significatifs.</p>
+
+      <div class="info-box info-box--warn">
+        <span class="info-box-icon">⚠</span>
+        <span>Les divergences peuvent durer longtemps avant de se matérialiser. Une divergence baissière ne signifie pas "vendez maintenant" — attendez toujours une <strong>confirmation de prix</strong> (cassure de support, bougie d'inversion) avant d'agir.</span>
+      </div>
+
+      <h3>Divergences sur l'histogramme</h3>
+      <p>Certains traders préfèrent tracer les divergences sur l'histogramme plutôt que sur la ligne MACD. L'histogramme réagit plus tôt et ses pics/creux sont plus nets, ce qui facilite l'identification des divergences sur des historiques chargés.</p>
+    </section>
+
+    <section class="guide-section" id="strategies">
+      <h2><span class="s-icon">🎯</span> Stratégies pratiques</h2>
+
+      <h3>Stratégie 1 — Bullish Cross en zone survente</h3>
+      <p>Attendez un Bullish Cross (MACD au-dessus du Signal) qui se produit en zone négative, idéalement après une divergence haussière avec le prix. Entrez à la clôture de la bougie où le croisement se confirme. Stop sous le dernier plus bas. C'est un des setups MACD les plus fiables.</p>
+
+      <h3>Stratégie 2 — MACD + RSI Double Momentum</h3>
+      <p>Attendez simultanément un Bullish Cross MACD ET un RSI en zone 40–55 (momentum qui reprend sans être en surachat). Ces deux confirmations ensemble filtrent la majorité des faux signaux. N'entrez que dans le sens de la tendance supérieure.</p>
+
+      <h3>Stratégie 3 — Divergence + Support clé</h3>
+      <p>Identifiez une divergence haussière MACD qui coïncide avec un test d'un support technique fort (level clé, Volume Profile POC, Kijun Ichimoku). La confluence maximise la probabilité de rebond. L'entrée se fait au rebond sur le support, le stop sous ce support.</p>
+    </section>
+
+    <section class="guide-section" id="limites">
+      <h2><span class="s-icon">⚠</span> Limites & pièges courants</h2>
+      <ul>
+        <li><strong>Indicateur laggard</strong> — Le MACD est basé sur des moyennes mobiles, donc décalé. En marché très rapide (altcoin volatile), les signaux arrivent souvent trop tard.</li>
+        <li><strong>Nombreux faux signaux en range</strong> — En marché sans tendance, le MACD génère des croisements fréquents et peu fiables. Filtrez toujours par la tendance supérieure.</li>
+        <li><strong>Paramètres non universels</strong> — Les 12-26-9 fonctionnent bien sur BTC/ETH. Sur des altcoins très volatils, des paramètres plus courts (8-17-9) peuvent mieux convenir.</li>
+        <li><strong>Ne pas confondre croisement et divergence</strong> — Un croisement peut se produire sans divergence et inversement. Ce sont deux types de signaux distincts avec des implications différentes.</li>
+      </ul>
+    </section>
+
+    <section class="guide-section" id="crypview">
+      <h2><span class="s-icon">⚡</span> MACD sur CrypView</h2>
+      <p>CrypView intègre le MACD (12/26/9) dans un sous-panneau dédié avec histogramme coloré, ligne MACD et ligne Signal. Les croisements haussiers et baissiers sont mis en évidence automatiquement.</p>
+      <ol>
+        <li>Clic droit → <strong>Indicateurs → MACD (12/26/9)</strong></li>
+        <li>Le sous-panneau apparaît sous le graphique principal</li>
+        <li>Raccourci clavier : <code>Shift+M</code> pour activer/désactiver</li>
+        <li>Combinez avec le RSI (<code>Shift+R</code>) pour la double confirmation</li>
+      </ol>
+      <p>Les calculs sont réalisés via Web Worker pour ne pas impacter la fluidité du graphique principal, même sur de grands historiques.</p>
+    </section>
+
+    <div class="guide-cta">
+      <div class="guide-cta-title">Analysez les divergences MACD en temps réel</div>
+      <div class="guide-cta-sub">MACD, RSI et 17 autres indicateurs sur toutes les paires Binance. Données live WebSocket, sans inscription.</div>
+      <a class="guide-cta-btn" href="../page.html">▶ Lancer CrypView</a>
+      <div class="guide-cta-links">
+        <a href="rsi-crypto.html">Guide RSI</a> — <a href="ichimoku-crypto.html">Guide Ichimoku</a> — <a href="../wiki.html#momentum">Wiki Momentum</a>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="guide-aside">
+    <div class="aside-card">
+      <div class="aside-card-title">Autres guides</div>
+      <a class="aside-link" href="rsi-crypto.html">RSI crypto</a>
+      <a class="aside-link" href="ichimoku-crypto.html">Ichimoku Cloud</a>
+      <a class="aside-link" href="footprint-chart.html">Footprint Chart</a>
+      <a class="aside-link" href="volume-profile.html">Volume Profile</a>
+      <a class="aside-link" href="orderflow-delta.html">Orderflow Delta</a>
+      <a class="aside-link" href="multi-charts.html">Multi-Charts</a>
+    </div>
+    <div class="aside-card">
+      <div class="aside-card-title">Documentation</div>
+      <a class="aside-link" href="../wiki.html#momentum">Wiki Momentum</a>
+      <a class="aside-link" href="../faq.html">FAQ CrypView</a>
+    </div>
+  </aside>
+</div>
+
+<footer class="guide-footer">
+  <span>© 2026 CrypView — Beta Capital Enterprise · <a href="../risks.html">Avertissement risques</a></span>
+  <nav style="display:flex;gap:16px"><a href="../faq.html">FAQ</a><a href="../wiki.html">Wiki</a><a href="../index.html">Accueil</a></nav>
+</footer>
+
+<script>(function(){var links=document.querySelectorAll('.toc-link[href^="#"]');var sections=Array.from(document.querySelectorAll('.guide-section'));function onScroll(){var y=window.scrollY+80;var cur='';sections.forEach(function(s){if(s.offsetTop<=y)cur=s.id;});links.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+cur);});}window.addEventListener('scroll',onScroll,{passive:true});onScroll();})();</script>
+</body>
+</html>

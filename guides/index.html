@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();</script>
+  <title>Guides Trading Crypto — Indicateurs, Orderflow, Analyse Technique | CrypView</title>
+  <meta name="description" content="Guides complets de trading crypto : RSI, MACD, Ichimoku, Footprint Chart, Volume Profile, Orderflow Delta, Multi-Charts. Apprenez l'analyse technique et appliquez-la directement sur CrypView.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/guides/">
+  <link rel="icon" type="image/svg+xml" href="../public/favicon.svg">
+  <link rel="manifest" href="../public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="guide-shared.css">
+  <style>
+    .index-hero { padding: 80px 60px 56px; max-width: 900px; margin: 0 auto; }
+    .index-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); max-width: 1100px; margin: 0 auto 80px; }
+    @media(max-width: 860px) { .index-grid { grid-template-columns: 1fr 1fr; } .index-hero { padding: 48px 24px 40px; } }
+    @media(max-width: 560px) { .index-grid { grid-template-columns: 1fr; } }
+
+    .guide-card {
+      background: var(--panel); padding: 28px 24px;
+      text-decoration: none; display: block; transition: background .15s;
+      position: relative; overflow: hidden;
+    }
+    .guide-card:hover { background: rgba(0,255,136,.04); }
+    .guide-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--accent); opacity: 0;
+      transition: opacity .15s;
+    }
+    .guide-card:hover::before { opacity: 1; }
+
+    .gc-level {
+      font-size: 8px; text-transform: uppercase; letter-spacing: .16em;
+      padding: 3px 8px; border-radius: 2px; margin-bottom: 14px; display: inline-block;
+    }
+    .gc-level--int { background: rgba(0,200,255,.1); border: 1px solid rgba(0,200,255,.25); color: var(--cyan); }
+    .gc-level--adv { background: rgba(224,64,251,.1); border: 1px solid rgba(224,64,251,.25); color: var(--purple); }
+    .gc-level--deb { background: rgba(0,255,136,.1); border: 1px solid rgba(0,255,136,.25); color: var(--accent); }
+
+    .gc-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+    .gc-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: var(--text); margin-bottom: 8px; letter-spacing: -.01em; }
+    .gc-desc { font-size: 11px; color: var(--muted); line-height: 1.7; letter-spacing: .03em; margin-bottom: 14px; }
+    .gc-meta { font-size: 9px; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; }
+    .gc-arrow { position: absolute; bottom: 20px; right: 20px; font-size: 14px; color: var(--accent); opacity: 0; transition: opacity .15s, transform .15s; }
+    .guide-card:hover .gc-arrow { opacity: 1; transform: translateX(3px); }
+
+    .index-section-label { text-align: center; font-size: 9px; text-transform: uppercase; letter-spacing: .2em; color: var(--muted); margin-bottom: 12px; }
+    .index-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(30px, 4vw, 52px); letter-spacing: -.02em; margin-bottom: 16px; }
+    .index-title .hl { color: var(--accent); }
+    .index-sub { font-size: 13px; color: var(--muted); line-height: 1.8; max-width: 540px; margin-bottom: 40px; letter-spacing: .03em; }
+    .index-cta { display: inline-flex; align-items: center; gap: 10px; padding: 11px 24px; background: var(--accent); color: #070a0f; text-decoration: none; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; border-radius: 3px; transition: opacity .2s; }
+    .index-cta:hover { opacity: .85; }
+
+    .category-header { max-width: 1100px; margin: 0 auto 8px; padding: 0 0 0 0; font-size: 9px; text-transform: uppercase; letter-spacing: .16em; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav id="gnav">
+  <a class="gnav-logo" href="../index.html">CRYP<span class="accent">VIEW</span></a>
+  <div class="gnav-right">
+    <a class="gnav-back" href="../index.html">← Accueil</a>
+    <a class="gnav-cta" href="../page.html">▶ Lancer l'app</a>
+  </div>
+</nav>
+
+<div class="index-hero">
+  <div class="index-section-label">Documentation · Tutoriels</div>
+  <h1 class="index-title">Guides <span class="hl">Trading Crypto</span></h1>
+  <p class="index-sub">Des guides pratiques pour comprendre et appliquer les outils d'analyse technique et d'orderflow — directement sur CrypView avec des données Binance en temps réel.</p>
+  <a class="index-cta" href="../page.html">▶ Appliquer sur CrypView</a>
+</div>
+
+<p class="category-header">Indicateurs techniques classiques</p>
+<div class="index-grid" style="margin-bottom:1px">
+  <a class="guide-card" href="rsi-crypto.html">
+    <span class="gc-icon">📊</span>
+    <span class="gc-level gc-level--int">Intermédiaire</span>
+    <div class="gc-title">RSI en trading crypto</div>
+    <p class="gc-desc">Calcul, niveaux 30/50/70, divergences haussières et baissières. La technique complète pour exploiter le RSI sur toutes les paires.</p>
+    <div class="gc-meta">8 min · RSI (14) · Momentum</div>
+    <span class="gc-arrow">→</span>
+  </a>
+  <a class="guide-card" href="macd-trading.html">
+    <span class="gc-icon">📈</span>
+    <span class="gc-level gc-level--int">Intermédiaire</span>
+    <div class="gc-title">MACD : divergences & croisements</div>
+    <p class="gc-desc">Histogramme, lignes Signal, croisements Bullish/Bearish, divergences cachées. Le guide complet du MACD appliqué au crypto.</p>
+    <div class="gc-meta">9 min · MACD (12/26/9) · Momentum</div>
+    <span class="gc-arrow">→</span>
+  </a>
+  <a class="guide-card" href="ichimoku-crypto.html">
+    <span class="gc-icon">☁</span>
+    <span class="gc-level gc-level--int">Intermédiaire</span>
+    <div class="gc-title">Ichimoku Cloud : lecture & stratégies</div>
+    <p class="gc-desc">Tenkan, Kijun, Senkou A/B, Chikou, Kumo. Comprendre les 5 composantes et les signaux TK Cross, Cloud Breakout et pullback Kijun.</p>
+    <div class="gc-meta">12 min · Ichimoku (9/26/52) · Tendance</div>
+    <span class="gc-arrow">→</span>
+  </a>
+</div>
+
+<p class="category-header" style="margin-top:24px">Analyse d'orderflow & volume</p>
+<div class="index-grid" style="margin-bottom:1px">
+  <a class="guide-card" href="footprint-chart.html">
+    <span class="gc-icon">🦶</span>
+    <span class="gc-level gc-level--adv">Avancé</span>
+    <div class="gc-title">Footprint Chart — Guide complet</div>
+    <p class="gc-desc">Volume Ask/Bid par niveau de prix, détection des imbalances ≥3×, Point of Control intra-bougie. L'outil d'orderflow le plus précis.</p>
+    <div class="gc-meta">10 min · AggTrades · Orderflow</div>
+    <span class="gc-arrow">→</span>
+  </a>
+  <a class="guide-card" href="orderflow-delta.html">
+    <span class="gc-icon">⚡</span>
+    <span class="gc-level gc-level--adv">Avancé</span>
+    <div class="gc-title">Orderflow Delta & CVD</div>
+    <p class="gc-desc">Mesurer la pression directionnelle bougie par bougie. Divergences Delta/Prix, absorption institutionnelle, CVD cumulatif.</p>
+    <div class="gc-meta">9 min · Delta/CVD · Pression</div>
+    <span class="gc-arrow">→</span>
+  </a>
+  <a class="guide-card" href="volume-profile.html">
+    <span class="gc-icon">📊</span>
+    <span class="gc-level gc-level--int">Intermédiaire</span>
+    <div class="gc-title">Volume Profile : POC, VAH, VAL</div>
+    <p class="gc-desc">Distribution du volume par prix, Point of Control, Value Area 70%, Low Volume Nodes. Les niveaux que les institutionnels surveillent.</p>
+    <div class="gc-meta">10 min · VRVP · Structure</div>
+    <span class="gc-arrow">→</span>
+  </a>
+</div>
+
+<p class="category-header" style="margin-top:24px">Organisation & workflow</p>
+<div class="index-grid">
+  <a class="guide-card" href="multi-charts.html">
+    <span class="gc-icon">🔲</span>
+    <span class="gc-level gc-level--deb">Débutant</span>
+    <div class="gc-title">Analyser plusieurs crypto en même temps</div>
+    <p class="gc-desc">Layouts 2/4/9 panneaux, analyse MTF (multi-timeframe), corrélations BTC/ETH, synchronisation crosshair. Configurez votre workspace optimal.</p>
+    <div class="gc-meta">8 min · Multi-Charts · Workflow</div>
+    <span class="gc-arrow">→</span>
+  </a>
+</div>
+
+<footer class="guide-footer" style="margin-top: 0">
+  <span>© 2026 CrypView — Beta Capital Enterprise · <a href="../risks.html">Avertissement risques</a></span>
+  <nav style="display:flex;gap:16px">
+    <a href="../wiki.html">Wiki</a>
+    <a href="../faq.html">FAQ</a>
+    <a href="../sitemap.html">Plan du site</a>
+    <a href="../index.html">Accueil</a>
+  </nav>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();</script>
+  <title>Comment utiliser le RSI en trading crypto — Guide complet 2026 | CrypView</title>
+  <meta name="description" content="Maîtrisez le RSI en crypto trading : calcul, niveaux de surachat/survente, divergences haussières et baissières, stratégies avancées. Guide complet avec exemples pratiques.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/guides/rsi-crypto.html">
+  <link rel="alternate" hreflang="fr" href="https://ezilryb.github.io/CRYPVIEW/guides/rsi-crypto.html">
+  <link rel="alternate" hreflang="en" href="https://ezilryb.github.io/CRYPVIEW/guides/en/rsi-crypto.html">
+  <link rel="alternate" hreflang="x-default" href="https://ezilryb.github.io/CRYPVIEW/guides/en/rsi-crypto.html">
+  <meta property="og:title" content="Comment utiliser le RSI en trading crypto — CrypView">
+  <meta property="og:description" content="Guide complet sur le RSI : calcul, divergences, stratégies. Appliquez-le directement sur CrypView avec données Binance live.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://ezilryb.github.io/CRYPVIEW/guides/rsi-crypto.html">
+  <link rel="icon" type="image/svg+xml" href="../public/favicon.svg">
+  <link rel="manifest" href="../public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="guide-shared.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Comment utiliser le RSI en trading crypto",
+    "description": "Guide complet sur le RSI (Relative Strength Index) en trading de cryptomonnaies : calcul, niveaux, divergences et stratégies.",
+    "author": { "@type": "Organization", "name": "CrypView — Beta Capital Enterprise" },
+    "publisher": { "@type": "Organization", "name": "CrypView" },
+    "datePublished": "2026-04-12",
+    "dateModified": "2026-04-12"
+  }
+  </script>
+</head>
+<body>
+
+<nav id="gnav">
+  <a class="gnav-logo" href="../index.html">CRYP<span class="accent">VIEW</span></a>
+  <div class="gnav-right">
+    <a class="gnav-back" href="../index.html">← Accueil</a>
+    <a class="gnav-cta" href="../page.html">▶ Lancer l'app</a>
+  </div>
+</nav>
+
+<div class="guide-layout">
+
+  <!-- TOC gauche -->
+  <aside class="guide-toc" aria-label="Table des matières">
+    <div class="toc-section">
+      <span class="toc-label">Dans ce guide</span>
+      <a class="toc-link" href="#intro">Introduction</a>
+      <a class="toc-link" href="#calcul">Calcul & formule</a>
+      <a class="toc-link" href="#niveaux">Niveaux clés</a>
+      <a class="toc-link" href="#divergences">Divergences</a>
+      <a class="toc-link" href="#strategies">Stratégies pratiques</a>
+      <a class="toc-link" href="#limites">Limites du RSI</a>
+      <a class="toc-link" href="#crypview">RSI sur CrypView</a>
+    </div>
+    <div class="toc-section">
+      <span class="toc-label">Guides liés</span>
+      <a class="toc-link" href="macd-trading.html">MACD crypto</a>
+      <a class="toc-link" href="volume-profile.html">Volume Profile</a>
+      <a class="toc-link" href="ichimoku-crypto.html">Ichimoku Cloud</a>
+    </div>
+  </aside>
+
+  <!-- Contenu principal -->
+  <main class="guide-body">
+
+    <div class="guide-hero">
+      <div class="guide-tag">Guide technique</div>
+      <h1 class="guide-title">Comment utiliser le <span class="hl">RSI</span><br>en trading crypto</h1>
+      <p class="guide-intro">Le RSI (Relative Strength Index) est l'un des indicateurs techniques les plus populaires en trading de cryptomonnaies. Créé par J. Welles Wilder en 1978, il mesure la vitesse et l'amplitude des mouvements de prix pour identifier les zones de surachat et de survente.</p>
+      <div class="guide-meta">
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Lecture : 8 min</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Mis à jour : Avril 2026</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Niveau : Intermédiaire</span>
+      </div>
+    </div>
+
+    <!-- Introduction -->
+    <section class="guide-section" id="intro">
+      <h2><span class="s-icon">📊</span> Qu'est-ce que le RSI ?</h2>
+      <p>Le <strong>Relative Strength Index</strong> est un oscillateur de momentum qui oscille entre 0 et 100. Il compare l'amplitude des gains récents à celle des pertes récentes sur une période donnée — généralement 14 bougies. Plus la valeur est haute, plus le marché a progressé rapidement ; plus elle est basse, plus il a reculé fortement.</p>
+      <p>Contrairement à ce que son nom pourrait laisser croire, le RSI ne compare pas un actif à un autre : il mesure uniquement la <strong>force interne</strong> d'un instrument par rapport à son propre historique récent. C'est pourquoi il fonctionne aussi bien sur Bitcoin, Ethereum ou n'importe quelle altcoin.</p>
+      <div class="info-box info-box--note">
+        <span class="info-box-icon">ℹ</span>
+        <span>Sur CrypView, le RSI est disponible dans la catégorie <strong>Momentum</strong> du sélecteur d'indicateurs. La période par défaut est 14, conforme aux standards de l'industrie.</span>
+      </div>
+    </section>
+
+    <!-- Calcul -->
+    <section class="guide-section" id="calcul">
+      <h2><span class="s-icon">🧮</span> Calcul & formule</h2>
+      <p>Le calcul du RSI se fait en deux étapes. D'abord, on calcule le gain moyen et la perte moyenne sur la période choisie (14 bougies par défaut). Ensuite, on applique la formule de Relative Strength.</p>
+
+      <div class="formula-box">
+        <div class="formula-label">Formule RSI</div>
+        <div class="formula-expr">RSI = 100 − [ 100 / (1 + RS) ]</div>
+        <div class="formula-note">Où RS = Gain moyen sur N périodes / Perte moyenne sur N périodes</div>
+      </div>
+
+      <p>En pratique, les calculs successifs utilisent une moyenne lissée (EMA) plutôt qu'une SMA simple, ce qui donne un indicateur légèrement plus réactif aux mouvements récents tout en conservant la mémoire de l'historique.</p>
+
+      <h3>Interprétation de la valeur brute</h3>
+      <p>Une valeur RSI de 50 indique un équilibre parfait entre gains et pertes sur la période. Au-dessus de 50, les gains dominent — le momentum est haussier. En dessous, les pertes dominent — le momentum est baissier. Cette ligne médiane est souvent utilisée comme signal de tendance secondaire.</p>
+    </section>
+
+    <!-- Niveaux -->
+    <section class="guide-section" id="niveaux">
+      <h2><span class="s-icon">📏</span> Niveaux clés : 30, 50 et 70</h2>
+      <p>Wilder définissait à l'origine le <strong>surachat à 70</strong> et la <strong>survente à 30</strong>. Ces seuils restent les plus utilisés, mais des ajustements sont courants selon les marchés.</p>
+
+      <div class="level-cards">
+        <div class="level-card">
+          <div class="level-card-num">RSI &gt; 70</div>
+          <div class="level-card-title">Zone de surachat</div>
+          <div class="level-card-desc">Le marché a progressé rapidement. Attention aux retournements. Dans une forte tendance, le RSI peut rester en surachat longuement.</div>
+        </div>
+        <div class="level-card">
+          <div class="level-card-num">RSI 50–70</div>
+          <div class="level-card-title">Momentum haussier</div>
+          <div class="level-card-desc">Zone intermédiaire favorable aux acheteurs. Un RSI qui remonte depuis 50 est souvent un signe de reprise de tendance haussière.</div>
+        </div>
+        <div class="level-card">
+          <div class="level-card-num">RSI 30–50</div>
+          <div class="level-card-title">Momentum baissier</div>
+          <div class="level-card-desc">Zone défavorable aux acheteurs. Un RSI qui repasse sous 50 depuis au-dessus est un signal baissier fréquemment utilisé.</div>
+        </div>
+        <div class="level-card">
+          <div class="level-card-num">RSI &lt; 30</div>
+          <div class="level-card-title">Zone de survente</div>
+          <div class="level-card-desc">Le marché a reculé rapidement. Potentiel rebond technique. Comme pour le surachat, la survente peut durer en forte tendance baissière.</div>
+        </div>
+      </div>
+
+      <div class="info-box info-box--warn">
+        <span class="info-box-icon">⚠</span>
+        <span>En marché crypto, les mouvements extrêmes sont fréquents. Un RSI à 80 ou 20 n'est pas automatiquement un signal de vente ou d'achat — la <strong>tendance sous-jacente</strong> reste le filtre prioritaire.</span>
+      </div>
+
+      <h3>Ajuster les seuils selon le contexte</h3>
+      <p>Sur les cryptos à haute volatilité (altcoins, meme coins), certains traders élèvent le seuil de surachat à 80 et abaissent le seuil de survente à 20 pour réduire les faux signaux. Sur Bitcoin en timeframe journalier, les seuils 70/30 classiques fonctionnent généralement bien.</p>
+    </section>
+
+    <!-- Divergences -->
+    <section class="guide-section" id="divergences">
+      <h2><span class="s-icon">↗</span> Divergences : le signal le plus puissant</h2>
+      <p>Les <strong>divergences entre le prix et le RSI</strong> sont considérées par de nombreux traders comme le signal le plus fiable de cet indicateur. Une divergence se produit lorsque le prix et l'indicateur ne confirment pas la même direction.</p>
+
+      <table class="signal-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Prix</th>
+            <th>RSI</th>
+            <th>Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Divergence haussière</td>
+            <td>Plus bas plus bas</td>
+            <td>Plus bas plus haut</td>
+            <td><span class="badge-bull">Haussier</span></td>
+          </tr>
+          <tr>
+            <td>Divergence baissière</td>
+            <td>Plus haut plus haut</td>
+            <td>Plus haut plus bas</td>
+            <td><span class="badge-bear">Baissier</span></td>
+          </tr>
+          <tr>
+            <td>Divergence cachée haussière</td>
+            <td>Plus bas plus haut</td>
+            <td>Plus bas plus bas</td>
+            <td><span class="badge-bull">Continuation</span></td>
+          </tr>
+          <tr>
+            <td>Divergence cachée baissière</td>
+            <td>Plus haut plus bas</td>
+            <td>Plus haut plus haut</td>
+            <td><span class="badge-bear">Continuation</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Comment lire une divergence baissière</h3>
+      <p>Imaginez que Bitcoin atteigne un nouveau sommet à 70 000$ puis à 75 000$. Si le RSI au second sommet est inférieur à celui du premier, malgré le nouveau record de prix, c'est une <strong>divergence baissière</strong>. Le momentum s'affaiblit : les acheteurs ont du mal à pousser le marché plus haut avec la même force. C'est souvent un signal précurseur d'un retournement.</p>
+
+      <h3>Les divergences cachées : confirmation de tendance</h3>
+      <p>Moins connues mais tout aussi utiles, les divergences cachées confirment la tendance plutôt que de signaler un retournement. En tendance haussière, un prix qui fait un plus bas plus haut (retracement) combiné à un RSI qui fait un plus bas plus bas est un signal de continuation haussière — le marché recharge ses forces avant de repartir à la hausse.</p>
+    </section>
+
+    <!-- Stratégies -->
+    <section class="guide-section" id="strategies">
+      <h2><span class="s-icon">🎯</span> Stratégies pratiques</h2>
+
+      <h3>Stratégie 1 — RSI + Tendance (la plus simple)</h3>
+      <p>Identifiez la tendance principale sur un timeframe supérieur (H4 ou journalier). Puis, sur un timeframe inférieur (H1 ou 15min), n'entrez en position que dans le sens de cette tendance. En tendance haussière : achetez uniquement quand le RSI descend sous 40–50 et remonte. Ignorez les signaux de surachat.</p>
+
+      <h3>Stratégie 2 — RSI Failure Swing</h3>
+      <p>C'est la technique originale de Wilder. En surachat (RSI &gt; 70), attendez que le RSI repasse sous son dernier creux avant de toucher à nouveau 70. Ce <strong>"failure swing"</strong> est un signal de vente. L'inverse s'applique en survente : attendez que le RSI repasse au-dessus de son dernier pic avant de remonter depuis 30.</p>
+
+      <h3>Stratégie 3 — RSI + MACD (double confirmation)</h3>
+      <p>Combinez le RSI avec le MACD pour filtrer les faux signaux. N'entrez en position que lorsque les deux indicateurs convergent : RSI en zone de survente ET croisement haussier du MACD, ou RSI en zone de surachat ET croisement baissier du MACD. Moins de trades, mais meilleure qualité.</p>
+
+      <div class="info-box info-box--tip">
+        <span class="info-box-icon">💡</span>
+        <span>Sur CrypView, activez simultanément le RSI et le MACD depuis le sélecteur d'indicateurs pour visualiser la double confirmation en temps réel sur n'importe quelle paire Binance.</span>
+      </div>
+    </section>
+
+    <!-- Limites -->
+    <section class="guide-section" id="limites">
+      <h2><span class="s-icon">⚠</span> Limites & pièges courants</h2>
+      <ul>
+        <li><strong>Faux signaux en tendance forte</strong> — En forte tendance haussière, le RSI peut rester en surachat pendant des semaines. Vendre au premier passage à 70 peut vous faire rater l'essentiel du mouvement.</li>
+        <li><strong>Sensibilité à la période</strong> — Un RSI(9) réagit bien plus vite qu'un RSI(21). Adaptez la période à votre timeframe et à votre style de trading.</li>
+        <li><strong>Ne pas utiliser seul</strong> — Le RSI est un indicateur laggard (décalé). En isolation, il génère de nombreux faux signaux. Toujours combiner avec l'analyse de tendance ou un autre indicateur.</li>
+        <li><strong>Timeframes multiples obligatoires</strong> — Un RSI en survente sur H1 peut parfaitement coexister avec un RSI en surachat sur H4. Toujours vérifier le contexte sur le timeframe supérieur.</li>
+      </ul>
+    </section>
+
+    <!-- CrypView -->
+    <section class="guide-section" id="crypview">
+      <h2><span class="s-icon">⚡</span> Utiliser le RSI sur CrypView</h2>
+      <p>CrypView intègre le RSI(14) nativement, calculé sur les données live Binance WebSocket. Le sous-panneau s'affiche automatiquement sous le graphique principal avec les niveaux 30, 50 et 70 matérialisés par des lignes de référence.</p>
+      <ol>
+        <li>Ouvrez <a href="../page.html">page.html</a> ou lancez l'application</li>
+        <li>Clic droit → <strong>Indicateurs → Choisir des indicateurs</strong></li>
+        <li>Sélectionnez <strong>RSI (14)</strong> dans la catégorie Momentum</li>
+        <li>Le RSI apparaît dans un sous-panneau synchronisé avec le graphique principal</li>
+        <li>Combinez-le avec le MACD ou les Bandes de Bollinger pour des signaux filtrés</li>
+      </ol>
+      <p>Le raccourci clavier <code>Shift+R</code> active et désactive le RSI instantanément. Consultez le <a href="../wiki.html#momentum">Wiki CrypView</a> pour la documentation complète des indicateurs.</p>
+    </section>
+
+    <!-- CTA -->
+    <div class="guide-cta">
+      <div class="guide-cta-title">Mettez le RSI en pratique maintenant</div>
+      <div class="guide-cta-sub">Analysez n'importe quelle paire Binance en temps réel avec le RSI, le MACD et 17 autres indicateurs. Gratuit, sans inscription.</div>
+      <a class="guide-cta-btn" href="../page.html">▶ Lancer CrypView</a>
+      <div class="guide-cta-links">
+        Ou consultez le <a href="../wiki.html">Wiki complet</a> — <a href="macd-trading.html">Guide MACD</a> — <a href="ichimoku-crypto.html">Guide Ichimoku</a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Aside droite -->
+  <aside class="guide-aside" aria-label="Ressources">
+    <div class="aside-card">
+      <div class="aside-card-title">Autres guides</div>
+      <a class="aside-link" href="macd-trading.html">MACD crypto</a>
+      <a class="aside-link" href="footprint-chart.html">Footprint Chart</a>
+      <a class="aside-link" href="ichimoku-crypto.html">Ichimoku Cloud</a>
+      <a class="aside-link" href="volume-profile.html">Volume Profile</a>
+      <a class="aside-link" href="orderflow-delta.html">Orderflow Delta</a>
+      <a class="aside-link" href="multi-charts.html">Multi-Charts</a>
+    </div>
+    <div class="aside-card">
+      <div class="aside-card-title">Ressources</div>
+      <a class="aside-link" href="../wiki.html">Documentation Wiki</a>
+      <a class="aside-link" href="../faq.html">FAQ CrypView</a>
+      <a class="aside-link" href="../page.html">Lancer l'app</a>
+    </div>
+    <div class="aside-card">
+      <div class="aside-card-title">Indicateurs similaires</div>
+      <a class="aside-link" href="../wiki.html#momentum">Stochastique (14)</a>
+      <a class="aside-link" href="../wiki.html#momentum">Williams %R</a>
+      <a class="aside-link" href="../wiki.html#momentum">CCI (20)</a>
+      <a class="aside-link" href="../wiki.html#momentum">MFI (14)</a>
+    </div>
+  </aside>
+
+</div>
+
+<footer class="guide-footer">
+  <span>© 2026 CrypView — Beta Capital Enterprise · <a href="../risks.html">Avertissement risques</a></span>
+  <nav style="display:flex;gap:16px">
+    <a href="../faq.html">FAQ</a>
+    <a href="../wiki.html">Wiki</a>
+    <a href="../index.html">Accueil</a>
+  </nav>
+</footer>
+
+<script>
+(function(){
+  var links = document.querySelectorAll('.toc-link[href^="#"]');
+  var sections = Array.from(document.querySelectorAll('.guide-section'));
+  function onScroll(){
+    var y = window.scrollY + 80;
+    var cur = '';
+    sections.forEach(function(s){ if(s.offsetTop <= y) cur = s.id; });
+    links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === '#' + cur); });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+})();
+</script>
+</body>
+</html>

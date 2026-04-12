@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){var s=localStorage.getItem('crypview-theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='light'||(!s&&!d))document.documentElement.classList.add('light-theme')})();</script>
+  <title>Footprint Chart crypto — Guide complet 2026 | CrypView</title>
+  <meta name="description" content="Comprendre et utiliser le Footprint Chart en crypto trading : Ask/Bid par niveau de prix, détection des imbalances, lecture du flux d'ordres intra-bougie. Guide complet avec exemples.">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/guides/footprint-chart.html">
+  <link rel="alternate" hreflang="fr" href="https://ezilryb.github.io/CRYPVIEW/guides/footprint-chart.html">
+  <link rel="alternate" hreflang="en" href="https://ezilryb.github.io/CRYPVIEW/guides/en/footprint-chart.html">
+  <link rel="alternate" hreflang="x-default" href="https://ezilryb.github.io/CRYPVIEW/guides/en/footprint-chart.html">
+  <meta property="og:title" content="Footprint Chart crypto — Guide complet 2026 | CrypView">
+  <meta property="og:description" content="Maîtrisez le Footprint Chart : lecture du volume Ask/Bid par niveau de prix, imbalances, POC et stratégies d'orderflow.">
+  <meta property="og:type" content="article">
+  <link rel="icon" type="image/svg+xml" href="../public/favicon.svg">
+  <link rel="manifest" href="../public/manifest.json">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="guide-shared.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Footprint Chart crypto — Guide complet 2026","author":{"@type":"Organization","name":"CrypView"},"datePublished":"2026-04-12"}</script>
+</head>
+<body>
+
+<nav id="gnav">
+  <a class="gnav-logo" href="../index.html">CRYP<span class="accent">VIEW</span></a>
+  <div class="gnav-right">
+    <a class="gnav-back" href="../index.html">← Accueil</a>
+    <a class="gnav-cta" href="../page.html">▶ Lancer l'app</a>
+  </div>
+</nav>
+
+<div class="guide-layout">
+
+  <aside class="guide-toc">
+    <div class="toc-section">
+      <span class="toc-label">Dans ce guide</span>
+      <a class="toc-link" href="#intro">Qu'est-ce que le Footprint ?</a>
+      <a class="toc-link" href="#structure">Structure d'une cellule</a>
+      <a class="toc-link" href="#imbalances">Détection des imbalances</a>
+      <a class="toc-link" href="#poc">Point of Control</a>
+      <a class="toc-link" href="#lecture">Lire un Footprint</a>
+      <a class="toc-link" href="#strategies">Stratégies pratiques</a>
+      <a class="toc-link" href="#crypview">Footprint sur CrypView</a>
+    </div>
+    <div class="toc-section">
+      <span class="toc-label">Guides liés</span>
+      <a class="toc-link" href="orderflow-delta.html">Orderflow Delta</a>
+      <a class="toc-link" href="volume-profile.html">Volume Profile</a>
+      <a class="toc-link" href="rsi-crypto.html">RSI crypto</a>
+    </div>
+  </aside>
+
+  <main class="guide-body">
+
+    <div class="guide-hero">
+      <div class="guide-tag">Analyse avancée</div>
+      <h1 class="guide-title"><span class="hl">Footprint Chart</span><br>crypto — Guide complet</h1>
+      <p class="guide-intro">Le Footprint Chart est l'outil d'orderflow le plus précis disponible pour les traders crypto. Contrairement aux chandeliers japonais classiques, il révèle le volume échangé à chaque niveau de prix à l'intérieur d'une bougie — décomposé entre acheteurs agressifs (Ask) et vendeurs agressifs (Bid).</p>
+      <div class="guide-meta">
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Lecture : 10 min</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Mis à jour : Avril 2026</span>
+        <span class="guide-meta-item"><span class="guide-meta-dot"></span>Niveau : Avancé</span>
+      </div>
+    </div>
+
+    <section class="guide-section" id="intro">
+      <h2><span class="s-icon">🦶</span> Qu'est-ce que le Footprint Chart ?</h2>
+      <p>Un chandelier japonais classique vous dit le prix d'ouverture, le plus haut, le plus bas et la clôture. Il vous dit <em>où</em> le marché est allé, mais pas <em>comment</em>. Le Footprint Chart comble cette lacune : il affiche, pour chaque niveau de prix à l'intérieur de la bougie, combien de volume a été échangé par les acheteurs initiateurs (<strong>Ask</strong>) et par les vendeurs initiateurs (<strong>Bid</strong>).</p>
+      <p>Cette information vient des <strong>aggTrades</strong> — les transactions individuelles — et non des OHLCV. Chaque transaction est classée : si elle a été exécutée au prix Ask (l'acheteur a frappé le prix le plus bas disponible à la vente), elle est comptabilisée côté Ask. Si elle l'a été au prix Bid (le vendeur a frappé l'offre d'achat), elle est côté Bid.</p>
+      <div class="info-box info-box--note">
+        <span class="info-box-icon">ℹ</span>
+        <span>Ask = volume initié par les acheteurs agressifs (market buyers). Bid = volume initié par les vendeurs agressifs (market sellers). Une bougie haussière avec un Ask dominant confirme la conviction des acheteurs.</span>
+      </div>
+    </section>
+
+    <section class="guide-section" id="structure">
+      <h2><span class="s-icon">🔲</span> Structure d'une cellule Footprint</h2>
+      <p>Le Footprint décompose chaque bougie en une grille de cellules. Chaque ligne correspond à un tick ou un niveau de prix agrégé. Dans chaque cellule, vous voyez :</p>
+      <ul>
+        <li><strong>Volume Ask (gauche ou vert)</strong> — Volume des acheteurs initiateurs à ce niveau de prix</li>
+        <li><strong>Volume Bid (droite ou rouge)</strong> — Volume des vendeurs initiateurs à ce niveau de prix</li>
+        <li><strong>Delta de la cellule</strong> — Différence Ask − Bid, visible dans certains modes d'affichage</li>
+      </ul>
+      <p>La hauteur de chaque cellule (le <em>tick size</em>) est ajustable selon votre instrument et votre niveau de zoom. Sur Bitcoin, un regroupement par tranches de 10–50$ est courant sur des bougies en 5 ou 15 minutes.</p>
+
+      <h3>Les différents modes d'affichage</h3>
+      <p>Les Footprint Charts existent en plusieurs variantes : <strong>Volume Profile Footprint</strong> (barres horizontales de volume), <strong>Delta Footprint</strong> (affiche uniquement la différence Ask−Bid), <strong>Bid×Ask Footprint</strong> (le plus courant, affiche les deux colonnes). CrypView utilise le mode Bid×Ask, le plus informatif pour l'analyse d'orderflow.</p>
+    </section>
+
+    <section class="guide-section" id="imbalances">
+      <h2><span class="s-icon">⚡</span> Détection des imbalances</h2>
+      <p>Une <strong>imbalance</strong> (déséquilibre) se produit lorsqu'un côté — Ask ou Bid — domine massivement l'autre à un niveau de prix donné. Dans CrypView, une cellule est marquée comme imbalance lorsque le ratio dépasse <strong>3× en faveur d'un côté</strong>.</p>
+      <p>Les imbalances ont une signification particulière : elles indiquent que le marché a traversé ce niveau de prix de façon agressive, sans résistance significative de l'autre côté. Ces zones deviennent souvent des <strong>niveaux de support/résistance</strong> importants lors des visites suivantes, car le marché tend à y revenir pour "remplir" l'imbalance.</p>
+
+      <h3>Imbalances haussières (Ask dominant)</h3>
+      <p>Quand le volume Ask est 3× ou plus supérieur au volume Bid à un niveau de prix, c'est une imbalance haussière. Les acheteurs ont traversé ce niveau avec force. Si le prix revient tester ce niveau ultérieurement, les acheteurs défendent souvent leur position — c'est un <strong>support potentiel</strong>.</p>
+
+      <h3>Imbalances baissières (Bid dominant)</h3>
+      <p>L'inverse : les vendeurs ont dominé massivement à ce niveau. Le marché y a rencontré une forte pression vendeuse. En cas de retour du prix, c'est une <strong>résistance potentielle</strong> à surveiller.</p>
+
+      <div class="info-box info-box--tip">
+        <span class="info-box-icon">💡</span>
+        <span>Sur CrypView, les imbalances sont signalées par un <strong>contour doré ★</strong> sur la cellule concernée, visible dès que le zoom est suffisant (environ 28px par bougie).</span>
+      </div>
+    </section>
+
+    <section class="guide-section" id="poc">
+      <h2><span class="s-icon">📍</span> Point of Control (POC)</h2>
+      <p>Le <strong>Point of Control</strong> d'un Footprint est le niveau de prix où le volume total (Ask + Bid) est le plus élevé à l'intérieur d'une bougie. C'est le "centre de gravité" de cette bougie — le niveau où le marché a passé le plus de temps et échangé le plus de volume.</p>
+      <p>Le POC d'une bougie a plusieurs utilisations pratiques :</p>
+      <ul>
+        <li><strong>Zone d'équilibre</strong> — Le marché y retourne fréquemment après des extensions</li>
+        <li><strong>Référence d'entrée</strong> — Un retour sur le POC d'une bougie forte est souvent une opportunité d'entrée dans le sens de la bougie</li>
+        <li><strong>Filtre de tendance</strong> — Si le prix clôture régulièrement au-dessus du POC, la tendance est haussière</li>
+      </ul>
+    </section>
+
+    <section class="guide-section" id="lecture">
+      <h2><span class="s-icon">👁</span> Lire un Footprint Chart</h2>
+      <p>La lecture d'un Footprint se fait de bas en haut pour les bougies haussières, et de haut en bas pour les bougies baissières — dans le sens du mouvement de prix. Voici ce qu'on cherche :</p>
+
+      <table class="signal-table">
+        <thead><tr><th>Signal</th><th>Ce qu'il indique</th><th>Signification</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Ask dominant + bougie haussière</td>
+            <td>Acheteurs actifs tout au long de la bougie</td>
+            <td><span class="badge-bull">Haussier confirmé</span></td>
+          </tr>
+          <tr>
+            <td>Bid dominant + bougie haussière</td>
+            <td>Le prix monte mais les vendeurs résistent</td>
+            <td><span class="badge-neutral">Divergence — Attention</span></td>
+          </tr>
+          <tr>
+            <td>Clôture sous le POC de la bougie</td>
+            <td>Les vendeurs ont repris le contrôle en fin de bougie</td>
+            <td><span class="badge-bear">Faiblesse haussière</span></td>
+          </tr>
+          <tr>
+            <td>Forte imbalance Ask à un support</td>
+            <td>Absorption des vendeurs par les acheteurs</td>
+            <td><span class="badge-bull">Support fort</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="guide-section" id="strategies">
+      <h2><span class="s-icon">🎯</span> Stratégies pratiques avec le Footprint</h2>
+
+      <h3>Absorption de support / résistance</h3>
+      <p>L'une des stratégies les plus populaires avec le Footprint est la détection d'<strong>absorption</strong>. Quand le prix teste un niveau de support et que le Footprint montre un fort volume Bid (vendeurs) mais que le prix ne baisse pas — ou remonte — c'est que les acheteurs absorbent toute l'offre disponible. C'est un signal haussier fort.</p>
+
+      <h3>Exhaustion du mouvement</h3>
+      <p>Une bougie haussière avec un fort volume Ask dans les cellules supérieures, combinée à une clôture qui revient en milieu de bougie, indique une <strong>exhaustion des acheteurs</strong>. Le marché a progressé violemment mais les vendeurs ont repris le dessus avant la clôture — signal de possible retournement.</p>
+
+      <h3>Confluence Footprint + Volume Profile</h3>
+      <p>Combinez le Footprint avec le <a href="volume-profile.html">Volume Profile</a> pour identifier les zones à forte confluence : un POC de Volume Profile qui coïncide avec une zone d'imbalances Footprint non remplie est un niveau de prix à surveiller attentivement.</p>
+    </section>
+
+    <section class="guide-section" id="crypview">
+      <h2><span class="s-icon">⚡</span> Footprint Chart sur CrypView</h2>
+      <p>CrypView propose un Footprint Chart temps réel propulsé par les flux <code>aggTrade</code> de Binance. Aucune clé API n'est nécessaire. Le seed historique est chargé via REST puis le WebSocket prend le relais pour les trades en direct.</p>
+      <ol>
+        <li>Ouvrez <a href="../page.html">page.html</a> et choisissez votre paire (ex : BTCUSDT)</li>
+        <li>Clic droit → <strong>Indicateurs → Footprint Chart</strong></li>
+        <li>Zoomez sur le graphique (au moins 28px par bougie) pour voir les cellules</li>
+        <li>Les imbalances ≥ 3× apparaissent avec un contour doré ★</li>
+        <li>Utilisez le raccourci <code>Shift+F</code> pour activer/désactiver rapidement</li>
+      </ol>
+      <div class="info-box info-box--warn">
+        <span class="info-box-icon">⚠</span>
+        <span>Sur les timeframes très courts (&lt;1m), le Footprint peut basculer en mode approximation OHLCV si le flux aggTrade est throttled. Un toast vous en informe automatiquement.</span>
+      </div>
+    </section>
+
+    <div class="guide-cta">
+      <div class="guide-cta-title">Analysez le flux d'ordres en temps réel</div>
+      <div class="guide-cta-sub">Footprint Chart, Orderflow Delta et Volume Profile sur toutes les paires Binance. Sans inscription, sans limite.</div>
+      <a class="guide-cta-btn" href="../page.html">▶ Lancer CrypView</a>
+      <div class="guide-cta-links">
+        <a href="orderflow-delta.html">Guide Orderflow Delta</a> — <a href="volume-profile.html">Guide Volume Profile</a> — <a href="../wiki.html#footprint">Wiki Footprint</a>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="guide-aside">
+    <div class="aside-card">
+      <div class="aside-card-title">Autres guides</div>
+      <a class="aside-link" href="rsi-crypto.html">RSI crypto</a>
+      <a class="aside-link" href="macd-trading.html">MACD crypto</a>
+      <a class="aside-link" href="ichimoku-crypto.html">Ichimoku Cloud</a>
+      <a class="aside-link" href="volume-profile.html">Volume Profile</a>
+      <a class="aside-link" href="orderflow-delta.html">Orderflow Delta</a>
+      <a class="aside-link" href="multi-charts.html">Multi-Charts</a>
+    </div>
+    <div class="aside-card">
+      <div class="aside-card-title">Documentation</div>
+      <a class="aside-link" href="../wiki.html#footprint">Wiki Footprint</a>
+      <a class="aside-link" href="../wiki.html#orderflow">Wiki Orderflow</a>
+      <a class="aside-link" href="../faq.html">FAQ CrypView</a>
+    </div>
+  </aside>
+</div>
+
+<footer class="guide-footer">
+  <span>© 2026 CrypView — Beta Capital Enterprise · <a href="../risks.html">Avertissement risques</a></span>
+  <nav style="display:flex;gap:16px"><a href="../faq.html">FAQ</a><a href="../wiki.html">Wiki</a><a href="../index.html">Accueil</a></nav>
+</footer>
+
+<script>(function(){var links=document.querySelectorAll('.toc-link[href^="#"]');var sections=Array.from(document.querySelectorAll('.guide-section'));function onScroll(){var y=window.scrollY+80;var cur='';sections.forEach(function(s){if(s.offsetTop<=y)cur=s.id;});links.forEach(function(l){l.classList.toggle('active',l.getAttribute('href')==='#'+cur);});}window.addEventListener('scroll',onScroll,{passive:true});onScroll();})();</script>
+</body>
+</html>

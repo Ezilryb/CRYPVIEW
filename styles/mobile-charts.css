@@ -1,0 +1,590 @@
+/* ============================================================
+   styles/mobile-charts.css — CrypView V2
+   Responsive pour page.html et toutes les vues multi-charts.
+   À inclure APRÈS les autres feuilles de style.
+   ============================================================ */
+
+/* ══════════════════════════════════════════════════════════════
+   TABLETTE — 1024px
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+
+  /* Sidebar réduite */
+  .sidebar {
+    width: 150px;
+  }
+
+  /* Timeframe bar plus compacte */
+  .tf-scroll {
+    width: 140px;
+  }
+
+  /* Prix moins grand */
+  #live-price {
+    font-size: 18px;
+  }
+
+  /* Multi-grid : 2 col forcées même pour multi4 */
+  .multi-grid-4 {
+    grid-template-rows: 1fr 1fr;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE — 768px
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── BODY / ROOT ─────────────────────────────────────────── */
+  body {
+    height: 100dvh;           /* dynamic viewport height (barre mobile) */
+    overflow: hidden;
+  }
+
+  /* ── HEADER ──────────────────────────────────────────────── */
+  header {
+    padding: 6px 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 48px;
+  }
+
+  .logo {
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Recherche symbole */
+  .sym-search-wrap {
+    order: 2;
+    flex: 1 1 auto;
+    min-width: 90px;
+  }
+
+  #sym-input {
+    width: 100%;
+    font-size: 11px;
+    padding: 5px 24px 5px 8px;
+    transition: none;          /* désactive l'agrandissement au focus */
+  }
+
+  #sym-input:focus {
+    width: 100%;               /* ne s'agrandit plus en mobile */
+  }
+
+  /* Barre timeframe */
+  .tf-scroll-wrapper {
+    order: 3;
+    flex: 0 0 auto;
+  }
+
+  .tf-scroll {
+    width: 120px;
+  }
+
+  /* Dropdown symbole : pleine largeur en mobile */
+  #sym-dropdown {
+    position: fixed;
+    top: 48px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 45vh;
+    border-radius: 0;
+    z-index: 9999;
+  }
+
+  /* Prix courant */
+  .price-display {
+    order: 1;
+    margin-left: auto;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  #live-price {
+    font-size: 15px;
+  }
+
+  #price-change {
+    font-size: 10px;
+  }
+
+  /* Statut : masqué en mobile (économie d'espace) */
+  .status {
+    display: none;
+  }
+
+  /* ── BARRE D'INDICATEURS ACTIFS ──────────────────────────── */
+  #ind-bar {
+    padding: 3px 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 4px;
+  }
+
+  #ind-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ind-tag {
+    font-size: 8px;
+    padding: 2px 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── LAYOUT PRINCIPAL ────────────────────────────────────── */
+  .main {
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR : cachée par défaut sur mobile ──────────────── */
+  .sidebar {
+    display: none;
+  }
+
+  /* ── CHART CONTAINER ─────────────────────────────────────── */
+  #chart-container,
+  .chart-area,
+  .chart-area-inner {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  /* ── MENU CONTEXTUEL ─────────────────────────────────────── */
+  #ctx-menu {
+    font-size: 12px;
+    min-width: 180px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .ctx-item {
+    padding: 10px 12px;
+  }
+
+  .ctx-cat {
+    padding: 10px 12px;
+  }
+
+  /* Sous-menus : positionnés en bas de l'écran */
+  .ctx-sub {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    min-width: unset !important;
+    border-radius: 12px 12px 0 0;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* ── INDICATEUR LÉGENDE FOOTPRINT ────────────────────────── */
+  #fp-legend {
+    font-size: 8px;
+    padding: 2px 6px;
+    top: 4px;
+    left: 4px;
+  }
+
+  /* ── OVERLAY DE CHARGEMENT ───────────────────────────────── */
+  #overlay-msg {
+    font-size: 11px;
+  }
+
+  #overlay-sub {
+    font-size: 9px;
+  }
+
+  /* ── DRAWING TOOLBAR ─────────────────────────────────────── */
+  #draw-toolbar {
+    bottom: 10px;
+    padding: 6px 12px;
+    font-size: 9px;
+  }
+
+  /* ── TOAST ───────────────────────────────────────────────── */
+  #toast-container {
+    bottom: 12px;
+    right: 8px;
+    left: 8px;
+  }
+
+  #toast-container > div {
+    max-width: 100%;
+  }
+
+  /* ── MODALES ─────────────────────────────────────────────── */
+  .modal-overlay {
+    align-items: flex-end !important;
+  }
+
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 85dvh !important;
+    border-radius: 16px 16px 0 0 !important;
+    transform: none !important;
+    top: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    position: absolute !important;
+  }
+
+  .modal-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .modal-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  /* Ajout : une poignée de glissement visible sur les modales */
+  .modal-box::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+
+  /* Screener : tableau scrollable */
+  #screener-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scr-table {
+    min-width: 500px;
+  }
+
+  .modal-box--screener {
+    width: 100% !important;
+  }
+
+  /* Paper Trading : grille de métriques 2 col au lieu de 4 */
+  .modal-box--paper-trading #pt-content > div[style*="grid-template-columns:1fr 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* Alert builder : conditions empilées */
+  #alert-builder-modal .modal-box > div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Profiles / Workspaces : 1 colonne */
+  #profile-modal-grid,
+  #ws-modal-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Export modal */
+  .modal-box--export {
+    width: 100% !important;
+  }
+
+  /* ── COMMAND PALETTE ─────────────────────────────────────── */
+  #cmd-palette-overlay {
+    align-items: flex-end !important;
+    padding-top: 0 !important;
+  }
+
+  #cmd-palette-overlay > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 16px 16px 0 0 !important;
+    max-height: 75dvh;
+  }
+
+  /* ── MULTI-CHART — HEADER DE PANNEAU ─────────────────────── */
+  .chart-panel-header {
+    padding: 4px 8px;
+    gap: 5px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  /* Dropdown TF en panneau multi */
+  .tf-btn-wrap {
+    flex-shrink: 0;
+  }
+
+  .tf-current-btn {
+    font-size: 10px;
+    padding: 2px 7px;
+  }
+
+  /* Champ recherche par panneau */
+  .panel-sym-input {
+    font-size: 10px;
+    padding: 3px 22px 3px 6px;
+  }
+
+  /* Prix par panneau */
+  .panel-live {
+    font-size: 10px;
+  }
+
+  .panel-pct {
+    font-size: 8px;
+  }
+
+  /* Barre indicateurs par panneau */
+  .ind-bar {
+    padding: 2px 6px;
+    gap: 3px;
+  }
+
+  /* ── SYNC TOOLBAR (multi) ────────────────────────────────── */
+  #sync-toolbar {
+    padding: 3px 8px;
+    gap: 5px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+  }
+
+  #sync-toolbar::-webkit-scrollbar { display: none; }
+
+  #sync-toolbar > * {
+    flex-shrink: 0;
+  }
+
+  /* Cache le hint de raccourci clavier */
+  #sync-toolbar > span[style*="margin-left:auto"] {
+    display: none;
+  }
+
+  /* ── MULTI-GRIDS ─────────────────────────────────────────── */
+
+  /* 2 graphiques côte-à-côte → empilés */
+  .multi-grid {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(auto-fill, 1fr) !important;
+  }
+
+  /* 4 graphiques → 2×2 reste en 2 col mais réduit */
+  .multi-grid-4 {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: 1fr 1fr !important;
+  }
+
+  /* Grilles verticales → déjà 1 col, OK */
+
+  /* 1+2 → stack */
+  .multi-grid-1p2 {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 2fr 1fr 1fr !important;
+  }
+
+  .multi-grid-1p2 #panel-0 {
+    grid-row: auto !important;
+  }
+
+  /* 1+3 → stack */
+  .multi-grid-1p3 {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: 2fr 1fr 1fr 1fr !important;
+  }
+
+  .multi-grid-1p3 #panel-0 {
+    grid-row: auto !important;
+  }
+
+  /* 9 graphiques → 3 col maintenu (très petit) ou 2 col */
+  .multi-grid-9 {
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: repeat(3, 1fr) !important;
+  }
+
+  /* ── EXCHANGE PREMIUM BAR ────────────────────────────────── */
+  #exchange-premium-bar {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  #exchange-premium-bar::-webkit-scrollbar { display: none; }
+
+  /* ── DEX SEARCH DROPDOWN ─────────────────────────────────── */
+  #dex-search-dropdown {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-height: 70dvh;
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  /* ── OBJECT TREE PANEL ───────────────────────────────────── */
+  #obj-tree-panel {
+    top: 0 !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    border-left: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    z-index: 500 !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   PETIT MOBILE — 480px
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+
+  /* Header encore plus compact */
+  header {
+    padding: 5px 8px;
+    gap: 6px;
+  }
+
+  .logo {
+    font-size: 13px;
+  }
+
+  #live-price {
+    font-size: 13px;
+  }
+
+  #price-change {
+    font-size: 9px;
+  }
+
+  .tf-scroll {
+    width: 90px;
+  }
+
+  /* 4 graphiques → 1 col sur très petit écran */
+  .multi-grid-4 {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(4, 1fr) !important;
+  }
+
+  /* 9 graphiques → 2 col */
+  .multi-grid-9 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-rows: repeat(5, 1fr) !important;  /* 9e panel prend toute la largeur */
+  }
+
+  /* Header de panneau encore plus compact */
+  .chart-panel-header {
+    padding: 3px 6px;
+  }
+
+  .panel-price-wrap {
+    display: none;   /* masqué sur très petit écran */
+  }
+
+  /* Drawing toolbar */
+  #draw-toolbar {
+    bottom: 6px;
+    font-size: 8px;
+    padding: 5px 10px;
+  }
+
+  /* Modales en full-screen */
+  .modal-box {
+    max-height: 90dvh !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   ORIENTATION PAYSAGE SUR MOBILE
+   (téléphone retourné)
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) and (orientation: landscape) {
+
+  /* Moins de hauteur disponible : header ultra-compact */
+  header {
+    min-height: 38px;
+    padding: 4px 10px;
+  }
+
+  #live-price {
+    font-size: 13px;
+  }
+
+  /* Sidebar visible mais très étroite en paysage */
+  .sidebar {
+    display: flex;
+    width: 120px;
+  }
+
+  .stat-label  { font-size: 7px; }
+  .stat-value  { font-size: 10px; }
+
+  .trade-row   { font-size: 8px; }
+  .sidebar-title { font-size: 8px; padding: 5px 8px; }
+
+  /* Modales moins hautes */
+  .modal-box {
+    max-height: 80dvh !important;
+  }
+
+  /* Multi-4 garde 2 colonnes en paysage */
+  .multi-grid-4 {
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: 1fr 1fr !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   TOUCH : améliore la réactivité des boutons
+══════════════════════════════════════════════════════════════ */
+@media (pointer: coarse) {
+
+  /* Boutons plus grands pour le toucher */
+  .ctx-item,
+  .ctx-cat {
+    min-height: 44px;
+  }
+
+  .sym-opt {
+    min-height: 44px;
+  }
+
+  .tf-btn,
+  .tf-opt {
+    min-height: 36px;
+    padding: 6px 10px;
+  }
+
+  .ind-remove {
+    font-size: 14px;
+    padding: 4px 6px;
+  }
+
+  button {
+    min-height: 36px;
+  }
+
+  /* Zoom/pan natif sur les charts */
+  canvas {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  .draw-canvas[style*="touch-action: none"] svg {
+    touch-action: none;
+  }
+  .draw-canvas {
+    touch-action: auto;
+  }
+}
