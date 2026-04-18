@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://ezilryb.github.io/CRYPVIEW/sitemap.xml
