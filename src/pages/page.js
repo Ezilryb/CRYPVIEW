@@ -333,9 +333,13 @@ async function boot() {
 
     onTf: (tf) => {
       connect(chart.symbol, tf);
-      // Met à jour le TF strip visuellement
       $('tf-scroll')?.querySelectorAll('.tf-btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.tf === tf);
+        const isActive = b.dataset.tf === tf;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', String(isActive));
+        if (isActive) {
+          b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       });
     },
 
@@ -463,7 +467,7 @@ function cycleTf() {
     const active = b.dataset.tf === next;
     b.classList.toggle('active', active);
     b.setAttribute('aria-pressed', String(active));
-    if (active) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (active) b.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   });
 
   connect(chart.symbol, next);

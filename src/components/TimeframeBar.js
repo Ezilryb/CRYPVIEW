@@ -100,7 +100,7 @@ export class TimeframeBar {
     });
 
     // Centrage automatique du bouton actif
-    requestAnimationFrame(() => this.#scrollToActive());
+    requestAnimationFrame(() => requestAnimationFrame(() => this.#scrollToActive()));
   }
 
   #selectTf(tf) {
@@ -111,21 +111,19 @@ export class TimeframeBar {
     this.#callbacks.onChange?.(tf);
   }
 
+  // APRÈS
   #scrollToActive() {
     const activeBtn = this.#gridEl?.querySelector('.tf-btn.active, .tf-opt.active');
     if (!activeBtn) return;
 
-    const container = this.#flat
-      ? this.#gridEl.parentElement   // .tf-scroll (le scroll-wrapper)
-      : this.#gridEl;
-
-    if (!container) return;
-
-    const btnLeft   = activeBtn.offsetLeft;
-    const btnWidth  = activeBtn.offsetWidth;
-    const contWidth = container.offsetWidth;
-
-    container.scrollLeft = btnLeft - contWidth / 2 + btnWidth / 2;
+    // scrollIntoView avec inline:'center' est la méthode
+    // la plus fiable sur tous les appareils (iOS Safari inclus).
+    // block:'nearest' évite tout scroll vertical parasite.
+    activeBtn.scrollIntoView({
+      behavior: 'smooth',
+      block:    'nearest',
+      inline:   'center',
+    });
   }
 
   #bindToggle() {
