@@ -24,7 +24,7 @@
          ════════════════════════════════════════════════════════ -->
     <title>CrypView — Tracker Crypto Temps Réel | 34 Indicateurs</title>
    
-    <meta name="description" content="CrypView : tracker crypto en temps réel avec 19 indicateurs techniques, Footprint, Orderflow et alertes de prix. Données live Binance WebSocket. 100% gratuit.">
+    <meta name="description" content="CrypView : tracker crypto en temps réel avec 32 indicateurs techniques, Footprint, Orderflow et alertes de prix. Données live Binance WebSocket. 100% gratuit.">
     
     <link rel="alternate" hreflang="fr" href="https://ezilryb.github.io/CRYPVIEW/" />
     <link rel="alternate" hreflang="en" href="https://ezilryb.github.io/CRYPVIEW/en/" />
@@ -50,7 +50,7 @@
     <meta property="og:locale"      content="fr_FR">
     <meta property="og:url"         content="https://ezilryb.github.io/CRYPVIEW/">
     <meta property="og:title"       content="CrypView — Tracker Crypto Temps Réel">
-    <meta property="og:description" content="Analyse technique crypto en temps réel : 19 indicateurs, Footprint, Orderflow, alertes de prix. Données live Binance. Gratuit &amp; open-source.">
+    <meta property="og:description" content="Analyse technique crypto en temps réel : 32 indicateurs, Footprint, Orderflow, alertes de prix. Données live Binance. Gratuit &amp; open-source.">
    
     <!--
       og:image — utilise le PNG converti depuis ton og-image.svg
@@ -74,7 +74,7 @@
     <meta name="twitter:site"        content="@BetaCapital">
     <meta name="twitter:creator"     content="@BetaCapital">
     <meta name="twitter:title"       content="CrypView — Tracker Crypto Temps Réel">
-    <meta name="twitter:description" content="19 indicateurs, Footprint, Orderflow et alertes de prix. Données live Binance. Gratuit &amp; open-source.">
+    <meta name="twitter:description" content="Graphiques crypto en temps réel (1s à 1M) avec 34 indicateurs avancés, Footprint, Orderflow et Drawing Tools. Données live Binance WebSocket.">
     <meta name="twitter:image"       content="https://ezilryb.github.io/CRYPVIEW/public/og-image.png">
     <meta name="twitter:image:alt"   content="CrypView — graphiques crypto temps réel">
    
@@ -120,7 +120,7 @@
       "@type": "WebApplication",
       "name": "CrypView",
       "url": "https://ezilryb.github.io/CRYPVIEW/",
-      "description": "Tracker crypto en temps réel avec 19 indicateurs techniques, Footprint, Orderflow et alertes de prix. Données live Binance WebSocket. 100% gratuit et open-source.",
+      "description": "Tracker crypto en temps réel avec 32 indicateurs techniques, Footprint, Orderflow et alertes de prix. Données live Binance WebSocket. 100% gratuit et open-source.",
       "applicationCategory": "FinanceApplication",
       "operatingSystem": "Any",
       "browserRequirements": "Requires a modern web browser with JavaScript enabled",
@@ -146,7 +146,7 @@
       },
       "featureList": [
         "Graphiques en chandeliers temps réel",
-        "19 indicateurs techniques",
+        "32 indicateurs techniques",
         "Footprint Chart",
         "Volume Profile",
         "Orderflow Delta",
@@ -191,8 +191,39 @@
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/mobile-index.css">
     <link rel="stylesheet" href="styles/a11y-contrast-light.css">
-   
-  </head>
+    <link rel="stylesheet" href="styles/ai-drawer.css">
+    <style>
+      .hstat { display: flex; flex-direction: row; align-items: center; gap: 10px; }
+      .hstat-icon { display: flex; align-items: center; justify-content: center; opacity: .75; color: var(--accent, #00ff88); flex-shrink: 0; transition: opacity .2s; }
+      .hstat:hover .hstat-icon { opacity: 1; }
+      .hstat-text { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+      .hstat-badge--ai {
+        background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #00ff88 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+        letter-spacing: .05em;
+      }
+      .hstat-ai-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: 2px;
+        padding: 1px 6px;
+        border-radius: 20px;
+        font-size: 0.58rem;
+        font-weight: 600;
+        letter-spacing: .04em;
+        color: #a855f7;
+        border: 1px solid rgba(168,85,247,.35);
+        background: rgba(168,85,247,.08);
+        white-space: nowrap;
+      }
+      .hstat-ai-badge svg { color: #a855f7; }
+    </style>
+
 <body>
 
 <a href="#main-content" class="sr-only" data-i18n="a11y.skipToContent">Passer au contenu principal</a>
@@ -208,70 +239,151 @@
     <li><a href="#preview"  data-i18n="nav.preview">Aperçu</a></li>
     <li><a href="#acces"    data-i18n="nav.access">Accès</a></li>
   </ul>
-  <a class="nav-btn" href="page.html"
-     aria-label="Lancer l'application CrypView"
-     data-i18n="nav.launchApp">▶ Lancer l'app</a>
+  <div class="nav-actions">
+
+    <!-- Bouton Assistant IA -->
+    <button
+      class="nav-ai-btn"
+      id="ai-chat-btn"
+      aria-label="Ouvrir l'assistant IA CrypView"
+      aria-expanded="false"
+      aria-controls="ai-drawer"
+    >
+      <svg class="ai-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2a1 1 0 01.894.553l2.618 5.302 5.85.85a1 1 0 01.555
+                 1.705l-4.234 4.126.999 5.825a1 1 0 01-1.451 1.054L12
+                 18.902l-5.231 2.513a1 1 0 01-1.451-1.054l.999-5.825L2.083
+                 10.41a1 1 0 01.555-1.705l5.85-.85L11.106
+                 2.553A1 1 0 0112 2z"/>
+      </svg>
+      <span class="ai-btn-label">Assistant IA</span>
+    </button>
+
+    <!-- Bouton Lancer l'app (inchangé) -->
+    <a
+      class="nav-btn"
+      href="page.html"
+      aria-label="Lancer l'application CrypView"
+      data-i18n="nav.launchApp"
+    >▶ Lancer l'app</a>
+
+  </div>
 </nav>
 
 <!-- ══════════════════════════════════════════════════════════
      HERO
 ══════════════════════════════════════════════════════════ -->
 <section class="hero" id="main-content" aria-label="Présentation">
-  <div class="hero-grid" aria-hidden="true"></div>
-  <div class="hero-orb"  aria-hidden="true"></div>
-  <div class="hero-orb2" aria-hidden="true"></div>
-
   <div class="hero-inner">
-    <div class="hero-badge" aria-label="Données live Binance — PWA — Accès gratuit">
-      <span class="badge-dot" aria-hidden="true"></span>
-      <span data-i18n="hero.badge">Données live Binance · PWA Installable · Gratuit</span>
+    <div class="hero-badge" aria-label="LIVE BINANCE DATA — INSTALLABLE PWA — FREE">
+      <span aria-hidden="true" class="hero-badge-square">■</span>
+      <span class="hero-badge-text">LIVE BINANCE DATA · INSTALLABLE PWA · FREE</span>
     </div>
 
-    <h1 class="hero-title">
-      <span data-i18n="hero.title.line1">Lire les</span><br>
-      <span class="line2" data-i18n="hero.title.line2">marchés</span><br>
-      <span class="hl"    data-i18n="hero.title.line3">autrement.</span>
+    <h1 class="hero-title" aria-label="Read the markets differently.">
+      <span class="hero-title-line" data-i18n="hero.title.line1">Read the</span>
+      <span class="hero-title-line line2" data-i18n="hero.title.line2">markets</span>
+      <span class="hero-title-line hl" data-i18n="hero.title.line3">differently.</span>
     </h1>
 
-    <p class="hero-sub" data-i18n="hero.sub">
-      Graphiques crypto en temps réel. Footprint, Orderflow, Alertes natives.<br>
-      Interface professionnelle — sans inscription, sans limite.
+    <p class="hero-sub">
+      Real-time crypto charts. Footprint, Orderflow, native alerts. Pro-grade interface — no signup, no limits.
     </p>
 
     <div class="hero-actions">
-      <a class="btn-primary" href="page.html"
-         aria-label="Accéder aux marchés crypto en temps réel">
-        ▶ &nbsp;<span data-i18n="hero.cta.primary">Accéder aux marchés</span>
-      </a>
-      <a class="btn-ghost" href="#features"
-         data-i18n="hero.cta.secondary">Découvrir →</a>
+      <a class="btn-primary" href="page.html" aria-label="Accéder aux marchés crypto en temps réel">► ACCESS MARKETS</a>
+      <a class="btn-ghost" href="#features" data-i18n="hero.cta.secondary">DISCOVER →</a>
     </div>
 
     <div class="hero-stats" aria-label="Chiffres clés">
+
       <div class="hstat">
-        <div class="hstat-val">500<em>+</em></div>
-        <div class="hstat-label" data-i18n="hero.stats.pairs">Paires USDT</div>
+        <div class="hstat-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 64 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polyline points="2,18 10,12 16,14 24,6 30,9 38,3 46,8 54,5 62,10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+        <div class="hstat-text">
+          <div class="hstat-val">500<em>+</em></div>
+          <div class="hstat-label" data-i18n="hero.stats.pairs">Paires USDT</div>
+        </div>
       </div>
+
       <div class="hstat-sep" aria-hidden="true"></div>
+
       <div class="hstat">
-        <div class="hstat-val">1<em>s</em></div>
-        <div class="hstat-label" data-i18n="hero.stats.refresh">Rafraîchissement</div>
+        <div class="hstat-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20Zm1-10.6V6h-2v6.4l4.8 2.8 1-1.7-3.8-2.1Z"/>
+          </svg>
+        </div>
+        <div class="hstat-text">
+          <div class="hstat-val">1<em>s</em></div>
+          <div class="hstat-label" data-i18n="hero.stats.refresh">Rafraîchissement</div>
+        </div>
       </div>
+
       <div class="hstat-sep" aria-hidden="true"></div>
+
       <div class="hstat">
-        <div class="hstat-val">19<em>+</em></div>
-        <div class="hstat-label" data-i18n="hero.stats.indicators">Indicateurs</div>
+        <div class="hstat-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3h2v18H3V3Zm16 0h2v18h-2V3ZM7 13h2v8H7v-8Zm4-6h2v14h-2V7Zm4 3h2v11h-2V10Z"/>
+          </svg>
+        </div>
+        <div class="hstat-text">
+          <div class="hstat-val">32<em>+</em></div>
+          <div class="hstat-label" data-i18n="hero.stats.indicators">Indicateurs</div>
+          <div class="hstat-ai-badge" aria-label="AI-Powered Insights">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0"><path d="M12 2a1 1 0 01.894.553l2.618 5.302 5.85.85a1 1 0 01.555 1.705l-4.234 4.126.999 5.825a1 1 0 01-1.451 1.054L12 18.902l-5.231 2.513a1 1 0 01-1.451-1.054l.999-5.825L2.083 10.41a1 1 0 01.555-1.705l5.85-.85L11.106 2.553A1 1 0 0112 2z"/></svg>
+            AI-Powered Insights
+          </div>
+        </div>
       </div>
+
       <div class="hstat-sep" aria-hidden="true"></div>
+
       <div class="hstat">
-        <div class="hstat-val hstat-badge">PWA</div>
-        <div class="hstat-label" data-i18n="hero.stats.pwa">Installable</div>
+        <div class="hstat-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 20 26" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 2h10v2H7V2Zm-3 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm0 2v10h16V8H4Zm6 12h4v2h-4v-2Z"/>
+          </svg>
+        </div>
+        <div class="hstat-text">
+          <div class="hstat-val hstat-badge">PWA</div>
+          <div class="hstat-label" data-i18n="hero.stats.pwa">Installable</div>
+        </div>
       </div>
+
       <div class="hstat-sep" aria-hidden="true"></div>
+
       <div class="hstat">
-        <div class="hstat-val">8<em>+</em></div>
-        <div class="hstat-label" data-i18n="hero.stats.layouts">Layouts</div>
+        <div class="hstat-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3h8v8H3V3Zm10 0h8v5h-8V3ZM3 13h5v8H3v-8Zm7 0h11v8H10v-8Z"/>
+          </svg>
+        </div>
+        <div class="hstat-text">
+          <div class="hstat-val">8<em>+</em></div>
+          <div class="hstat-label" data-i18n="hero.stats.layouts">Layouts</div>
+        </div>
       </div>
+
+      <div class="hstat-sep" aria-hidden="true"></div>
+
+      <div class="hstat">
+        <div class="hstat-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5Z"/>
+            <path d="M5 5l1.5 1.5M18.5 5L17 6.5M5 19l1.5-1.5M18.5 19L17 17.5" stroke-width="1.4"/>
+          </svg>
+        </div>
+        <div class="hstat-text">
+          <div class="hstat-val hstat-badge hstat-badge--ai">AI</div>
+          <div class="hstat-label">Powered Insights</div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -311,13 +423,13 @@
     <article class="feat-card" role="listitem">
       <div class="feat-num" aria-hidden="true">02</div>
       <div class="feat-icon" aria-hidden="true">📊</div>
-      <h3 class="feat-title" data-i18n="features.cards.indicators.title">19 Indicateurs techniques</h3>
+      <h3 class="feat-title" data-i18n="features.cards.indicators.title"32 Indicateurs techniques</h3>
       <p class="feat-text" data-i18n="features.cards.indicators.text">RSI, MACD, Bollinger, Stochastique, ATR, Momentum, Ichimoku, SuperTrend, Keltner, HMA, VWAP, MA… Panneaux synchronisés, calculs via Web Worker.</p>
       <div class="feat-tags" aria-label="Indicateurs">
         <span class="feat-tag">RSI</span>
         <span class="feat-tag">MACD</span>
         <span class="feat-tag">Ichimoku</span>
-        <span class="feat-tag" data-i18n="features.cards.indicators.tag">19 indicateurs</span>
+        <span class="feat-tag" data-i18n="features.cards.indicators.tag">32 indicateurs</span>
       </div>
     </article>
 
@@ -1004,7 +1116,7 @@
         "name": "Quels indicateurs techniques sont disponibles sur CrypView ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "CrypView propose 19 indicateurs : RSI, MACD, Bollinger Bands, Ichimoku Cloud, SuperTrend, VWAP, EMA, SMA, ATR, Stochastique, ADX, Williams %R, CCI, OBV, MFI, CMF, HMA, DEMA, Keltner Channels."
+          "text": "CrypView propose 32 indicateurs : RSI, MACD, Bollinger Bands, Ichimoku Cloud, SuperTrend, VWAP, EMA, SMA, ATR, Stochastique, ADX, Williams %R, CCI, OBV, MFI, CMF, HMA, DEMA, Keltner Channels."
         }
       },
       {
@@ -1027,6 +1139,148 @@
   }
   </script>
 
+<!-- ═══════════════════════════════════════════════════════════
+     DRAWER IA — Overlay + Panneau latéral
+═══════════════════════════════════════════════════════════ -->
+
+<!-- Overlay sombre -->
+<div id="ai-overlay" role="presentation" aria-hidden="true"></div>
+
+<!-- Panneau drawer -->
+<aside
+  id="ai-drawer"
+  role="complementary"
+  aria-label="Assistant IA CrypView"
+  aria-hidden="true"
+>
+  <!-- En-tête -->
+  <div class="ai-drawer-header">
+    <div class="ai-drawer-title">
+      <div class="ai-drawer-title-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a1 1 0 01.894.553l2.618 5.302 5.85.85a1 1 0 01.555
+                   1.705l-4.234 4.126.999 5.825a1 1 0 01-1.451 1.054L12
+                   18.902l-5.231 2.513a1 1 0 01-1.451-1.054l.999-5.825L2.083
+                   10.41a1 1 0 01.555-1.705l5.85-.85L11.106
+                   2.553A1 1 0 0112 2z"/>
+        </svg>
+      </div>
+      <div class="ai-drawer-title-text">
+        <span class="ai-drawer-name">Assistant IA</span>
+        <span class="ai-drawer-sub">CrypView · Powered by AI</span>
+      </div>
+    </div>
+
+    <div class="ai-drawer-live" aria-hidden="true">
+      <span class="ai-drawer-live-dot"></span>
+      LIVE
+    </div>
+
+    <button
+      class="ai-drawer-close"
+      id="ai-drawer-close-btn"
+      aria-label="Fermer l'assistant IA"
+    >&#x2715;</button>
+  </div>
+
+  <!-- Corps : iframe Chatwoot -->
+  <div class="ai-drawer-body">
+    <div class="ai-drawer-loading" id="ai-drawer-loading" aria-hidden="true">
+      <div class="ai-loading-spinner"></div>
+      <span class="ai-loading-text">Chargement&#8230;</span>
+    </div>
+    <iframe
+      id="ai-chatbot-iframe"
+      src="about:blank"
+      data-src="https://app.chatwoot.com/widget?website_token=69f25dded7f0fea2c6c006d2"
+      title="Assistant IA CrypView"
+      allow="microphone"
+      loading="lazy"
+    ></iframe>
+  </div>
+
+  <div class="ai-drawer-footer" aria-hidden="true">
+    Propuls&#233; par Chatwoot &#183; CrypView &#169; 2026
+  </div>
+</aside>
+
+<!-- CHATWOOT — SDK (bulle native masquée, on utilise notre drawer) -->
+<script>
+  window.chatwootSettings = {
+    hideMessageBubble : true,   /* on gère l'ouverture via notre bouton nav */
+    position          : 'right',
+    locale            : 'fr',
+    type              : 'standard'
+  };
+
+  (function (d, t) {
+    var BASE_URL = 'https://app.chatwoot.com';
+    var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+    g.src   = BASE_URL + '/packs/js/sdk.js';
+    g.defer = true;
+    g.async = true;
+    s.parentNode.insertBefore(g, s);
+
+    g.onload = function () {
+      window.chatwootSDK.run({
+        websiteToken : '69f25dded7f0fea2c6c006d2',
+        baseUrl      : BASE_URL
+      });
+    };
+  })(document, 'script');
+</script>
+
+<!-- Bouton nav "Assistant IA" → toggle drawer custom -->
+<script>
+(function () {
+  'use strict';
+
+  var btn          = document.getElementById('ai-chat-btn');
+  var overlay      = document.getElementById('ai-overlay');
+  var drawer       = document.getElementById('ai-drawer');
+  var closeBtn     = document.getElementById('ai-drawer-close-btn');
+  var loading      = document.getElementById('ai-drawer-loading');
+  var iframe       = document.getElementById('ai-chatbot-iframe');
+  var iframeLoaded = false;
+
+  function openDrawer() {
+    if (!iframeLoaded) {
+      iframe.src = iframe.dataset.src;
+      iframeLoaded = true;
+      iframe.addEventListener('load', function () {
+        loading.classList.add('hidden');
+      }, { once: true });
+    }
+    overlay.classList.add('open');
+    requestAnimationFrame(function () { overlay.classList.add('visible'); });
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    overlay.classList.remove('visible');
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+    overlay.addEventListener('transitionend', function h() {
+      overlay.classList.remove('open');
+      overlay.removeEventListener('transitionend', h);
+    });
+  }
+
+  btn.addEventListener('click', openDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+  });
+})();
+</script>
+
 <script type="module" src="src/pages/index.js"></script>
+
 </body>
 </html>
