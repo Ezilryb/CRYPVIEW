@@ -4,39 +4,30 @@
 //  NE JAMAIS coder ces valeurs en dur ailleurs.
 // ============================================================
 
-// ── Endpoints Binance ────────────────────────────────────────
 export const BINANCE = {
   REST_BASE:     'https://api.binance.com/api/v3',
   WS_BASE:       'wss://stream.binance.com:9443/ws',
 
-  /** URL REST pour les klines historiques */
   klines: (symbol, interval, limit) =>
     `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${interval}&limit=${limit}`,
 
-  /** URL REST pour la liste des symboles */
   EXCHANGE_INFO: 'https://api.binance.com/api/v3/exchangeInfo',
 
-  /** URL WS stream kline */
   wsKline:  (symbol, interval) => `wss://stream.binance.com:9443/ws/${symbol}@kline_${interval}`,
 
-  /** URL WS aggTrades (Footprint + Orderflow) */
   wsAgg:    (symbol) => `wss://stream.binance.com:9443/ws/${symbol}@aggTrade`,
 
-  /** URL WS ticker 24h */
   wsTicker: (symbol) => `wss://stream.binance.com:9443/ws/${symbol}@ticker`,
 
-  /** URL WS trades individuels (sidebar) */
   wsTrades: (symbol) => `wss://stream.binance.com:9443/ws/${symbol}@trade`,
 };
 
-// ── Reconnexion WebSocket ────────────────────────────────────
 export const WS_CONFIG = {
   MAX_RECONNECT_ATTEMPTS: 5,
   BASE_DELAY_MS:          5_000,
   MAX_DELAY_MS:           30_000,
 };
 
-// ── Couleurs du thème ────────────────────────────────────────
 export const COLORS = {
   GREEN:        '#00ff88',
   RED:          '#ff3d5a',
@@ -57,21 +48,12 @@ export const COLORS = {
   GRID:         '#1c2333',
 };
 
-// ── Configuration des thèmes ──────────────────────────────────
-/**
- * THEME.DEFAULT     : thème appliqué si aucun choix n'est en localStorage
- *                     et si le système ne signale pas de préférence.
- * THEME.STORAGE_KEY : clé localStorage pour persister le choix.
- * THEME.CSS_CLASS   : classe ajoutée sur <html> pour activer le thème clair.
- */
 export const THEME = {
   DEFAULT:     'dark',
   STORAGE_KEY: 'crypview-theme',
   CSS_CLASS:   'light-theme',
 };
 
-// ── Options LightweightCharts de base ─────────────────────────
-// Retourne un objet d'options à passer à createChart()
 export function baseChartOptions(el, height) {
   return {
     layout: {
@@ -84,7 +66,7 @@ export function baseChartOptions(el, height) {
       horzLines: { color: COLORS.GRID },
     },
     crosshair: {
-      mode: 1, // CrosshairMode.Normal — LightweightCharts doit être chargé avant
+      mode: 1,
       vertLine: { color: `${COLORS.GREEN}55`, labelBackgroundColor: '#0d1117' },
       horzLine: { color: `${COLORS.GREEN}55`, labelBackgroundColor: '#0d1117' },
     },
@@ -99,19 +81,15 @@ export function baseChartOptions(el, height) {
   };
 }
 
-// ── Historique ────────────────────────────────────────────────
-/** Nombre de bougies à charger selon le timeframe */
 export const HISTORY_LIMITS = {
   '1s':    500,
   default: 300,
 };
 
-/** Certains TF custom doivent être remappés vers l'API Binance */
 export const TF_API_MAP = {
   '5d': '1d',
 };
 
-/** Conversion timeframe → millisecondes (pour Footprint & Orderflow) */
 export const TF_TO_MS = {
   '1s':  1_000,
   '1m':  60_000,
@@ -130,19 +108,12 @@ export const TF_TO_MS = {
   '1M':  2_592_000_000,
 };
 
-// ── Throttle rendu Canvas ─────────────────────────────────────
-/** Délai max entre deux redraws Footprint / Orderflow (ms) */
 export const RENDER_THROTTLE_MS = 100;
 
-/** Mémoire tampon maximale de bougies en RAM */
 export const MAX_CANDLES_IN_MEMORY = 800;
 
-/** Hauteur des panneaux d'indicateurs sous le chart principal */
 export const IND_PANEL_HEIGHT = 125;
 
-// ── Palettes LightweightCharts par thème ──────────────────────
-// Utilisé par ChartCore et MultiChartInstance pour applyOptions()
-// lors d'un changement de thème.
 export const CHART_THEMES = {
   dark: {
     layout: {
@@ -178,8 +149,6 @@ export const CHART_THEMES = {
   },
 };
 
-// ── Métadonnées des indicateurs ───────────────────────────────
-// Utilisé par IndicatorModal et la barre d'indicateurs actifs
 export const IND_META = {
   ma:    { label: 'MA 20/50/200',        desc: 'Moyennes mobiles simples',          overlay: true,  color: COLORS.YELLOW,  cat: 'trend'      },
   bb:    { label: 'Bollinger (20)',       desc: 'Bandes de Bollinger',               overlay: true,  color: '#7c6fff',      cat: 'volatility' },
@@ -212,7 +181,6 @@ export const IND_META = {
   squeeze:{ label: 'Squeeze Momentum',     desc: 'LazyBear — compression BB/KC + momentum',       overlay: false, color: '#9b5de5',  cat: 'momentum'   },
   eray:  { label: 'Elder Ray (13)',       desc: 'Bull Power + Bear Power vs EMA(13)',             overlay: false, color: '#4cc9f0',  cat: 'momentum'   },
 
-  // ── Futures Binance (FAPI) ───────────────────────────────────
   oi:      {
     label:   'Open Interest',
     desc:    'Delta OI histogram + ligne absolue — Binance Futures',
@@ -235,7 +203,6 @@ export const IND_META = {
     cat:     'volume',
   },
 
-  // ── Liquidation Heatmap ──────────────────────────────────────
   liq: {
     label:   'Liquidation Heatmap',
     desc:    'Heatmap temps réel des liquidations — Binance Futures @forceOrder',
@@ -245,13 +212,11 @@ export const IND_META = {
   },
 };
 
-// ── Configuration multi-exchange ─────────────────────────────
 export const EXCHANGE_CONFIG = {
   bybit: { label: 'Bybit', icon: '🟠', enabled: true },
   okx:   { label: 'OKX',   icon: '⬛', enabled: true },
 };
 
-// ── Configuration DEX / GeckoTerminal ────────────────────────
 export const DEX_CONFIG = {
   enabled:      true,
   apiBase:      'https://api.geckoterminal.com/api/v2',

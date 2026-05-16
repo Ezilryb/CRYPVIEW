@@ -11,24 +11,19 @@
 const OKX_REST = 'https://www.okx.com/api/v5/market';
 
 /**
- * Convertit le symbol CrypView (btcusdt) → format OKX (BTC-USDT).
  * @param {string} symbol
  * @returns {string}
  */
 function toOKXInstrument(symbol) {
-  // 'btcusdt' → 'BTC-USDT'
   const upper = symbol.toUpperCase();
   if (upper.endsWith('USDT'))  return `${upper.slice(0, -4)}-USDT`;
   if (upper.endsWith('USDC'))  return `${upper.slice(0, -4)}-USDC`;
   if (upper.endsWith('BTC'))   return `${upper.slice(0, -3)}-BTC`;
-  return upper; // fallback
+  return upper;
 }
 
 /**
- * Récupère le ticker spot OKX.
- * Retourne null si la paire n'existe pas sur OKX.
- *
- * @param {string} symbol — ex: 'btcusdt'
+ * @param {string} symbol
  * @returns {Promise<ExchangeTicker|null>}
  */
 export async function fetchOKXTicker(symbol) {
@@ -48,14 +43,13 @@ export async function fetchOKXTicker(symbol) {
     price:     parseFloat(t.last),
     bid:       parseFloat(t.bidPx),
     ask:       parseFloat(t.askPx),
-    volume24h: parseFloat(t.vol24h),  // en tokens de base
+    volume24h: parseFloat(t.vol24h),
     pct24h:    ((parseFloat(t.last) - parseFloat(t.open24h)) / parseFloat(t.open24h)) * 100,
     timestamp: Date.now(),
   };
 }
 
 /**
- * Récupère le ticker de plusieurs symboles (requêtes parallèles).
  * @param {string[]} symbols
  * @returns {Promise<ExchangeTicker[]>}
  */

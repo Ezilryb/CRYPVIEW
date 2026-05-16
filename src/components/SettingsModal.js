@@ -25,18 +25,14 @@ export class SettingsModal {
     this.#callbacks = callbacks;
     this.#current   = localStorage.getItem(THEME.STORAGE_KEY) ?? THEME.DEFAULT;
 
-    // Piège de focus + rôle dialog WCAG 2.1
     this.#trap = new FocusTrap(this.#overlay);
     markAsDialog(this.#overlay, this.#overlay?.querySelector('h2, h3'));
 
     this.#bindStaticEvents();
 
-    // Instancie le sélecteur (monté dans render())
     this.#langSelector = new LanguageSelector();
     this.#langUnsub    = onLocaleChange(() => this.#renderLang());
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   open() {
     this.#render();
@@ -49,7 +45,6 @@ export class SettingsModal {
     this.#overlay.style.display = 'none';
   }
 
-  /** Sync externe : appelé quand le thème change ailleurs. */
   setCurrentTheme(theme) {
     this.#current = theme;
     this.#render();
@@ -62,30 +57,24 @@ export class SettingsModal {
     this.#overlay = null;
   }
 
-  // ── Rendu ─────────────────────────────────────────────────
-
   #render() {
     const grid = document.getElementById('settings-modal-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Thèmes
     const themes = [
       { key: 'dark',  label: 'Thème sombre', desc: 'Optimisé pour les environnements peu éclairés', icon: '🌑', color: '#8b949e' },
       { key: 'light', label: 'Thème clair',  desc: 'Optimisé pour les environnements lumineux',    icon: '☀️', color: '#f7c948' },
     ];
     themes.forEach(t => grid.appendChild(this.#makeCard(t)));
 
-    // ── Section Langue ─────────────────────────────────────────
     const langLabel = document.createElement('div');
     langLabel.className   = 'modal-section-label';
     langLabel.textContent = '🌐 Langue / Language';
-    grid.parentElement.insertBefore(langLabel, grid);   // avant la grille
+    grid.parentElement.insertBefore(langLabel, grid);
 
-    // Slot pour le sélecteur
     const langSlot = document.getElementById('settings-lang-slot') ?? this.#makeLangSlot(grid);
 
-    // Monte le sélecteur si pas encore fait
     if (!langSlot.hasChildNodes()) {
       this.#langSelector.mount(langSlot);
     }
@@ -100,7 +89,6 @@ export class SettingsModal {
   }
 
   #renderLang() {
-    // Le LanguageSelector se met à jour via onLocaleChange — rien à faire
   }
 
   #makeCard({ key, label, desc, icon, color }) {
@@ -159,8 +147,6 @@ export class SettingsModal {
 
     return card;
   }
-
-  // ── Événements statiques ──────────────────────────────────
 
   #bindStaticEvents() {
     document.getElementById('settings-modal-close')

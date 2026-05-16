@@ -32,10 +32,6 @@ function emitStatus(state, extra = {}) {
   );
 }
 
-/**
- * Ferme proprement un WebSocket existant.
- * Idiome : `this.#ws = closeWS(this.#ws)`
- */
 export function closeWS(ws) {
   if (!ws) return null;
   try {
@@ -46,8 +42,6 @@ export function closeWS(ws) {
   } catch (_) {}
   return null;
 }
-
-// ── Classe WSManager ──────────────────────────────────────────
 
 export class WSManager {
   #ws                = null;
@@ -158,8 +152,6 @@ export class WSManager {
 
   #clearAll() { this.#clearPingTimeout(); this.#clearReconnectTimer(); }
 }
-
-// ── Factories ─────────────────────────────────────────────────
 
 export function createKlineStream(symbol, interval) {
   return new WSManager(BINANCE.wsKline(symbol, interval));

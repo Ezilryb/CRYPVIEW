@@ -28,17 +28,13 @@ export class Header {
     this.#btnBack    = document.getElementById('btn-back');
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Met à jour l'indicateur visuel de connexion WebSocket.
    * @param {'live'|'offline'|'connecting'|'reconnecting'} state
-   * @param {string} [text] — texte alternatif (optionnel)
+   * @param {string} [text]
    */
   setStatus(state, text) {
     if (!this.#dot) return;
 
-    // Retire toutes les classes d'état
     this.#dot.className = 'dot';
 
     if (state === 'live') {
@@ -48,14 +44,12 @@ export class Header {
       this.#dot.classList.add('reconnecting');
       if (this.#statusText) this.#statusText.textContent = text ?? t('header.status.reconnecting');
     } else {
-      // 'offline' | 'connecting' | tout autre état
       if (this.#statusText) this.#statusText.textContent = text ?? t('header.status.connecting');
     }
   }
 
   /**
-   * Définit la cible du bouton retour.
-   * @param {string} href — URL de destination
+   * @param {string} href
    */
   setBackHref(href) {
     if (!this.#btnBack) return;

@@ -34,10 +34,7 @@ export class Sidebar {
     this.#tradesList = $('trades');
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Met à jour le bloc Stats 24h (déclenché par crypview:ticker:update).
    * @param {{ open24:number, high24:number, low24:number, vol24:number, trades24:number }} stats
    */
   updateStats({ open24, high24, low24, vol24, trades24 }) {
@@ -49,7 +46,6 @@ export class Sidebar {
   }
 
   /**
-   * Ajoute un trade en tête de liste (déclenché par crypview:trade:new).
    * @param {{ price:number, qty:number, isBuy:boolean, timeFormatted:string }} trade
    */
   addTrade({ price, qty, isBuy, timeFormatted }) {
@@ -61,24 +57,19 @@ export class Sidebar {
       <span class="t-qty">${qty.toFixed(4)}</span>
       <span class="t-time">${timeFormatted}</span>`;
     this.#tradesList.prepend(row);
-    // Limite à MAX_TRADES éléments pour éviter les fuites mémoire DOM
     while (this.#tradesList.children.length > MAX_TRADES) {
       this.#tradesList.removeChild(this.#tradesList.lastChild);
     }
   }
 
-  /** Vide la liste des trades (ex : changement de symbole). */
   clearTrades() {
     if (this.#tradesList) this.#tradesList.innerHTML = '';
   }
 
-  /** Réinitialise toutes les stats à '—'. */
   reset() {
     Object.values(this.#els).forEach(el => { if (el) el.textContent = '—'; });
     this.clearTrades();
   }
-
-  // ── Interne ──────────────────────────────────────────────
 
   #set(key, val) {
     if (this.#els[key]) this.#els[key].textContent = val ?? '—';

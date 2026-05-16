@@ -49,11 +49,7 @@ export class ObjectTreePanel {
     this.#inject();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Attache le panel aux modules du graphique actif.
-   * Ne wrape PLUS les callbacks — utilise refresh() à la place.
    * @param {import('../chart/ChartDrawing').ChartDrawing|null}    drawing
    * @param {import('../chart/ChartIndicators').ChartIndicators|null} indicators
    * @param {{ onRemoveIndicator?: (key: string) => void }}        callbacks
@@ -65,15 +61,11 @@ export class ObjectTreePanel {
     if (this.#visible) this.#render();
   }
 
-  /**
-   * Force un re-rendu si le panel est visible.
-   * Appelé par multi.js après tout changement d'état.
-   */
   refresh() {
     if (this.#visible) this.#render();
   }
 
-  /** Ouvre / ferme le panel. @returns {boolean} nouvel état */
+  /**@returns {boolean}*/
   toggle() {
     this.#visible = !this.#visible;
     if (this.#el) this.#el.style.display = this.#visible ? 'flex' : 'none';
@@ -93,8 +85,6 @@ export class ObjectTreePanel {
     this.#el?.remove();
     this.#el = null;
   }
-
-  // ── Injection DOM ─────────────────────────────────────────
 
   #inject() {
     const existing = document.getElementById('obj-tree-panel');
@@ -143,7 +133,6 @@ export class ObjectTreePanel {
     document.body.appendChild(el);
     this.#el = el;
 
-    // Bouton fermeture
     const closeBtn = document.getElementById('obj-tree-close');
     if (closeBtn) {
       closeBtn.addEventListener('click', () => this.setVisible(false));
@@ -151,7 +140,6 @@ export class ObjectTreePanel {
       closeBtn.addEventListener('mouseleave', () => { closeBtn.style.color = 'var(--muted)'; });
     }
 
-    // Raccourci clavier O
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'o' && e.key !== 'O') return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -164,8 +152,6 @@ export class ObjectTreePanel {
       this.toggle();
     });
   }
-
-  // ── Rendu ─────────────────────────────────────────────────
 
   #render() {
     const content = document.getElementById('obj-tree-content');
@@ -202,8 +188,6 @@ export class ObjectTreePanel {
     }
   }
 
-  // ── Section header ────────────────────────────────────────
-
   #sectionHeader(label, count) {
     const el = document.createElement('div');
     el.style.cssText = [
@@ -224,8 +208,6 @@ export class ObjectTreePanel {
     return el;
   }
 
-  // ── Ligne de tracé (CORRIGÉE — plus de double append) ─────
-
   #drawingRow(d) {
     const row = document.createElement('div');
     row.setAttribute('role', 'listitem');
@@ -241,12 +223,10 @@ export class ObjectTreePanel {
     row.addEventListener('mouseenter', () => { row.style.background = 'rgba(255,255,255,.03)'; });
     row.addEventListener('mouseleave', () => { row.style.background = ''; });
 
-    // Icône type
     const icon = document.createElement('span');
     icon.style.cssText = 'font-size:12px;flex-shrink:0;';
     icon.textContent = TOOL_ICONS[d.type] ?? '—';
 
-    // Label
     const label = document.createElement('span');
     label.style.cssText = [
       'flex:1',
@@ -258,13 +238,11 @@ export class ObjectTreePanel {
     ].filter(Boolean).join(';');
     label.textContent = TOOL_LABELS[d.type] ?? d.type;
 
-    // Boutons d'action (visibles au survol)
     const actions = document.createElement('div');
     actions.style.cssText = 'display:flex;gap:1px;flex-shrink:0;opacity:0;transition:opacity .15s;';
     row.addEventListener('mouseenter', () => { actions.style.opacity = '1'; });
     row.addEventListener('mouseleave', () => { actions.style.opacity = '0'; });
 
-    // 👁 Masquer / Afficher — re-render immédiat
     const eyeBtn = this.#actionBtn(
       d.hidden ? '🙈' : '👁',
       d.hidden ? 'Afficher' : 'Masquer',
@@ -274,7 +252,6 @@ export class ObjectTreePanel {
       }
     );
 
-    // 🔒 Verrouiller / Déverrouiller — re-render immédiat
     const lockBtn = this.#actionBtn(
       d.locked ? '🔒' : '🔓',
       d.locked ? 'Déverrouiller' : 'Verrouiller',
@@ -286,7 +263,6 @@ export class ObjectTreePanel {
       d.locked ? 'var(--orange)' : null
     );
 
-    // 🗑 Supprimer
     const delBtn = this.#actionBtn('🗑', 'Supprimer', () => {
       if (d.locked) {
         _showInlineWarning('🔒 Tracé verrouillé — déverrouillez d\'abord.');
@@ -298,10 +274,8 @@ export class ObjectTreePanel {
 
     actions.append(eyeBtn, lockBtn, delBtn);
 
-    // ── Assemblage (une seule fois, sans duplication) ────────
     row.append(icon, label);
 
-    // Badge de verrouillage visuel (optionnel, affiché en permanence si locked)
     if (d.locked) {
       const lockBadge = document.createElement('span');
       lockBadge.style.cssText = 'font-size:9px;color:var(--orange);flex-shrink:0;';
@@ -312,8 +286,6 @@ export class ObjectTreePanel {
     row.appendChild(actions);
     return row;
   }
-
-  // ── Ligne d'indicateur ────────────────────────────────────
 
   #indicatorRow(key) {
     const meta = IND_META[key];
@@ -357,7 +329,6 @@ export class ObjectTreePanel {
 
     const delBtn = this.#actionBtn(`🗑`, `Retirer ${meta.label}`, () => {
       this.#callbacks.onRemoveIndicator?.(key);
-      // Refresh après un tick pour laisser le temps à la suppression
       setTimeout(() => this.#render(), 50);
     }, true);
 
@@ -365,8 +336,6 @@ export class ObjectTreePanel {
     row.append(dot, label, typeTag, actions);
     return row;
   }
-
-  // ── Helper : bouton d'action ──────────────────────────────
 
   #actionBtn(icon, title, onClick, isDanger = false, color = null) {
     const btn = document.createElement('button');
@@ -398,8 +367,6 @@ export class ObjectTreePanel {
   }
 }
 
-// ── Helper local : avertissement inline ──────────────────────
-// (ne pas importer showToast pour ne pas créer une dépendance circulaire)
 function _showInlineWarning(msg) {
   const div = document.createElement('div');
   div.style.cssText = [

@@ -29,9 +29,6 @@ export class ChartFootprint {
   #container;
   #getSymTf;
 
-  // ── Bug #4 : ID du canvas, paramétrable ──────────────────
-  // Valeur par défaut 'fp-canvas' pour la vue simple (page.html).
-  // En multi, passer 'fp-canvas-0', 'fp-canvas-1', etc.
   #canvasId;
 
   #cache       = new Map();
@@ -53,8 +50,8 @@ export class ChartFootprint {
    * @param {IChartApi}   chart
    * @param {ISeriesApi}  cSeries
    * @param {HTMLElement} container
-   * @param {function}    getSymTf     — () => { symbol, timeframe }
-   * @param {string}      [canvasId='fp-canvas'] — ID unique du canvas overlay
+   * @param {function}    getSymTf
+   * @param {string}      [canvasId='fp-canvas']
    */
   constructor(chart, cSeries, container, getSymTf, canvasId = 'fp-canvas') {
     this.#chart     = chart;
@@ -63,8 +60,6 @@ export class ChartFootprint {
     this.#getSymTf  = getSymTf;
     this.#canvasId  = canvasId;
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   activate(candles) {
     if (this.#active) return;
@@ -157,8 +152,6 @@ export class ChartFootprint {
     this.#canvas = null;
   }
 
-  // ── Gestion du cache (LRU simplifié) ─────────────────────
-
   #switchKey(symbol, timeframe) {
     const key  = `${symbol.toLowerCase()}_${timeframe}`;
     const warm = this.#cache.has(key) && this.#cache.get(key).size > 0;
@@ -186,8 +179,6 @@ export class ChartFootprint {
     const oldestKey = this.#data.keys().next().value;
     this.#data.delete(oldestKey);
   }
-
-  // ── Phase 1 : Seed OHLCV ─────────────────────────────────
 
   #seed(candles) {
     for (const c of candles) {
@@ -217,8 +208,6 @@ export class ChartFootprint {
       this.#trimDataIfNeeded();
     }
   }
-
-  // ── Phase 2 : Upgrade REST aggTrades ─────────────────────
 
   async #upgradeSeedAsync(candles) {
     if (!candles.length || !this.#active) return;
@@ -305,8 +294,6 @@ export class ChartFootprint {
     if (isBuy) b.askVol += qty; else b.bidVol += qty;
   }
 
-  // ── WebSocket aggTrades via WSPool ────────────────────────
-
   #connectWS() {
     const { symbol } = this.#getSymTf();
     const streamName = `${symbol.toLowerCase()}@aggTrade`;
@@ -326,8 +313,6 @@ export class ChartFootprint {
       this.#schedRedraw();
     });
   }
-
-  // ── Dessin canvas ─────────────────────────────────────────
 
   #canvas = null;
 
@@ -413,8 +398,6 @@ export class ChartFootprint {
     }
   }
 
-  // ── Abonnements de redessins ──────────────────────────────
-
   #subscribeRedraws(candles) {
     if (this.#redrawSubs) return;
     this.#redrawSubs = true;
@@ -451,8 +434,6 @@ export class ChartFootprint {
     }, RENDER_THROTTLE_MS);
   }
 
-  // ── Helpers ───────────────────────────────────────────────
-
   #tickSize(price) {
     if (price >= 10000) return 10;
     if (price >= 1000)  return 1;
@@ -462,10 +443,6 @@ export class ChartFootprint {
     return 0.0001;
   }
 
-  // ── Bug #4 corrigé ────────────────────────────────────────
-  // Cherche le canvas dans this.#container (scope local) plutôt
-  // que via document.getElementById() (scope global).
-  // Cela évite qu'un panneau multi récupère le canvas d'un autre.
   #ensureCanvas() {
     let c = this.#container.querySelector(`#${this.#canvasId}`);
     if (!c) {

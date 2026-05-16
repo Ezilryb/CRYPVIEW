@@ -24,7 +24,6 @@ export class ExchangePremiumBar {
   #el       = null;
   #visible  = true;
 
-  /** Injecte le conteneur dans le DOM (après le header). */
   mount() {
     if (document.getElementById('exchange-premium-bar')) return;
 
@@ -52,7 +51,6 @@ export class ExchangePremiumBar {
               aria-label="Masquer/Afficher la barre multi-exchange">✕</button>
     `;
 
-    // Insère après le header
     const header = document.querySelector('header');
     header?.insertAdjacentElement('afterend', bar);
     this.#el = bar;
@@ -62,14 +60,12 @@ export class ExchangePremiumBar {
       if (this.#el) this.#el.style.display = this.#visible ? 'flex' : 'none';
     });
 
-    // Écoute les mises à jour de l'agrégateur
     window.addEventListener('exchange:update', ({ detail }) => {
       this.update(detail.exchanges, detail.bestBid, detail.bestAsk);
     });
   }
 
   /**
-   * Met à jour l'affichage avec les données fraîches.
    * @param {Map<string, AggEntry>} data
    * @param {number|null} bestBid
    * @param {number|null} bestAsk
@@ -78,7 +74,6 @@ export class ExchangePremiumBar {
     const inner = document.getElementById('epb-inner');
     if (!inner) return;
 
-    // Vide les chips précédentes (garde le label)
     inner.querySelectorAll('.epb-chip').forEach(c => c.remove());
 
     const binanceEntry = data.get('binance');
@@ -88,7 +83,6 @@ export class ExchangePremiumBar {
       inner.appendChild(chip);
     }
 
-    // Best bid/ask agrégé (si disponible)
     if (bestBid && bestAsk && binanceEntry) {
       const sep = document.createElement('div');
       sep.className = 'epb-chip';
@@ -101,11 +95,10 @@ export class ExchangePremiumBar {
   }
 
   /**
-   * Construit un chip d'exchange.
    * @param {string}     exchange
    * @param {AggEntry}   entry
    * @param {AggEntry|null} binance
-   * @param {boolean}    isRef — true pour Binance (référence)
+   * @param {boolean}    isRef
    * @returns {HTMLElement}
    */
   #buildChip(exchange, entry, binance, isRef) {
@@ -143,7 +136,6 @@ export class ExchangePremiumBar {
         <span style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">${exchange}</span>
       `;
 
-      // Tooltip spread
       if (entry.spread !== null) {
         chip.title = `Spread ${exchange}: ${entry.spread.toFixed(4)}%`;
       }
@@ -152,13 +144,10 @@ export class ExchangePremiumBar {
     return chip;
   }
 
-  /** Retire la barre du DOM. */
   destroy() {
     this.#el?.remove();
     this.#el = null;
   }
-
-  // ── Styles ────────────────────────────────────────────────
 
   #barStyles() {
     return [

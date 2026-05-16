@@ -19,20 +19,20 @@ import { fmtPrice, fmtTime } from '../utils/format.js';
 
 const STORAGE_KEY  = 'crypview_paper_v1';
 const DEFAULT_BALANCE = 10_000;
-const TAKER_FEE       = 0.001; // 0.1%
-const MAX_EQUITY_PTS  = 500;   // max points courbe equity
+const TAKER_FEE       = 0.001;
+const MAX_EQUITY_PTS  = 500;
 
 /**
  * @typedef {object} PaperPosition
  * @property {string}      id
  * @property {string}      symbol
  * @property {'long'|'short'} side
- * @property {number}      qty        — quantité achetée/vendue
+ * @property {number}      qty
  * @property {number}      entryPrice
- * @property {number}      stopLoss   — 0 = désactivé
- * @property {number}      takeProfit — 0 = désactivé
+ * @property {number}      stopLoss
+ * @property {number}      takeProfit
  * @property {number}      openedAt
- * @property {number}      pnl        — non-réalisé courant
+ * @property {number}      pnl
  * @property {number}      pnlPct
  */
 
@@ -45,18 +45,18 @@ const MAX_EQUITY_PTS  = 500;   // max points courbe equity
  * @property {number}      qty
  * @property {number}      price
  * @property {number}      fee
- * @property {number}      pnl        — réalisé (0 si ouverture)
+ * @property {number}      pnl
  * @property {number}      timestamp
  */
 
 /**
  * @typedef {object} EquityPoint
- * @property {number} time  — timestamp ms
- * @property {number} value — equity totale
+ * @property {number} time
+ * @property {number} value
  */
 
 export class PaperTradingEngine {
-  /** @type {number} Solde USDT disponible */
+  /** @type {number}*/
   #balance  = DEFAULT_BALANCE;
 
   /** @type {PaperPosition[]} */
@@ -68,27 +68,21 @@ export class PaperTradingEngine {
   /** @type {EquityPoint[]} */
   #equity    = [];
 
-  /** Dernier prix connu par symbole */
   #lastPrices = new Map();
 
-  /** Equity totale initiale (pour calcul drawdown) */
   #peakEquity = DEFAULT_BALANCE;
 
-  /** Hook UI */
   onUpdate = () => {};
 
   constructor() {
     this.#load();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Ouvre une position Market.
    * @param {'long'|'short'} side
    * @param {string} symbol
-   * @param {number} price     — prix actuel
-   * @param {number} usdtAmount — montant USDT à engager
+   * @param {number} price
+   * @param {number} usdtAmount
    * @param {number} [stopLoss=0]
    * @param {number} [takeProfit=0]
    * @returns {PaperPosition|null}
@@ -143,11 +137,10 @@ export class PaperTradingEngine {
   }
 
   /**
-   * Ferme une position par son id.
    * @param {string} posId
-   * @param {number} price — prix de clôture
+   * @param {number} price
    * @param {'close'|'sl'|'tp'} [reason='close']
-   * @returns {number} P&L réalisé
+   * @returns {number}
    */
   closePosition(posId, price, reason = 'close') {
     const idx = this.#positions.findIndex(p => p.id === posId);
@@ -187,7 +180,6 @@ export class PaperTradingEngine {
   }
 
   /**
-   * Appelé à chaque tick de prix — met à jour PnL, vérifie SL/TP.
    * @param {string} symbol
    * @param {number} price
    */
@@ -199,12 +191,10 @@ export class PaperTradingEngine {
     for (const pos of [...this.#positions]) {
       if (pos.symbol !== sym) continue;
 
-      // Mise à jour P&L non-réalisé
       pos.pnl    = this.#calcUnrealizedPnl(pos, price);
       pos.pnlPct = (pos.pnl / (pos.entryPrice * pos.qty)) * 100;
       changed    = true;
 
-      // Stop-Loss
       if (pos.stopLoss > 0) {
         const hit = pos.side === 'long'
           ? price <= pos.stopLoss
@@ -212,7 +202,6 @@ export class PaperTradingEngine {
         if (hit) { this.closePosition(pos.id, price, 'sl'); continue; }
       }
 
-      // Take-Profit
       if (pos.takeProfit > 0) {
         const hit = pos.side === 'long'
           ? price >= pos.takeProfit
@@ -227,7 +216,6 @@ export class PaperTradingEngine {
     }
   }
 
-  /** Réinitialise tout le compte. */
   reset() {
     this.#balance   = DEFAULT_BALANCE;
     this.#positions = [];
@@ -239,27 +227,22 @@ export class PaperTradingEngine {
     showToast('Paper Trading réinitialisé', 'info');
   }
 
-  // ── Getters ───────────────────────────────────────────────
-
   get balance()   { return this.#balance; }
   get positions() { return [...this.#positions]; }
   get trades()    { return [...this.#trades]; }
   get equity()    { return [...this.#equity]; }
 
-  /** Equity totale = balance + valeur des positions ouvertes */
   get totalEquity() {
     const openVal = this.#positions.reduce((acc, p) => acc + p.pnl, 0);
     return this.#balance + openVal;
   }
 
-  /** P&L réalisé total */
   get realizedPnl() {
     return this.#trades
       .filter(t => t.action !== 'open')
       .reduce((a, t) => a + t.pnl, 0);
   }
 
-  /** Drawdown maximum en % */
   get maxDrawdown() {
     if (!this.#equity.length) return 0;
     let peak = this.#equity[0].value;
@@ -272,14 +255,11 @@ export class PaperTradingEngine {
     return maxDD;
   }
 
-  /** Win rate sur les trades fermés */
   get winRate() {
     const closed = this.#trades.filter(t => t.action !== 'open');
     if (!closed.length) return 0;
     return (closed.filter(t => t.pnl > 0).length / closed.length) * 100;
   }
-
-  // ── Privé ─────────────────────────────────────────────────
 
   #calcUnrealizedPnl(pos, price) {
     const raw = pos.side === 'long'

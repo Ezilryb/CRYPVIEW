@@ -24,7 +24,7 @@ function debounce(fn, ms) {
 }
 
 export class DEXSearch {
-  #el       = null;   // bouton déclencheur
+  #el       = null;
   #dropdown = null;
   #input    = null;
   #resultsEl = null;
@@ -38,11 +38,9 @@ export class DEXSearch {
     this.#callbacks = callbacks;
   }
 
-  /** Injecte le bouton DEX dans le header. */
   mount() {
     if (document.getElementById('dex-search-trigger')) return;
 
-    // ── Bouton déclencheur ────────────────────────────────
     const btn = document.createElement('button');
     btn.id    = 'dex-search-trigger';
     btn.title = 'Rechercher une paire DEX (GeckoTerminal)';
@@ -69,7 +67,6 @@ export class DEXSearch {
       this.#isOpen ? this.#close() : this.#open();
     });
 
-    // Insère avant le prix dans le header
     const header = document.querySelector('header');
     const priceDisplay = header?.querySelector('.price-display');
     if (priceDisplay) {
@@ -79,11 +76,9 @@ export class DEXSearch {
     }
     this.#el = btn;
 
-    // ── Dropdown ──────────────────────────────────────────
     this.#dropdown = this.#buildDropdown();
     document.body.appendChild(this.#dropdown);
 
-    // Fermeture au clic extérieur
     document.addEventListener('click', (e) => {
       if (!this.#dropdown?.contains(e.target) && e.target !== this.#el) {
         this.#close();
@@ -95,15 +90,13 @@ export class DEXSearch {
     });
   }
 
-  // ── Ouverture/fermeture ───────────────────────────────────
-
   #open() {
     this.#isOpen = true;
     const rect = this.#el?.getBoundingClientRect();
     if (rect && this.#dropdown) {
       this.#dropdown.style.top  = `${rect.bottom + 4}px`;
       this.#dropdown.style.left = `${rect.left}px`;
-      this.#dropdown.style.display = 'flex'; // FIX : 'block' cassait le layout flex-direction:column
+      this.#dropdown.style.display = 'flex';
     }
     this.#input?.focus();
     this.#loadTrending();
@@ -113,8 +106,6 @@ export class DEXSearch {
     this.#isOpen = false;
     if (this.#dropdown) this.#dropdown.style.display = 'none';
   }
-
-  // ── Construction du dropdown ─────────────────────────────
 
   #buildDropdown() {
     const wrap = document.createElement('div');
@@ -129,7 +120,6 @@ export class DEXSearch {
     `;
 
     wrap.innerHTML = `
-      <!-- Header -->
       <div style="padding:10px 12px;border-bottom:1px solid var(--border);flex-shrink:0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <span style="font-size:12px;">🔗</span>
@@ -148,12 +138,10 @@ export class DEXSearch {
                  aria-label="Recherche de pool DEX">
         </div>
       </div>
-      <!-- Network selector -->
       <div id="dex-network-bar"
            style="display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid var(--border);
                   overflow-x:auto;flex-shrink:0;scrollbar-width:none;">
       </div>
-      <!-- Résultats -->
       <div id="dex-results"
            style="flex:1;overflow-y:auto;scrollbar-width:thin;padding:4px 0;">
         <div style="padding:16px;text-align:center;color:var(--muted);font-size:10px;">
@@ -162,7 +150,6 @@ export class DEXSearch {
       </div>
     `;
 
-    // Bind input
     const input  = wrap.querySelector('#dex-search-input');
     this.#input  = input;
 
@@ -175,15 +162,11 @@ export class DEXSearch {
       if (input) input.style.borderColor = 'var(--border)';
     });
 
-    // Network bar
     this.#networkEl = wrap.querySelector('#dex-network-bar');
     this.#buildNetworkBar();
 
     this.#resultsEl = wrap.querySelector('#dex-results');
 
-    // FIX : stoppe la propagation de TOUS les clics internes.
-    // Sans ça, les clics sur les boutons réseau détachent leur nœud
-    // via innerHTML = '' → document.contains() retourne false → fermeture intempestive.
     wrap.addEventListener('click', e => e.stopPropagation());
 
     return wrap;
@@ -210,7 +193,7 @@ export class DEXSearch {
 
       btn.addEventListener('click', () => {
         this.#currentNetwork = id;
-        this.#buildNetworkBar(); // refresh styles
+        this.#buildNetworkBar();
         const q = this.#input?.value.trim();
         if (q) this.#search(q);
         else   this.#loadTrending();
@@ -219,8 +202,6 @@ export class DEXSearch {
       this.#networkEl.appendChild(btn);
     }
   }
-
-  // ── Recherche & trending ──────────────────────────────────
 
   async #search(query) {
     if (!query.trim()) { this.#loadTrending(); return; }
@@ -245,8 +226,6 @@ export class DEXSearch {
       this.#renderResults([]);
     }
   }
-
-  // ── Rendu des résultats ───────────────────────────────────
 
   #renderResults(pools) {
     if (!this.#resultsEl) return;
@@ -327,8 +306,6 @@ export class DEXSearch {
     return row;
   }
 
-  // ── États UI ─────────────────────────────────────────────
-
   #setLoading() {
     if (this.#resultsEl) {
       this.#resultsEl.innerHTML = `
@@ -347,8 +324,6 @@ export class DEXSearch {
         </div>`;
     }
   }
-
-  // ── Helpers ───────────────────────────────────────────────
 
   #fmtVol(v) {
     if (!isFinite(v)) return '—';

@@ -20,10 +20,7 @@ export class LanguageSelector {
   #unsub   = null;
   #open    = false;
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Injecte le composant dans un conteneur.
    * @param {HTMLElement} container
    */
   mount(container) {
@@ -40,15 +37,11 @@ export class LanguageSelector {
     this.#root = this.#menu = this.#trigger = null;
   }
 
-  // ── Construction DOM ──────────────────────────────────────
-
   #build() {
-    // Conteneur racine
     this.#root = document.createElement('div');
     this.#root.className = 'lang-selector';
     this.#root.style.cssText = 'position:relative;display:inline-flex;';
 
-    // Bouton déclencheur
     this.#trigger = document.createElement('button');
     this.#trigger.className = 'lang-trigger';
     this.#trigger.setAttribute('aria-haspopup', 'listbox');
@@ -75,7 +68,6 @@ export class LanguageSelector {
 
     this.#root.appendChild(this.#trigger);
 
-    // Menu flottant (injecté dans body pour éviter les overflow:hidden)
     this.#menu = document.createElement('div');
     this.#menu.className = 'lang-menu';
     this.#menu.setAttribute('role', 'listbox');
@@ -96,7 +88,6 @@ export class LanguageSelector {
 
     document.body.appendChild(this.#menu);
 
-    // Fermeture au clic extérieur
     document.addEventListener('click', () => this.#closeMenu());
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && this.#open) this.#closeMenu();
@@ -117,9 +108,9 @@ export class LanguageSelector {
 
     item.addEventListener('click', async e => {
       e.stopPropagation();
-      await setLocale(locale);   // persiste dans localStorage
+      await setLocale(locale);
       this.#closeMenu();
-      window.location.reload();  // recharge avec la nouvelle locale
+      window.location.reload();
     });
     item.addEventListener('mouseenter', () => {
       item.style.background = 'rgba(0,255,136,.07)';
@@ -163,14 +154,11 @@ export class LanguageSelector {
     return el;
   }
 
-  // ── Menu open/close ───────────────────────────────────────
-
   #openMenu() {
     this.#open = true;
     this.#trigger.setAttribute('aria-expanded', 'true');
     this.#trigger.style.borderColor = 'var(--accent)';
 
-    // Position sous le trigger
     const rect = this.#trigger.getBoundingClientRect();
     const mw   = 184;
     let   left = rect.left;
@@ -190,13 +178,10 @@ export class LanguageSelector {
     this.#menu.style.display = 'none';
   }
 
-  // ── Mise à jour visuelle ──────────────────────────────────
-
   #refresh() {
     const locale = getLocale();
     const meta   = LOCALE_META[locale];
 
-    // Bouton déclencheur
     if (this.#trigger) {
       this.#trigger.innerHTML = `
         <span style="font-size:15px">${meta.flag}</span>
@@ -205,7 +190,6 @@ export class LanguageSelector {
       `;
     }
 
-    // Coches dans le menu
     this.#menu?.querySelectorAll('[data-locale]').forEach(item => {
       const isActive = item.dataset.locale === locale;
       const check    = item.querySelector('.lang-check');

@@ -192,6 +192,12 @@ export function mountSharedModals(config = {}) {
     <div style="width:8px"></div>${t('ctxMenu.export')}
   </div>
   <div class="ctx-sep" role="separator"></div>
+  <div class="ctx-item" id="ctx-open-risk-calc" role="menuitem">
+    <div style="width:14px;text-align:center;font-size:12px">🧮</div>
+    <div style="width:8px"></div>
+    ${t('calc.title')}
+  </div>
+  <div class="ctx-sep" role="separator"></div>
   <div class="ctx-item" id="ctx-open-settings" role="menuitem">
     <div style="width:14px;text-align:center;font-size:12px">⚙️</div>
     <div style="width:8px"></div>${t('ctxMenu.settings')}
@@ -665,6 +671,182 @@ export function mountSharedModals(config = {}) {
     <div id="ws-save-section" style="padding:12px 16px 14px;border-top:1px solid var(--border);flex-shrink:0;"></div>
   </div>
 </div>
+
+<div id="risk-calc-overlay"
+     class="modal-overlay"
+     style="align-items:center;justify-content:center;"
+     role="dialog" aria-modal="true" aria-label="${t('calc.title')}">
+  <div class="modal-box modal-box--risk-calc">
+
+    <!-- Header -->
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="modal-title">🧮 ${t('calc.toolsTitle')}</div>
+        <span style="font-size:9px;padding:2px 8px;border-radius:3px;
+                     background:rgba(0,200,255,.12);color:#00c8ff;
+                     border:1px solid rgba(0,200,255,.3);letter-spacing:.5px;">${t('calc.badge')}</span>
+      </div>
+      <button id="risk-calc-close" class="modal-close" aria-label="${t('alerts.delete')}">✕</button>
+    </div>
+
+    <!-- Tabs — 6 onglets -->
+    <div class="modal-tabs rc-tabs-scroll" role="tablist" aria-label="${t('calc.tabsLabel')}">
+      <button class="ind-tab active" id="rc-tab-position"
+              role="tab" aria-selected="true">📐 ${t('calc.tabPosition')}</button>
+      <button class="ind-tab" id="rc-tab-rr"
+              role="tab" aria-selected="false">⚖ ${t('calc.tabRR')}</button>
+      <button class="ind-tab" id="rc-tab-liq"
+              role="tab" aria-selected="false">⚡ ${t('calc.tabLeverage')}</button>
+      <button class="ind-tab" id="rc-tab-maxloss"
+              role="tab" aria-selected="false">📉 ${t('calc.tabMaxLoss')}</button>
+      <button class="ind-tab" id="rc-tab-trailing"
+              role="tab" aria-selected="false">🎯 ${t('calc.tabTrailing')}</button>
+      <button class="ind-tab" id="rc-tab-slippage"
+              role="tab" aria-selected="false">💸 ${t('calc.tabFees')}</button>
+    </div>
+
+    <!-- Dynamic content -->
+    <div id="rc-content"
+         style="flex:1;overflow-y:auto;padding:16px 18px;scrollbar-width:thin;"></div>
+  </div>
+</div>
+
+<!-- ── CSS dédié Risk Calculator (v4.0 — 6 tabs) ──────────── -->
+<style>
+  /* Taille de la boîte — plus large pour les nouveaux onglets */
+  .modal-box--risk-calc {
+    width: 580px;
+    max-height: 92vh;
+  }
+
+  /* Scroll horizontal pour les 6 tabs sur mobile */
+  .rc-tabs-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .rc-tabs-scroll::-webkit-scrollbar { display: none; }
+  .rc-tabs-scroll .ind-tab {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Description intro */
+  .rc-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,.02);
+    border-radius: 6px;
+    border-left: 2px solid var(--border);
+  }
+
+  /* Grille 2 colonnes pour les inputs */
+  .rc-grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  /* Bouton principal */
+  .rc-btn-primary {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    transition: background .15s;
+    letter-spacing: .04em;
+    margin-bottom: 14px;
+  }
+  .rc-btn-primary:hover { background: #00e57a; }
+
+  /* Bloc résultats */
+  .rc-result {
+    background: rgba(0,255,136,.04);
+    border: 1px solid rgba(0,255,136,.18);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .rc-result-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-bottom: 12px;
+  }
+  .rc-result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .rc-result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(28,35,51,.5);
+  }
+  .rc-result-row strong { color: var(--text); }
+
+  /* Astuce en bas */
+  .rc-tip {
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 8px 10px;
+    background: rgba(0,200,255,.05);
+    border: 1px solid rgba(0,200,255,.15);
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  /* Avertissement rouge */
+  .rc-warn {
+    font-size: 10px;
+    color: var(--red);
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgba(255,61,90,.07);
+    border: 1px solid rgba(255,61,90,.25);
+    border-radius: 4px;
+  }
+
+  /* Barre R/R visuelle */
+  .rc-rr-bar {
+    display: flex;
+    align-items: stretch;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 12px 0 6px;
+    gap: 2px;
+  }
+  .rc-rr-loss  { background: rgba(255,61,90,.6);  border-radius: 5px 0 0 5px; }
+  .rc-rr-pivot { width: 3px; background: var(--text); flex-shrink: 0; }
+  .rc-rr-gain  { background: rgba(0,255,136,.6);  border-radius: 0 5px 5px 0; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .modal-box--risk-calc { width: 96vw; }
+    .rc-grid2 { grid-template-columns: 1fr; }
+    .rc-result-grid { grid-template-columns: 1fr; }
+  }
+</style>
 
 `;
 

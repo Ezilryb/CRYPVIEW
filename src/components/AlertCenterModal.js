@@ -22,16 +22,14 @@ const SNOOZE_OPTIONS = [
 export class AlertCenterModal {
   #overlay;
   #alertManager;
-  #activeTab = 'active'; // 'active' | 'history'
+  #activeTab = 'active';
 
-  /** @param {import('../features/AlertManagerV2').AlertManagerV2} alertManager */
+  /** @param {import('../features/AlertManagerV2').AlertManagerV2}*/
   constructor(alertManager) {
     this.#alertManager = alertManager;
     this.#overlay      = document.getElementById('alert-center-overlay');
     this.#bindStaticEvents();
   }
-
-  // ── API publique ──────────────────────────────────────────────
 
   open() {
     this.#activeTab = 'active';
@@ -44,12 +42,9 @@ export class AlertCenterModal {
     this.#overlay.style.display = 'none';
   }
 
-  /** Rafraîchit si la modal est ouverte. */
   refresh() {
     if (this.#overlay?.style.display === 'block') this.#render();
   }
-
-  // ── Rendu ─────────────────────────────────────────────────────
 
   #renderTabs() {
     ['active', 'history'].forEach(tab => {
@@ -120,8 +115,6 @@ export class AlertCenterModal {
     }
   }
 
-  // ── Onglet Actives ────────────────────────────────────────────
-
   #renderActive(container) {
     const alerts = this.#alertManager.getActive();
     const now    = Date.now();
@@ -134,7 +127,6 @@ export class AlertCenterModal {
       return;
     }
 
-    // Tri : actives d'abord, snoozées ensuite
     const sorted = [...alerts].sort((a, b) => {
       const aSnz = a.snoozedUntil && a.snoozedUntil > now;
       const bSnz = b.snoozedUntil && b.snoozedUntil > now;
@@ -145,7 +137,7 @@ export class AlertCenterModal {
     sorted.forEach(alert => container.appendChild(this.#alertCard(alert, now)));
   }
 
-  /** @param {import('../features/AlertManagerV2').AlertV2} alert */
+  /** @param {import('../features/AlertManagerV2').AlertV2}*/
   #alertCard(alert, now) {
     const snoozed   = !!(alert.snoozedUntil && alert.snoozedUntil > now);
     const hasRepeat = alert.repeat;
@@ -160,7 +152,6 @@ export class AlertCenterModal {
     card.addEventListener('mouseenter', () => { card.style.background = 'rgba(255,255,255,.025)'; });
     card.addEventListener('mouseleave', () => { card.style.background = ''; });
 
-    // Ligne principale : symbole + conditions
     const header = document.createElement('div');
     header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:5px;';
 
@@ -195,7 +186,6 @@ export class AlertCenterModal {
 
     header.append(sym, ...(name ? [name] : []), badges);
 
-    // Conditions
     const condList = document.createElement('div');
     condList.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;';
     alert.conditions.forEach((c, i) => {
@@ -208,7 +198,6 @@ export class AlertCenterModal {
       condList.appendChild(this.#condBadge(c));
     });
 
-    // Actions
     const actions = document.createElement('div');
     actions.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;';
 
@@ -219,7 +208,6 @@ export class AlertCenterModal {
       });
       actions.appendChild(wakeBtn);
     } else {
-      // Menu snooze
       const snoozeWrap = document.createElement('div');
       snoozeWrap.style.cssText = 'position:relative;';
       const snoozeBtn = this.#actionBtn('💤 Snooze ▾', '#8b949e');
@@ -261,8 +249,6 @@ export class AlertCenterModal {
     card.append(header, condList, actions);
     return card;
   }
-
-  // ── Onglet Historique ─────────────────────────────────────────
 
   #renderHistory(container) {
     const history = this.#alertManager.getHistory();
@@ -309,8 +295,6 @@ export class AlertCenterModal {
       container.appendChild(row);
     });
   }
-
-  // ── Helpers UI ────────────────────────────────────────────────
 
   #condBadge(cond) {
     const meta  = CONDITION_META[cond.type];
@@ -375,10 +359,7 @@ export class AlertCenterModal {
   }
 
   /**
-   * Formate un timestamp selon son ancienneté :
-   * - < 24h  → date relative (ex : "il y a 5 min")
-   * - ≥ 24h  → date+heure complète localisée
-   * @param {number} ts — timestamp ms
+   * @param {number} ts
    * @returns {string}
    */
   #formatDate(ts) {
@@ -386,8 +367,6 @@ export class AlertCenterModal {
     if (elapsed < 86_400_000) return fmtRelative(ts);
     return fmtDateTime(ts);
   }
-
-  // ── Événements statiques ──────────────────────────────────────
 
   #bindStaticEvents() {
     document.getElementById('alert-center-close')

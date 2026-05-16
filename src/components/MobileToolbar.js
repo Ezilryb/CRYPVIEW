@@ -39,7 +39,7 @@ export class MobileToolbar {
   #bar           = null;
   #sheet         = null;
   #overlay       = null;
-  #activeSheet   = null; // 'draw' | 'nav' | null
+  #activeSheet   = null;
   #activeTool    = null;
   #mq            = null;
 
@@ -48,7 +48,6 @@ export class MobileToolbar {
     this.#onIndicators = onIndicators;
     this.#onScreener   = onScreener;
 
-    // N'active la toolbar que sur ≤768px
     this.#mq = window.matchMedia('(max-width: 768px)');
     if (this.#mq.matches) this.#mount();
     this.#mq.addEventListener('change', (e) => {
@@ -57,12 +56,8 @@ export class MobileToolbar {
     });
   }
 
-  // ── API publique ───────────────────────────────────────────
-
-  /** Met à jour la référence drawing (changement de panneau en multi) */
   setDrawing(drawing) {
     this.#drawing = drawing;
-    // Réinitialise l'outil actif si on change de panneau
     if (this.#activeTool) {
       this.#selectTool(null);
     }
@@ -72,8 +67,6 @@ export class MobileToolbar {
     this.#unmount();
     this.#mq = null;
   }
-
-  // ── Montage DOM ────────────────────────────────────────────
 
   #mount() {
     this.#buildOverlay();
@@ -93,8 +86,6 @@ export class MobileToolbar {
     this.#overlay = null;
   }
 
-  // ── Overlay (fond semi-transparent) ───────────────────────
-
   #buildOverlay() {
     const el = document.createElement('div');
     el.id = 'mobile-tb-overlay';
@@ -106,8 +97,6 @@ export class MobileToolbar {
     el.addEventListener('click', () => this.#closeSheet());
     this.#overlay = el;
   }
-
-  // ── Feuille coulissante (draw ou nav) ──────────────────────
 
   #buildSheet() {
     const el = document.createElement('div');
@@ -144,8 +133,6 @@ export class MobileToolbar {
     this.#overlay.style.display = 'none';
     this.#updateBarActive(null);
   }
-
-  // ── HTML des feuilles ──────────────────────────────────────
 
   #drawSheetHTML() {
     const handle = `<div style="width:40px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 0;"></div>`;
@@ -225,8 +212,6 @@ export class MobileToolbar {
     return `${handle}${header}<div style="padding-bottom:16px;">${links}</div>`;
   }
 
-  // ── Bind events dans la feuille ────────────────────────────
-
   #bindSheetEvents(type) {
     if (type === 'draw') {
       this.#sheet.querySelector('#mtb-close-draw')
@@ -234,7 +219,7 @@ export class MobileToolbar {
       this.#sheet.querySelector('#mtb-clear-draw')
         ?.addEventListener('click', () => {
           this.#drawing?.clear();
-          this.#selectTool(null);  // annule aussi l'outil actif dans ChartDrawing
+          this.#selectTool(null);
           this.#closeSheet();
         });
       this.#sheet.querySelectorAll('.mtb-tool').forEach(btn => {
@@ -251,16 +236,13 @@ export class MobileToolbar {
     }
   }
 
-  // ── Sélection d'outil ─────────────────────────────────────
-
   #selectTool(tool) {
     this.#activeTool = tool;
     if (tool) {
       this.#drawing?.setTool(tool);
     } else {
-      this.#drawing?.cancel();   // était setTool(null), qui n'existe pas
+      this.#drawing?.cancel();
     }
-    // Met à jour le libellé dans la barre
     const drawBtn = this.#bar?.querySelector('[data-action="draw"]');
     if (drawBtn) {
       const toolInfo = DRAW_TOOLS.find(t => t.id === tool);
@@ -269,8 +251,6 @@ export class MobileToolbar {
       drawBtn.querySelector('.mtb-label').textContent = toolInfo ? toolInfo.label : 'Dessiner';
     }
   }
-
-  // ── Barre principale ───────────────────────────────────────
 
   #buildBar() {
     const bar = document.createElement('div');
@@ -314,7 +294,6 @@ export class MobileToolbar {
       bar.appendChild(btn);
     });
 
-    // Ajoute un padding en bas pour compenser la safe area iOS
     bar.style.paddingBottom = 'env(safe-area-inset-bottom, 0px)';
 
     this.#bar = bar;
@@ -339,13 +318,10 @@ export class MobileToolbar {
     });
   }
 
-  // ── Padding body pour ne pas masquer le contenu ────────────
-
   #pushBodyPadding(on) {
     const PADDING = '56px';
     if (on) {
       document.body.style.paddingBottom = PADDING;
-      // Ajuste également les modales qui utilisent bottom:0
       const style = document.createElement('style');
       style.id = 'mobile-tb-style';
       style.textContent = `

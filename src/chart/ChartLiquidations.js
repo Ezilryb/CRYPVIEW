@@ -27,12 +27,11 @@ const FSTREAM_BASE  = 'wss://fstream.binance.com/stream?streams=';
 const PING_TIMEOUT  = 35_000;
 const BACKOFF_BASE  = 1_000;
 const BACKOFF_MAX   = 30_000;
-const MAX_BUCKETS   = 200;  // nombre max de niveaux de prix
-const RETENTION_MS  = 4 * 60 * 60 * 1_000; // garder 4h de données
-const RECENT_MAX    = 30;   // flux live affiché
+const MAX_BUCKETS   = 200;
+const RETENTION_MS  = 4 * 60 * 60 * 1_000;
+const RECENT_MAX    = 30;
 
-/** Nombre de buckets de prix visibles simultanément */
-const VISIBLE_RANGE_FACTOR = 0.30; // 30% de la range visible
+const VISIBLE_RANGE_FACTOR = 0.30;
 
 export class ChartLiquidations {
   #chart;
@@ -40,10 +39,7 @@ export class ChartLiquidations {
   #container;
   #symbol;
 
-  /** Map<number, LiqBucket> : key = prix arrondi au bucket */
   #buckets = new Map();
-
-  /** Dernières liquidations pour le flux live */
   #recent  = [];
 
   #canvas  = null;
@@ -58,10 +54,7 @@ export class ChartLiquidations {
   #redrawPending = false;
   #resizeObs     = null;
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Active la heatmap sur le chart courant.
    * @param {IChartApi}   chart
    * @param {ISeriesApi}  cSeries
    * @param {HTMLElement} container
@@ -80,7 +73,6 @@ export class ChartLiquidations {
     this.#subscribeRedraws();
   }
 
-  /** Met à jour le symbole (reconnexion WS). */
   setSymbol(symbol) {
     if (!this.#active) return;
     this.#symbol  = symbol.toLowerCase();
@@ -114,10 +106,8 @@ export class ChartLiquidations {
 
   isActive() { return this.#active; }
 
-  /** @returns {Map<number, LiqBucket>} copie des buckets courants */
+  /** @returns {Map<number, LiqBucket>} */
   getBuckets() { return new Map(this.#buckets); }
-
-  // ── WebSocket Binance @forceOrder ─────────────────────────
 
   #connectWS() {
     if (this.#destroyed) return;
@@ -133,7 +123,6 @@ export class ChartLiquidations {
       this.#resetPing();
       try {
         const msg = JSON.parse(data);
-        // @forceOrder : msg.data.o contient l'ordre liquidé
         const o = msg?.data?.o;
         if (o) this.#handleLiquidation(o);
       } catch (_) {}
@@ -171,17 +160,11 @@ export class ChartLiquidations {
     this.#retryTimer = setTimeout(() => this.#connectWS(), delay);
   }
 
-  // ── Traitement d'une liquidation ─────────────────────────
-
   /**
-   * @param {{ S: string, q: string, ap: string, T: number }} o — order liquidation
-   *   S   = side BUY (long liq) | SELL (short liq)
-   *   q   = qty
-   *   ap  = average filled price
-   *   T   = timestamp ms
+    * @param {{ S: string, q: string, ap: string, T: number }} o
    */
   #handleLiquidation(o) {
-    const side  = o.S;        // 'BUY' = shorts liquidés | 'SELL' = longs liquidés
+    const side  = o.S;
     const price = parseFloat(o.ap || o.p);
     const qty   = parseFloat(o.q);
     const usd   = price * qty;
@@ -189,10 +172,8 @@ export class ChartLiquidations {
 
     if (!price || !qty || usd < 1) return;
 
-    // Nettoie les données trop anciennes
     this.#pruneOld(ts);
 
-    // Calcule le bucket de prix
     const tick   = this.#tickSize(price);
     const bucket = Math.floor(price / tick) * tick;
 
@@ -204,14 +185,11 @@ export class ChartLiquidations {
     b.ts.push(ts);
 
     if (side === 'SELL') {
-      // Longs liquidés : le prix a baissé → rouge
       b.longs += usd;
     } else {
-      // Shorts liquidés : le prix a monté → vert
       b.shorts += usd;
     }
 
-    // Flux live
     this.#recent.unshift({
       ts,
       price,
@@ -237,8 +215,6 @@ export class ChartLiquidations {
     }
   }
 
-  // ── Rendu Canvas ─────────────────────────────────────────
-
   #draw() {
     if (!this.#canvas || !this.#cSeries || !this.#chart) return;
 
@@ -252,11 +228,10 @@ export class ChartLiquidations {
 
     if (!this.#buckets.size) return;
 
-    // ── Calcul de l'échelle ───────────────────────────────
     const allUSD = [...this.#buckets.values()].map(b => b.total);
     const maxUSD = Math.max(...allUSD, 1);
 
-    const BAR_MAX_W = Math.min(W * 0.14, 80); // Largeur max d'une barre
+    const BAR_MAX_W = Math.min(W * 0.14, 80);
 
     for (const [, b] of this.#buckets) {
       const yTop = this.#cSeries.priceToCoordinate(b.price + this.#tickSize(b.price));
@@ -267,22 +242,18 @@ export class ChartLiquidations {
       const y     = Math.min(yTop, yBot);
       const ratio = b.total / maxUSD;
 
-      // Intensité en fonction du montant
       const alpha = 0.15 + ratio * 0.75;
       const wBar  = ratio * BAR_MAX_W;
 
-      // Background total (gris)
       ctx.fillStyle = `rgba(255,255,255,${alpha * 0.08})`;
       ctx.fillRect(0, y, wBar, h);
 
-      // Portion longs (rouge)
       if (b.longs > 0) {
         const wLong = (b.longs / b.total) * wBar;
         ctx.fillStyle = `rgba(255,61,90,${alpha})`;
         ctx.fillRect(0, y, wLong, h);
       }
 
-      // Portion shorts (vert)
       if (b.shorts > 0) {
         const wShort = (b.shorts / b.total) * wBar;
         const xShort  = (b.longs / b.total) * wBar;
@@ -290,7 +261,6 @@ export class ChartLiquidations {
         ctx.fillRect(xShort, y, wShort, h);
       }
 
-      // Label montant (si visible et assez grand)
       if (h >= 8 && wBar >= 20 && ratio > 0.1) {
         const label = this.#fmtUSD(b.total);
         ctx.font = 'bold 7px Space Mono,monospace';
@@ -300,8 +270,6 @@ export class ChartLiquidations {
       }
     }
   }
-
-  // ── Panneau flux live ─────────────────────────────────────
 
   #updateFluxPanel() {
     let panel = document.getElementById('liq-flux-panel');
@@ -329,7 +297,7 @@ export class ChartLiquidations {
         🔥 Liquidations live
       </div>
       ${this.#recent.slice(0, 8).map(l => {
-        const isLong  = l.side === 'SELL'; // SELL = longs liquidés
+        const isLong  = l.side === 'SELL';
         const color   = isLong ? '#ff3d5a' : '#00ff88';
         const icon    = isLong ? '🔴' : '🟢';
         const label   = isLong ? 'LONG' : 'SHORT';
@@ -352,8 +320,6 @@ export class ChartLiquidations {
     document.getElementById('liq-flux-panel')?.remove();
   }
 
-  // ── Abonnements de redessins ──────────────────────────────
-
   #subscribeRedraws() {
     const redraw = () => { if (this.#active) this.#draw(); };
     this.#chart.timeScale().subscribeVisibleTimeRangeChange(redraw);
@@ -374,8 +340,6 @@ export class ChartLiquidations {
       if (this.#active) this.#draw();
     }, RENDER_THROTTLE_MS);
   }
-
-  // ── Helpers ───────────────────────────────────────────────
 
   #ensureCanvas() {
     let c = this.#container.querySelector('#liq-canvas');
@@ -408,8 +372,8 @@ export class ChartLiquidations {
 /**
  * @typedef {object} LiqBucket
  * @property {number}   price
- * @property {number}   longs   — USD de longs liquidés
- * @property {number}   shorts  — USD de shorts liquidés
- * @property {number}   total   — longs + shorts
- * @property {number[]} ts      — timestamps des événements
+ * @property {number}   longs
+ * @property {number}   shorts
+ * @property {number}   total
+ * @property {number[]} ts
  */

@@ -1,50 +1,16 @@
 // ============================================================
 //  src/features/ProfileManager.js — CrypView V3.2
 //  Gestion des profils d'indicateurs et presets de workspace.
-//
-//  Presets intégrés (non supprimables) :
-//    🎯 Scalping   · 📈 Swing   · 📊 Volume
-//    🌊 Orderflow  · 🎭 Momentum
-//
-//  Profils custom (créés par l'utilisateur) :
-//    Snapshot de la configuration active (indicateurs + TF).
-//
-//  ── i18n ──────────────────────────────────────────────────
-//  Les champs `name` et `description` des builtins sont des
-//  valeurs de repli (fallback) en français.
-//  Dans ProfileModal (ou tout composant d'affichage), utiliser :
-//
-//    import { t } from '../i18n/i18n.js';
-//    import { BUILTIN_I18N_PREFIX } from './ProfileManager.js';
-//
-//    const label = t(`${BUILTIN_I18N_PREFIX}.${profile.id}.name`)
-//                  || profile.name;
-//    const desc  = t(`${BUILTIN_I18N_PREFIX}.${profile.id}.desc`)
-//                  || profile.description;
-//
-//  Usage :
-//    const pm = new ProfileManager();
-//    pm.apply('scalping')      → { indicators, tf }
-//    pm.save('Mon setup', [...], '1h')
-//    pm.remove(id)
-//    pm.getAll()               → [...builtins, ...custom]
 // ============================================================
 
 const STORAGE_KEY   = 'crypview_profiles_v1';
 const MAX_CUSTOM    = 20;
 
 /**
- * Préfixe de clé i18n pour tous les presets intégrés.
- * Clés attendues dans les fichiers de traduction :
- *   profiles.builtins.<id>.name
- *   profiles.builtins.<id>.desc
- *
  * @example
- *   t(`${BUILTIN_I18N_PREFIX}.scalping.name`) // → "Scalping"
  */
 export const BUILTIN_I18N_PREFIX = 'profiles.builtins';
 
-// ── Presets intégrés ──────────────────────────────────────────
 /** @type {Profile[]} */
 const BUILTINS = [
   {
@@ -110,8 +76,8 @@ const BUILTINS = [
  * @property {string}   icon
  * @property {'builtin'|'custom'} type
  * @property {string}   description
- * @property {string[]} indicators  — clés IND_META
- * @property {string}   [tf]        — timeframe suggéré
+ * @property {string[]} indicators
+ * @property {string}   [tf]
  * @property {number}   [createdAt]
  */
 
@@ -123,31 +89,22 @@ export class ProfileManager {
     this.#load();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
-  /** Tous les profils (builtins d'abord, puis custom). */
   getAll() { return [...BUILTINS, ...this.#custom]; }
 
-  /** Presets intégrés uniquement. */
   getBuiltins() { return [...BUILTINS]; }
 
-  /** Profils utilisateur. */
   getCustom() { return [...this.#custom]; }
 
   /**
-   * Retourne la clé i18n d'un preset builtin.
-   * Pratique dans les vues pour éviter de reconstruire la clé manuellement.
-   *
-   * @param {string} id      — id du builtin (ex: 'scalping')
+   * @param {string} id
    * @param {'name'|'desc'} field
-   * @returns {string}       — ex: 'profiles.builtins.scalping.name'
+   * @returns {string}
    */
   static i18nKey(id, field) {
     return `${BUILTIN_I18N_PREFIX}.${id}.${field}`;
   }
 
   /**
-   * Retourne les données applicables d'un profil.
    * @param {string} id
    * @returns {{ indicators: string[], tf: string|null } | null}
    */
@@ -158,7 +115,6 @@ export class ProfileManager {
   }
 
   /**
-   * Sauvegarde la configuration courante comme profil custom.
    * @param {string}   name
    * @param {string[]} indicators
    * @param {string}   [tf]
@@ -187,7 +143,6 @@ export class ProfileManager {
   }
 
   /**
-   * Supprime un profil custom (les builtins sont protégés).
    * @param {string} id
    * @returns {boolean}
    */
@@ -199,7 +154,6 @@ export class ProfileManager {
     return true;
   }
 
-  /** Renomme un profil custom. */
   rename(id, newName) {
     const p = this.#custom.find(c => c.id === id);
     if (!p) return false;
@@ -208,13 +162,9 @@ export class ProfileManager {
     return true;
   }
 
-  /** Nombre de profils custom. */
   get customCount() { return this.#custom.length; }
 
-  /** true si le quota est atteint. */
   get isFull() { return this.#custom.length >= MAX_CUSTOM; }
-
-  // ── Persistance ───────────────────────────────────────────
 
   #load() {
     try {

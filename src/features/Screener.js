@@ -13,35 +13,32 @@
 
 import { BINANCE } from '../config.js';
 
-/** Volume USDT minimum pour figurer dans le screener */
-const MIN_QUOTE_VOL = 500_000; // 500k USDT
+const MIN_QUOTE_VOL = 500_000;
 
-/** Seuil de posInRange pour "near high" / "near low" */
 const NEAR_HIGH_THRESH = 0.80;
 const NEAR_LOW_THRESH  = 0.20;
 
 /**
  * @typedef {object} ScreenerRow
  * @property {string}  symbol
- * @property {string}  base         — ex: 'BTC'
+ * @property {string}  base
  * @property {number}  price
- * @property {number}  pct          — variation 24h en %
- * @property {number}  vol          — volume en USDT (quoteVolume)
+ * @property {number}  pct
+ * @property {number}  vol
  * @property {number}  high
  * @property {number}  low
- * @property {number}  rangePct     — (high-low)/low × 100
- * @property {number}  posInRange   — 0..1
- * @property {number}  distHighPct  — % en-dessous du sommet 24h
- * @property {number}  count        — nombre de trades 24h
- * @property {number}  scoreMover   — score gainers/losers
- * @property {number}  scoreVol     — score volume
- * @property {number}  scoreBreakout — score breakout (près du high)
- * @property {number}  scoreExtreme  — score extrême (près du low ou high)
- * @property {number}  scoreVolat    — score volatilité (amplitude range)
+ * @property {number}  rangePct
+ * @property {number}  posInRange
+ * @property {number}  distHighPct
+ * @property {number}  count
+ * @property {number}  scoreMover
+ * @property {number}  scoreVol
+ * @property {number}  scoreBreakout
+ * @property {number}  scoreExtreme
+ * @property {number}  scoreVolat
  */
 
 /**
- * Charge et calcule toutes les métriques du screener.
  * @returns {Promise<ScreenerRow[]>}
  */
 export async function fetchScreenerData() {
@@ -53,18 +50,16 @@ export async function fetchScreenerData() {
   const rows = [];
 
   for (const t of raw) {
-    // Filtre : paires USDT uniquement
     if (!t.symbol.endsWith('USDT')) continue;
 
     const price  = +t.lastPrice;
     const open   = +t.openPrice;
     const high   = +t.highPrice;
     const low    = +t.lowPrice;
-    const vol    = +t.quoteVolume;          // en USDT
+    const vol    = +t.quoteVolume;
     const pct    = +t.priceChangePercent;
     const count  = +t.count;
 
-    // Filtre : liquidité minimale
     if (vol < MIN_QUOTE_VOL || price <= 0) continue;
 
     const range     = high - low;
@@ -72,8 +67,6 @@ export async function fetchScreenerData() {
     const posInRange = range > 0 ? (price - low) / range : 0.5;
     const distHighPct = high > 0 ? ((high - price) / high) * 100 : 0;
 
-    // Scores normalisés [0..1] — seront re-normalisés après tri
-    // On stocke les valeurs brutes d'abord
     rows.push({
       symbol:       t.symbol,
       base:         t.symbol.replace('USDT', ''),
@@ -86,13 +79,12 @@ export async function fetchScreenerData() {
       posInRange,
       distHighPct,
       count,
-      // Scores calculés ci-dessous
       scoreMover:    Math.abs(pct),
       scoreVol:      vol,
-      scoreBreakout: posInRange,    // plus haut = plus proche du high
+      scoreBreakout: posInRange,
       scoreExtreme:  posInRange >= 0.5
-        ? posInRange              // côté overbought
-        : 1 - posInRange,         // côté oversold (symétrique)
+        ? posInRange
+        : 1 - posInRange,
       scoreVolat:    rangePct,
     });
   }
@@ -100,26 +92,20 @@ export async function fetchScreenerData() {
   return rows;
 }
 
-// ── Filtres ───────────────────────────────────────────────────
-
 /**
- * Retourne les lignes selon l'onglet actif.
- *
  * @param {ScreenerRow[]} rows
  * @param {'all'|'gainers'|'losers'|'volume'|'breakout'|'extremes'} tab
- * @param {string} search — filtre texte sur base
+ * @param {string} search
  * @returns {ScreenerRow[]}
  */
 export function filterRows(rows, tab, search = '') {
   let filtered = rows;
 
-  // Filtre texte
   if (search.trim()) {
     const q = search.trim().toUpperCase();
     filtered = filtered.filter(r => r.base.startsWith(q));
   }
 
-  // Filtre par onglet
   switch (tab) {
     case 'gainers':
       return filtered.filter(r => r.pct > 0).sort((a, b) => b.pct - a.pct);
@@ -128,25 +114,21 @@ export function filterRows(rows, tab, search = '') {
     case 'volume':
       return filtered.sort((a, b) => b.vol - a.vol);
     case 'breakout':
-      // Près du sommet 24h + variation positive
       return filtered
         .filter(r => r.posInRange >= NEAR_HIGH_THRESH)
         .sort((a, b) => b.posInRange - a.posInRange);
     case 'extremes':
-      // Overbought (>80%) ou oversold (<20%)
       return filtered
         .filter(r => r.posInRange >= NEAR_HIGH_THRESH || r.posInRange <= NEAR_LOW_THRESH)
         .sort((a, b) => b.scoreExtreme - a.scoreExtreme);
     case 'volatile':
       return filtered.sort((a, b) => b.rangePct - a.rangePct);
     default:
-      // Tri par volume par défaut (vue "Tous")
       return filtered.sort((a, b) => b.vol - a.vol);
   }
 }
 
 /**
- * Tri générique d'un tableau de ScreenerRow.
  * @param {ScreenerRow[]} rows
  * @param {keyof ScreenerRow} key
  * @param {'asc'|'desc'} dir

@@ -19,7 +19,6 @@ import { CONDITION_TYPE, CONDITION_META } from '../features/AlertManagerV2.js';
 import { fmtPrice }                       from '../utils/format.js';
 import { FocusTrap, markAsDialog }        from '../utils/a11y.js';
 
-// ── Groupes de types pour le <select> ─────────────────────────
 const CONDITION_GROUPS = [
   {
     label: '💰 Prix',
@@ -41,7 +40,6 @@ const CONDITION_GROUPS = [
   },
 ];
 
-// Libellés affichés dans le <select>
 const TYPE_LABELS = {
   [CONDITION_TYPE.PRICE_ABOVE]:     'Prix au-dessus de',
   [CONDITION_TYPE.PRICE_BELOW]:     'Prix en-dessous de',
@@ -56,7 +54,6 @@ const TYPE_LABELS = {
   [CONDITION_TYPE.BREAKOUT_LOW]:    'Breakout support (N bougies)',
 };
 
-// Placeholders et unités selon le type
 const TYPE_CONFIG = {
   [CONDITION_TYPE.PRICE_ABOVE]:     { placeholder: '67000', unit: '' },
   [CONDITION_TYPE.PRICE_BELOW]:     { placeholder: '65000', unit: '' },
@@ -76,7 +73,7 @@ export class AlertBuilderModal {
   #symbol    = '';
   #snapshot  = null;
   #resolve   = null;
-  #condRows  = []; // { el, typeSelect, valueInput }
+  #condRows  = [];
   #expanded  = false;
   #trap;
 
@@ -87,13 +84,10 @@ export class AlertBuilderModal {
     this.#bindStaticEvents();
   }
 
-  // ── API publique ──────────────────────────────────────────────
-
   /**
-   * Ouvre le constructeur et résout avec la config de l'alerte ou null.
    *
    * @param {string} symbol
-   * @param {object} [snapshot] — { price, rsi, macd, pctChange24h, candles }
+   * @param {object} [snapshot]
    * @returns {Promise<object|null>}
    */
   open(symbol, snapshot = {}) {
@@ -104,7 +98,6 @@ export class AlertBuilderModal {
       this.#reset();
       this.#render();
       this.#overlay.style.display = 'block';
-      // FocusTrap avec focus initial sur le 1er input valeur de condition
       this.#trap.activate(this.#condRows[0]?.valueInput ?? null);
     });
   }
@@ -118,36 +111,28 @@ export class AlertBuilderModal {
     r(result);
   }
 
-  // ── Rendu ─────────────────────────────────────────────────────
-
   #render() {
-    // Symbole dans le header
     const symEl = document.getElementById('alert-builder-sym');
     if (symEl) symEl.textContent = this.#symbol.replace('USDT', '/USDT');
 
-    // Reset champ nom
     const nameInput = document.getElementById('alert-builder-name');
     if (nameInput) nameInput.value = '';
 
-    // Logique par défaut AND
     const logicSel = document.getElementById('alert-builder-logic');
     if (logicSel) logicSel.value = 'AND';
 
-    // Bouton comportement
     const behaviorToggle = document.getElementById('alert-builder-behavior-toggle');
     if (behaviorToggle) behaviorToggle.textContent = '⚙ Options avancées ▸';
     this.#expanded = false;
     const behEl = document.getElementById('alert-builder-behavior');
     if (behEl) behEl.style.display = 'none';
 
-    // Réinitialise les comportements par défaut
     this.#setField('ab-repeat', false);
     this.#setField('ab-cooldown', '5');
     this.#setField('ab-max-triggers', '0');
     this.#setField('ab-expiration', '0');
     this.#toggleCooldownVisibility(false);
 
-    // Ajoute une condition initiale
     this.#clearConditions();
     this.#addConditionRow(CONDITION_TYPE.PRICE_ABOVE);
 
@@ -158,8 +143,6 @@ export class AlertBuilderModal {
     this.#condRows = [];
     this.#expanded = false;
   }
-
-  // ── Gestion des lignes de conditions ──────────────────────────
 
   #clearConditions() {
     const container = document.getElementById('alert-builder-conditions');
@@ -177,7 +160,6 @@ export class AlertBuilderModal {
       margin-bottom:6px; animation:fadeCondIn .18s ease;
     `;
 
-    // Sélecteur de type
     const typeSelect = document.createElement('select');
     typeSelect.style.cssText = `
       flex:1; background:var(--bg); border:1px solid var(--border);
@@ -200,7 +182,6 @@ export class AlertBuilderModal {
       typeSelect.appendChild(og);
     });
 
-    // Input valeur
     const cfg         = TYPE_CONFIG[type] ?? {};
     const valueInput  = document.createElement('input');
     const noVal = CONDITION_META[type]?.noValue;
@@ -215,12 +196,10 @@ export class AlertBuilderModal {
       display:${noVal ? 'none' : 'block'};
     `;
 
-    // Unité + valeur de référence
     const unitRef = document.createElement('span');
     unitRef.style.cssText = 'font-size:10px; color:var(--muted); white-space:nowrap; flex-shrink:0;';
     this.#updateUnitRef(unitRef, type);
 
-    // Bouton supprimer
     const delBtn = document.createElement('button');
     delBtn.textContent = '✕';
     delBtn.style.cssText = `
@@ -231,13 +210,12 @@ export class AlertBuilderModal {
     delBtn.addEventListener('mouseenter', () => { delBtn.style.color = 'var(--red)'; });
     delBtn.addEventListener('mouseleave', () => { delBtn.style.color = 'var(--muted)'; });
     delBtn.addEventListener('click', () => {
-      if (this.#condRows.length <= 1) return; // au moins 1 condition
+      if (this.#condRows.length <= 1) return;
       row.remove();
       this.#condRows = this.#condRows.filter(r => r.el !== row);
       this.#updatePreview();
     });
 
-    // Mise à jour dynamique quand le type change
     typeSelect.addEventListener('change', () => {
       const newType  = typeSelect.value;
       const newCfg   = TYPE_CONFIG[newType] ?? {};
@@ -294,12 +272,9 @@ export class AlertBuilderModal {
         ref = cfg.unit ? cfg.unit : '';
     }
 
-    // Unité + ref
     const unit = cfg.unit && !CONDITION_META[type]?.noValue ? cfg.unit + ' ' : '';
     el.textContent = ref ? `${unit}${ref}` : unit;
   }
-
-  // ── Texte de prévisualisation ─────────────────────────────────
 
   #updatePreview() {
     const previewEl = document.getElementById('alert-builder-preview');
@@ -323,8 +298,6 @@ export class AlertBuilderModal {
       ? `<span style="color:var(--accent)">▸</span> ${this.#symbol} — ${parts.join(`<span style="color:var(--muted)">${sep}</span>`)}`
       : '';
   }
-
-  // ── Collecte de la config finale ─────────────────────────────
 
   #buildConfig() {
     const conditions = [];
@@ -367,8 +340,6 @@ export class AlertBuilderModal {
     };
   }
 
-  // ── Comportement (accordéon) ──────────────────────────────────
-
   #toggleBehavior() {
     this.#expanded = !this.#expanded;
     const behEl = document.getElementById('alert-builder-behavior');
@@ -386,16 +357,12 @@ export class AlertBuilderModal {
     if (el2) el2.style.display = show ? 'flex' : 'none';
   }
 
-  // ── Utilitaires ───────────────────────────────────────────────
-
   #setField(id, value) {
     const el = document.getElementById(id);
     if (!el) return;
     if (el.type === 'checkbox') el.checked = value;
     else el.value = value;
   }
-
-  // ── Liaison des événements statiques ─────────────────────────
 
   #bindStaticEvents() {
     document.getElementById('alert-builder-close')
@@ -432,13 +399,11 @@ export class AlertBuilderModal {
     document.getElementById('alert-builder-behavior-toggle')
       ?.addEventListener('click', () => this.#toggleBehavior());
 
-    // Toggle repeat → affiche/masque cooldown
     document.getElementById('ab-repeat')
       ?.addEventListener('change', e => {
         this.#toggleCooldownVisibility(e.target.checked);
       });
 
-    // Logique mise à jour de la preview
     document.getElementById('alert-builder-logic')
       ?.addEventListener('change', () => this.#updatePreview());
   }

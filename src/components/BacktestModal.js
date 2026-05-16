@@ -27,8 +27,6 @@ export class BacktestModal {
     this.#bindStaticEvents();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   open() {
     this.#overlay.style.display = 'flex';
     this.#switchTab('strategy');
@@ -37,8 +35,6 @@ export class BacktestModal {
   close() {
     this.#overlay.style.display = 'none';
   }
-
-  // ── Navigation ────────────────────────────────────────────
 
   #switchTab(tab) {
     this.#activeTab = tab;
@@ -56,10 +52,8 @@ export class BacktestModal {
       content.innerHTML = this.#tplStrategy();
       this.#bindStrategyEvents();
     } else {
-      // ── FIX : try-catch pour éviter l'écran blanc ────────
       try {
         content.innerHTML = this.#tplResults();
-        // Dessine la courbe equity (vide ou pleine)
         const eq = this.#lastResult?.equity ?? [];
         this.#drawEquityCurve(eq);
       } catch (err) {
@@ -73,8 +67,6 @@ export class BacktestModal {
     }
   }
 
-  // ── Helpers i18n ──────────────────────────────────────────
-
   #tr(key, fallback) {
     const v = t(key);
     return (v && v !== key) ? v : fallback;
@@ -86,8 +78,6 @@ export class BacktestModal {
       return `<option value="${s.id}">${label}</option>`;
     }).join('');
   }
-
-  // ── Template stratégie ────────────────────────────────────
 
   #tplStrategy() {
     const sym = (this.#callbacks.getSymbol?.() ?? 'btcusdt').toUpperCase().replace('USDT', '/USDT');
@@ -149,7 +139,6 @@ export class BacktestModal {
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-        <!-- Conditions d'entrée -->
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
             <span style="font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;">
@@ -203,6 +192,61 @@ export class BacktestModal {
         ${this.#paramField('bt-cap-pct', capLbl,   'number', null, '10')}
       </div>
 
+      <!-- ── Slippage & Frais ─────────────────────────────── -->
+      <div style="margin-bottom:14px;border:1px solid var(--border);border-radius:6px;
+                  padding:10px 14px;background:rgba(255,255,255,.015);">
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;
+                    letter-spacing:.8px;margin-bottom:10px;">
+          💸 Simulation slippage &amp; frais
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px;">
+          <div>
+            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Frais taker (%)</div>
+            <input id="bt-taker-fee" type="number" value="0.10" step="0.001" min="0"
+                   style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+                          padding:7px 8px;font-family:'Space Mono',monospace;font-size:11px;
+                          border-radius:4px;outline:none;text-align:center;">
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Frais maker (%)</div>
+            <input id="bt-maker-fee" type="number" value="0.02" step="0.001" min="0"
+                   style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+                          padding:7px 8px;font-family:'Space Mono',monospace;font-size:11px;
+                          border-radius:4px;outline:none;text-align:center;">
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Slippage (%)</div>
+            <input id="bt-slippage" type="number" value="0.05" step="0.001" min="0"
+                   style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);
+                          padding:7px 8px;font-family:'Space Mono',monospace;font-size:11px;
+                          border-radius:4px;outline:none;text-align:center;">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div>
+            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Type d'ordre</div>
+            <select id="bt-order-type"
+                    style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--muted);
+                           padding:7px 8px;font-family:'Space Mono',monospace;font-size:9px;
+                           border-radius:4px;outline:none;cursor:pointer;">
+              <option value="market">Market (Taker)</option>
+              <option value="limit">Limit (Maker)</option>
+              <option value="mix">Mix 50/50</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Impact marché</div>
+            <select id="bt-market-impact"
+                    style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--muted);
+                           padding:7px 8px;font-family:'Space Mono',monospace;font-size:9px;
+                           border-radius:4px;outline:none;cursor:pointer;">
+              <option value="false">Non (standard)</option>
+              <option value="true">Oui (gros trades)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <button id="bt-run-btn"
               style="width:100%;padding:13px;border-radius:6px;cursor:pointer;
                      font-family:'Syne',sans-serif;font-size:14px;font-weight:800;
@@ -227,8 +271,6 @@ export class BacktestModal {
     </div>`;
   }
 
-  // ── Liaison événements stratégie ─────────────────────────
-
   #bindStrategyEvents() {
     let entryIdx = 1;
     let exitIdx  = 1;
@@ -236,11 +278,9 @@ export class BacktestModal {
     const entryCont = document.getElementById('entry-conditions');
     const exitCont  = document.getElementById('exit-conditions');
 
-    // ── FIX PRINCIPAL : bind les lignes INITIALES ────────────
     if (entryCont) this.#bindCondRowEvents(entryCont);
     if (exitCont)  this.#bindCondRowEvents(exitCont);
 
-    // Boutons "+ Ajouter une condition"
     document.querySelectorAll('.bt-add-cond').forEach(btn => {
       btn.addEventListener('click', () => {
         const prefix    = btn.dataset.prefix;
@@ -250,17 +290,14 @@ export class BacktestModal {
         const tmp = document.createElement('div');
         tmp.innerHTML = this.#condRowHTML(prefix, idx);
         container.appendChild(tmp.firstElementChild);
-        // Re-bind tous les handlers (onchange/onclick, idempotent)
         this.#bindCondRowEvents(container);
       });
     });
 
-    // Bouton Run
     document.getElementById('bt-run-btn')
       ?.addEventListener('click', () => this.#runBacktest());
   }
 
-  /** HTML d'une ligne de condition (pour les ajouts dynamiques). */
   #condRowHTML(prefix, idx) {
     const thrLbl = this.#tr('backtest.threshold', 'seuil');
     const first  = SIGNAL_TYPES[0];
@@ -288,16 +325,12 @@ export class BacktestModal {
   }
 
   /**
-   * Lie les handlers sur TOUTES les lignes d'un conteneur.
-   * Utilise onclick/onchange (idempotent — pas de doublons à chaque re-bind).
    * @param {HTMLElement} container
    */
   #bindCondRowEvents(container) {
-    // ── Boutons de suppression ────────────────────────────
     container.querySelectorAll('.bt-del-cond').forEach(btn => {
       btn.onclick = () => {
         const row = document.getElementById(`${btn.dataset.prefix}-row-${btn.dataset.idx}`);
-        // On garde toujours au moins 1 ligne
         if (row && container.querySelectorAll('.bt-cond-row').length > 1) {
           row.remove();
         }
@@ -306,18 +339,15 @@ export class BacktestModal {
       btn.onmouseleave = () => { btn.style.color = 'var(--muted)'; };
     });
 
-    // ── Sélecteurs de type ────────────────────────────────
     container.querySelectorAll('.bt-cond-type').forEach(sel => {
       sel.onchange = () => {
         const meta     = SIGNAL_TYPES.find(s => s.id === sel.value);
         const valInput = container.querySelector(`.bt-cond-val[data-idx="${sel.dataset.idx}"]`);
         if (!valInput) return;
 
-        // Affiche/masque le champ valeur selon le type
         const needsValue = meta?.hasValue !== false;
         valInput.style.display = needsValue ? 'block' : 'none';
 
-        // Pré-remplit la valeur par défaut du type sélectionné
         if (meta?.defaultValue != null) {
           valInput.value = meta.defaultValue;
         } else if (!needsValue) {
@@ -327,7 +357,6 @@ export class BacktestModal {
     });
   }
 
-  /** Collecte les conditions depuis le DOM. */
   #collectConditions(prefix) {
     const container = document.getElementById(`${prefix}-conditions`);
     if (!container) return [];
@@ -350,8 +379,6 @@ export class BacktestModal {
 
     return result;
   }
-
-  // ── Lancement du backtest ─────────────────────────────────
 
   #runBacktest() {
     const candles = this.#callbacks.getCandles?.() ?? [];
@@ -381,6 +408,14 @@ export class BacktestModal {
       takeProfitPct:   parseFloat(document.getElementById('bt-tp-pct')?.value  ?? '4') || 0,
       capitalPct:      parseFloat(document.getElementById('bt-cap-pct')?.value ?? '10') || 10,
       initialBalance:  10_000,
+
+      // ── Slippage & frais (v4.0) ─────────────────────────
+      takerFeePct:     parseFloat(document.getElementById('bt-taker-fee')?.value ?? '0.10') || 0.10,
+      makerFeePct:     parseFloat(document.getElementById('bt-maker-fee')?.value ?? '0.02') || 0.02,
+      slippagePct:     parseFloat(document.getElementById('bt-slippage')?.value  ?? '0.05') || 0.05,
+      useMarketOrder:  (document.getElementById('bt-order-type')?.value ?? 'market') !== 'limit',
+      marketImpact:    (document.getElementById('bt-market-impact')?.value ?? 'false') === 'true',
+      maxSlippagePct:  0.5,
     };
 
     const btn = document.getElementById('bt-run-btn');
@@ -390,7 +425,6 @@ export class BacktestModal {
       btn.style.opacity = '0.7';
     }
 
-    // setTimeout pour laisser le navigateur rafraîchir l'UI avant le calcul
     setTimeout(() => {
       try {
         const result = Backtester.run(candles, config);
@@ -415,10 +449,7 @@ export class BacktestModal {
     }, 50);
   }
 
-  // ── Template résultats ────────────────────────────────────
-
   #tplResults() {
-    // Pas encore de résultat
     if (!this.#lastResult) {
       return `<div style="padding:48px;text-align:center;color:var(--muted);font-size:12px;">
         <div style="font-size:28px;margin-bottom:12px">⚙️</div>
@@ -428,7 +459,6 @@ export class BacktestModal {
 
     const { metrics, trades, equity, config } = this.#lastResult;
 
-    // ── Erreur de calcul ──────────────────────────────────
     const errorMsg = metrics?.error;
     if (errorMsg) {
       return `<div style="padding:32px;text-align:center;color:var(--muted);font-size:11px;">
@@ -438,7 +468,6 @@ export class BacktestModal {
       </div>`;
     }
 
-    // ── Cas 0 trades (message mais pas d'erreur dure) ─────
     const noTrades = !trades?.length;
     if (noTrades) {
       return `
@@ -459,7 +488,6 @@ export class BacktestModal {
 
         ${this.#tplConditionSummary(config)}
 
-        <!-- Courbe equity plate (solde inchangé) -->
         <div style="margin-bottom:12px;">
           <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">
             Courbe equity — Aucune position ouverte
@@ -481,7 +509,6 @@ export class BacktestModal {
         </div>`;
     }
 
-    // ── Résultats normaux ─────────────────────────────────
     const color  = metrics.totalPnlPct >= 0 ? 'var(--green)' : 'var(--red)';
     const trades_ = Array.isArray(trades) ? trades : [];
 
@@ -543,6 +570,9 @@ export class BacktestModal {
         ${box(this.#tr('backtest.metrics.avgLoss',   'Perte moy.'),     avgLossStr, 'var(--red)')}
       </div>
 
+      <!-- ── Coûts (frais + slippage) ─────────────────────── -->
+      ${this.#tplResultsCostSection(metrics)}
+
       <canvas id="bt-equity-canvas" height="90"
               style="width:100%;display:block;border:1px solid var(--border);
                      border-radius:6px;background:rgba(0,0,0,.25);margin-bottom:12px;"
@@ -570,7 +600,6 @@ export class BacktestModal {
   }
 
   /**
-   * Résumé des conditions configurées (affiché dans le cas 0 trades).
    * @param {object|null} config
    */
   #tplConditionSummary(config) {
@@ -611,7 +640,47 @@ export class BacktestModal {
       </div>`;
   }
 
-  // ── Courbe equity ─────────────────────────────────────────
+  #tplResultsCostSection(metrics) {
+    if (!metrics || metrics.error) return '';
+    const fees  = metrics.totalFees     ?? 0;
+    const slip  = metrics.totalSlippage ?? 0;
+    const drag  = metrics.costDrag      ?? 0;
+    const gross = metrics.totalPnlGross ?? metrics.totalPnl ?? 0;
+    const net   = metrics.totalPnl      ?? 0;
+    const color = drag > 10 ? 'var(--red)' : drag > 5 ? 'var(--yellow)' : 'var(--muted)';
+
+    if (fees === 0 && slip === 0) return '';
+
+    const box = (lbl, val, c = 'var(--text)') =>
+      `<div style="background:rgba(255,255,255,.02);border:1px solid var(--border);
+                   border-radius:6px;padding:10px 12px;">
+         <div style="font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">${lbl}</div>
+         <div style="font-size:14px;font-family:'Syne',sans-serif;font-weight:800;color:${c};">${val}</div>
+       </div>`;
+
+    return `
+      <div style="margin-bottom:10px;padding:10px 14px;
+                  background:rgba(255,255,255,.015);border:1px solid var(--border);
+                  border-radius:6px;">
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;
+                    letter-spacing:.8px;margin-bottom:8px;">
+          💸 Impact frais &amp; slippage
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;">
+          ${box('Frais totaux',  '-' + fees.toFixed(2) + ' $', 'var(--red)')}
+          ${box('Slippage tot.', '-' + slip.toFixed(2) + ' $', 'var(--yellow)')}
+          ${box('Drag capital',  drag.toFixed(3) + ' %',       color)}
+          ${box('P&L brut vs net',
+            gross.toFixed(2) + ' → ' + net.toFixed(2) + ' $',
+            net < gross ? 'var(--yellow)' : 'var(--text)')}
+        </div>
+        ${drag > 10
+          ? '<div style="font-size:9px;color:var(--red);padding:5px 8px;background:rgba(255,61,90,.07);border-radius:4px;border:1px solid rgba(255,61,90,.25);">🔴 Drag > 10% — les frais mangent une part significative de vos gains. Réduisez la fréquence de trading ou utilisez des ordres limit.</div>'
+          : drag > 5
+          ? '<div style="font-size:9px;color:var(--yellow);padding:5px 8px;background:rgba(247,201,72,.07);border-radius:4px;border:1px solid rgba(247,201,72,.25);">🟡 Drag 5–10% — coûts modérés. Envisagez les ordres limit pour réduire le slippage.</div>'
+          : '<div style="font-size:9px;color:var(--green);padding:5px 8px;background:rgba(0,255,136,.07);border-radius:4px;border:1px solid rgba(0,255,136,.2);">✅ Coûts maîtrisés — la structure de frais est raisonnable pour cette stratégie.</div>'}
+      </div>`;
+  }
 
   #drawEquityCurve(equity) {
     const canvas = document.getElementById('bt-equity-canvas');
@@ -623,7 +692,6 @@ export class BacktestModal {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, W, H);
 
-    // Cas sans données : ligne plate à 10 000
     if (!equity?.length || equity.length < 2) {
       const y = H / 2;
       ctx.strokeStyle = 'rgba(139,148,158,.4)';
@@ -647,7 +715,6 @@ export class BacktestModal {
     const range  = maxV - minV || 1;
     const initial = values[0];
 
-    // Ligne de référence (solde initial)
     const y0 = H - 8 - ((initial - minV) / range) * (H - 16);
     ctx.strokeStyle = 'rgba(139,148,158,.25)';
     ctx.lineWidth   = 0.8;
@@ -663,7 +730,6 @@ export class BacktestModal {
     const up  = values.at(-1) >= initial;
     const col = up ? '#00ff88' : '#ff3d5a';
 
-    // Gradient fill
     const grad = ctx.createLinearGradient(0, 0, 0, H);
     grad.addColorStop(0, up ? 'rgba(0,255,136,.18)' : 'rgba(255,61,90,.18)');
     grad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -675,15 +741,12 @@ export class BacktestModal {
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // Ligne principale
     ctx.beginPath();
     xs.forEach((x, i) => i === 0 ? ctx.moveTo(x, ys[i]) : ctx.lineTo(x, ys[i]));
     ctx.strokeStyle = col;
     ctx.lineWidth   = 1.8;
     ctx.stroke();
   }
-
-  // ── Événements statiques ──────────────────────────────────
 
   #bindStaticEvents() {
     document.getElementById('backtest-close')

@@ -1,16 +1,6 @@
 // ============================================================
 //  src/i18n/i18n.js — CrypView i18n Engine V1
 //  Détection, chargement dynamique, interpolation, pluriel, RTL.
-//
-//  API publique :
-//    await initI18n()           — détecte et charge la locale
-//    t('key.sub', { n: 3 })    — traduit (vars + pluriel)
-//    await setLocale('fr')      — change la locale à chaud
-//    getLocale()                — locale courante
-//    onLocaleChange(fn)         — abonnement aux changements
-//    offLocaleChange(fn)        — désabonnement
-//    SUPPORTED_LOCALES          — locales disponibles
-//    LOCALE_META                — { label, flag, direction }
 // ============================================================
 
 // ── Config ────────────────────────────────────────────────────

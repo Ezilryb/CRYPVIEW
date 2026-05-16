@@ -14,11 +14,9 @@
 import { showToast }              from '../utils/toast.js';
 import { fmtPrice, fmtDate, fmtTime } from '../utils/format.js';
 
-// ── Constantes layout export ──────────────────────────────────
 const EXPORT_HEADER_H = 48;
 const EXPORT_FOOTER_H = 26;
 
-// ── Palette export (indépendante du thème runtime) ────────────
 const EX = {
   BG:        '#070a0f',
   PANEL:     '#0d1117',
@@ -32,7 +30,6 @@ const EX = {
   DARKDIM:   '#2d3748',
 };
 
-// ── Helper : rect arrondi cross-browser ───────────────────────
 function _roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -47,19 +44,13 @@ function _roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-// ── Capture Chart ─────────────────────────────────────────────
-
 /**
- * Composite tous les canvas du container chart en un PNG.
- * Le canvas de sortie est étendu : HEADER_H px au-dessus du chart
- * et FOOTER_H px en dessous — le contenu du graphique n'est jamais rogné.
- *
- * @param {HTMLElement} container — div#chart-container ou .chart-area-inner
+ * @param {HTMLElement} container
  * @param {string}      symbol
  * @param {string}      tf
  * @param {object}      [options]
- * @param {number|null} [options.currentPrice] — dernier prix de clôture connu
- * @returns {Promise<string|null>} dataURL PNG ou null en cas d'échec
+ * @param {number|null} [options.currentPrice]
+ * @returns {Promise<string|null>}
  */
 export async function captureChart(container, symbol, tf, options = {}) {
   if (!container) return null;
@@ -76,14 +67,11 @@ export async function captureChart(container, symbol, tf, options = {}) {
     output.height   = totalH;
     const ctx       = output.getContext('2d');
 
-    // ── Fond global ──────────────────────────────────────────
     ctx.fillStyle = EX.BG;
     ctx.fillRect(0, 0, W, totalH);
 
     const cRect = container.getBoundingClientRect();
 
-    // ── Canvases chart décalés de HEADER_H ───────────────────
-    // LightweightCharts crée 2 canvas superposés + VP / FP / OF.
     const canvases = [...container.querySelectorAll('canvas')];
     for (const c of canvases) {
       if (!c.width || !c.height || c.style.display === 'none') continue;
@@ -93,17 +81,14 @@ export async function captureChart(container, symbol, tf, options = {}) {
         const y    = rect.top  - cRect.top;
         ctx.drawImage(c, x, y + EXPORT_HEADER_H, rect.width, rect.height);
       } catch (_) {
-        // Canvas cross-origin tainted → ignoré
       }
     }
 
-    // ── SVG drawings décalé de HEADER_H ─────────────────────
     const svgEl = container.querySelector('svg');
     if (svgEl) {
       await _drawSVGOnCanvas(ctx, svgEl, cRect, EXPORT_HEADER_H);
     }
 
-    // ── Header et Footer ─────────────────────────────────────
     _drawExportHeader(ctx, W, EXPORT_HEADER_H, symbol, tf, options);
     _drawExportFooter(ctx, W, H + EXPORT_HEADER_H, EXPORT_FOOTER_H);
 
@@ -116,11 +101,10 @@ export async function captureChart(container, symbol, tf, options = {}) {
 }
 
 /**
- * Sérialise un SVG et le dessine sur le canvas de destination.
  * @param {CanvasRenderingContext2D} ctx
  * @param {SVGElement}              svgEl
- * @param {DOMRect}                 cRect    — rect du container parent
- * @param {number}                  yOffset  — décalage vertical (header)
+ * @param {DOMRect}                 cRect
+ * @param {number}                  yOffset
  */
 async function _drawSVGOnCanvas(ctx, svgEl, cRect, yOffset = 0) {
   return new Promise(resolve => {
@@ -147,15 +131,10 @@ async function _drawSVGOnCanvas(ctx, svgEl, cRect, yOffset = 0) {
   });
 }
 
-// ── Header riche ──────────────────────────────────────────────
-
 /**
- * Dessine le header export :
- * [CRYPVIEW] | [Symbol] [TF badge] [Exchange]          [Prix] ● [Date] [Heure]
- *
  * @param {CanvasRenderingContext2D} ctx
  * @param {number}  W
- * @param {number}  H        — hauteur du header
+ * @param {number}  H
  * @param {string}  symbol
  * @param {string}  tf
  * @param {object}  [opts]
@@ -164,11 +143,9 @@ async function _drawSVGOnCanvas(ctx, svgEl, cRect, yOffset = 0) {
 function _drawExportHeader(ctx, W, H, symbol, tf, opts = {}) {
   const MID = Math.round(H / 2);
 
-  // ── Fond ──────────────────────────────────────────────────
   ctx.fillStyle = EX.PANEL;
   ctx.fillRect(0, 0, W, H);
 
-  // ── Ligne d'accent dégradée en bas ────────────────────────
   const lineGrad = ctx.createLinearGradient(0, 0, W, 0);
   lineGrad.addColorStop(0,    'rgba(0,255,136,0)');
   lineGrad.addColorStop(0.15, 'rgba(0,255,136,0.55)');
@@ -185,7 +162,6 @@ function _drawExportHeader(ctx, W, H, symbol, tf, opts = {}) {
   const dateStr = fmtDate(now.getTime(), { day: '2-digit', month: 'short', year: 'numeric' });
   const timeStr = fmtTime(now.getTime());
 
-  // ── PRÉ-MESURE (avant tout dessin) ────────────────────────
   ctx.font = 'bold 13px "Space Mono", monospace';
   const crypW = ctx.measureText('CRYP').width;
   const viewW = ctx.measureText('VIEW').width;
@@ -213,10 +189,8 @@ function _drawExportHeader(ctx, W, H, symbol, tf, opts = {}) {
     priceW = ctx.measureText(priceStr).width;
   }
 
-  // ── BLOC GAUCHE ────────────────────────────────────────────
   let x = 16;
 
-  // Logo CRYPVIEW
   ctx.font      = 'bold 13px "Space Mono", monospace';
   ctx.textAlign = 'left';
   ctx.fillStyle = EX.ACCENT;
@@ -227,19 +201,16 @@ function _drawExportHeader(ctx, W, H, symbol, tf, opts = {}) {
   ctx.fillText('VIEW', x, MID);
   x += viewW;
 
-  // Séparateur vertical
   x += 13;
   ctx.fillStyle = EX.BORDER;
   ctx.fillRect(x, MID - 13, 1, 26);
   x += 13;
 
-  // Symbole
   ctx.font      = 'bold 17px "Syne", Arial, sans-serif';
   ctx.fillStyle = EX.TEXT;
   ctx.fillText(sym, x, MID + 1);
   x += symW;
 
-  // Badge TF
   x += 9;
   const tfBadgeH = 20;
   const tfBadgeY = MID - tfBadgeH / 2;
@@ -259,44 +230,35 @@ function _drawExportHeader(ctx, W, H, symbol, tf, opts = {}) {
   ctx.fillText(tfStr, x + tfBadgeW / 2, MID + 0.5);
   x += tfBadgeW;
 
-  // Exchange
   x += 11;
   ctx.font      = '10px "Space Mono", monospace';
   ctx.fillStyle = EX.DIM;
   ctx.textAlign = 'left';
   ctx.fillText('Binance', x, MID + 0.5);
 
-  // ── BLOC DROIT ─────────────────────────────────────────────
-  // Ordre (de droite à gauche) : [date/heure] ← [dot] ← [|] ← [prix]
   ctx.textAlign = 'right';
 
-  // Date (ligne haute)
   ctx.font      = '10px "Space Mono", monospace';
   ctx.fillStyle = EX.MUTED;
   ctx.fillText(dateStr, W - 14, MID - 6);
 
-  // Heure (ligne basse)
   ctx.font      = '9px "Space Mono", monospace';
   ctx.fillStyle = EX.DIM;
   ctx.fillText(timeStr, W - 14, MID + 7);
 
-  // Dot live (à gauche du bloc date)
   const dotX = W - 14 - dateBlockW - 13;
   ctx.fillStyle = EX.ACCENT;
   ctx.beginPath();
   ctx.arc(dotX, MID, 4, 0, Math.PI * 2);
   ctx.fill();
 
-  // Halo dot
   ctx.strokeStyle = 'rgba(0,255,136,0.18)';
   ctx.lineWidth   = 1.5;
   ctx.beginPath();
   ctx.arc(dotX, MID, 7.5, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Prix courant (si disponible)
-  if (priceStr) {
-    // Séparateur prix / dot
+  if (priceStr) {t
     const sepX = dotX - 14;
     ctx.fillStyle = EX.BORDER;
     ctx.fillRect(sepX, MID - 13, 1, 26);
@@ -308,38 +270,26 @@ function _drawExportHeader(ctx, W, H, symbol, tf, opts = {}) {
   }
 }
 
-// ── Footer ───────────────────────────────────────────────────
-
-/**
- * Dessine le footer export : domaine à gauche, disclaimer à droite.
- */
 function _drawExportFooter(ctx, W, Y, H) {
-  // Fond
   ctx.fillStyle = 'rgba(7,10,15,0.92)';
   ctx.fillRect(0, Y, W, H);
 
-  // Bordure haute
   ctx.fillStyle = EX.BORDER;
   ctx.fillRect(0, Y, W, 1);
 
   ctx.textBaseline = 'middle';
   const MID = Y + H / 2 + 0.5;
 
-  // Domaine
   ctx.font      = '8px "Space Mono", monospace';
   ctx.fillStyle = EX.DARKDIM;
   ctx.textAlign = 'left';
   ctx.fillText('betacapital.enterprise', 14, MID);
 
-  // Disclaimer
   ctx.textAlign = 'right';
   ctx.fillText('Données Binance · À titre informatif uniquement · Risque de perte en capital', W - 14, MID);
 }
 
-// ── Téléchargements ───────────────────────────────────────────
-
 /**
- * Déclenche le téléchargement d'une image PNG.
  * @param {string} dataUrl
  * @param {string} symbol
  * @param {string} tf
@@ -353,7 +303,6 @@ export function downloadChartImage(dataUrl, symbol, tf) {
 }
 
 /**
- * Génère et télécharge un fichier CSV des bougies.
  * @param {Candle[]} candles
  * @param {string}   symbol
  * @param {string}   tf
@@ -381,7 +330,6 @@ export function exportCSV(candles, symbol, tf) {
 }
 
 /**
- * Génère et télécharge un fichier JSON structuré.
  * @param {Candle[]} candles
  * @param {string}   symbol
  * @param {string}   tf
@@ -422,12 +370,7 @@ export function exportJSON(candles, symbol, tf, indicators = []) {
   showToast(`✓ JSON exporté — ${candles.length} bougies`, 'success', 2_500);
 }
 
-// ── URL de partage ────────────────────────────────────────────
-
 /**
- * Construit l'URL de partage encodant la configuration complète.
- * Format : page.html?sym=btcusdt&tf=1h&ind=rsi,macd,bb
- *
  * @param {string}   symbol
  * @param {string}   tf
  * @param {string[]} indicators
@@ -447,7 +390,6 @@ export function buildShareURL(symbol, tf, indicators = []) {
 }
 
 /**
- * Copie l'URL dans le presse-papiers.
  * @param {string} url
  * @returns {Promise<void>}
  */
@@ -456,7 +398,6 @@ export async function copyShareURL(url) {
 }
 
 /**
- * Copie la configuration complète en JSON.
  * @param {string}   symbol
  * @param {string}   tf
  * @param {string[]} indicators
@@ -477,7 +418,6 @@ export async function copySetupJSON(symbol, tf, indicators = []) {
 }
 
 /**
- * Lit les paramètres d'une URL de partage CrypView.
  * @param {string} [search=location.search]
  * @returns {{ symbol: string|null, tf: string|null, indicators: string[] }}
  */
@@ -491,8 +431,6 @@ export function parseShareURL(search = location.search) {
       : [],
   };
 }
-
-// ── Helpers privés ────────────────────────────────────────────
 
 function _triggerDownload(href, filename) {
   const a         = document.createElement('a');
@@ -509,7 +447,6 @@ async function _copyToClipboard(text, successMsg) {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text);
     } else {
-      // Fallback HTTP (Vite dev)
       const ta        = document.createElement('textarea');
       ta.value        = text;
       ta.style.cssText = 'position:fixed;opacity:0;';

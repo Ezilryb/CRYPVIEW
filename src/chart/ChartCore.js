@@ -20,8 +20,6 @@ import { createKlineStream, createTickerStream, createTradeStream } from '../api
 import { showToast }                          from '../utils/toast.js';
 import { fmtPrice, fmtTime }                  from '../utils/format.js';
 
-// Nombre de bougies évincées accumulées avant un resync complet des séries.
-// Évite de faire setData() à chaque éviction individuelle.
 const RESYNC_BATCH = 50;
 
 export class TradingChart {
@@ -60,7 +58,6 @@ export class TradingChart {
     this.#connectTradeStream();
   }
 
-  // ── Changement de symbole uniquement ─────────────────────
   async changeSymbol(newSymbol) {
     this.symbol       = newSymbol.toLowerCase();
     this.candles      = [];
@@ -70,9 +67,6 @@ export class TradingChart {
     await this.start();
   }
 
-  // ── Changement de timeframe uniquement ───────────────────
-  // Bug 5 corrigé : reconnecte ticker + trades pour éviter
-  // la désynchronisation des streams indépendants du TF.
   async changeTimeframe(newTf) {
     this.timeframe    = newTf;
     this.candles      = [];
@@ -83,8 +77,6 @@ export class TradingChart {
     this.#connectTradeStream();
   }
 
-  // ── Changements simultanés symbole + timeframe ───────────
-  // Bug 3 corrigé : évite le double appel REST.
   async changeTo(newSymbol, newTf) {
     this.symbol       = newSymbol.toLowerCase();
     this.timeframe    = newTf;
@@ -288,11 +280,6 @@ export class TradingChart {
     }
   }
 
-  // ── Bug #11 corrigé ───────────────────────────────────────
-  // Après avoir mis à jour les séries candlestick + volume via
-  // setData(), on émet crypview:series:resynced pour que les
-  // écouteurs (page.js, multi.js) puissent rafraîchir les
-  // indicateurs (MA, BB, RSI…) et éviter le décalage temporel.
   #resyncChartSeries() {
     try {
       this.cSeries?.setData(this.candles.map((c) => ({
@@ -307,9 +294,6 @@ export class TradingChart {
         color: c.close >= c.open ? COLORS.GREEN_ALPHA : COLORS.RED_ALPHA,
       })));
     } catch (_) {}
-
-    // Notifie les modules externes (indicateurs, VP, FP, OF)
-    // que les données des séries ont été réinitialisées.
     this.#emit('series:resynced', { candles: this.candles });
   }
 

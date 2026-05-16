@@ -26,9 +26,8 @@ import {
 import { showToast } from '../utils/toast.js';
 import { fmtPrice }  from '../utils/format.js';
 
-// ── Constantes ───────────────────────────────────────────────
 const FUNDING_PRICE_LINE_TITLE = '⚡ Funding';
-const FUNDING_INTERVAL_MS      = 3 * 60_000; // rafraîchissement toutes les 3 min
+const FUNDING_INTERVAL_MS      = 3 * 60_000;
 
 export class ChartFutures {
   #chart;
@@ -36,13 +35,9 @@ export class ChartFutures {
   #chartsCol;
   #getSymTf;
 
-  /** État par clé d'indicateur ('oi' | 'funding' | 'lsr') */
   #state = new Map();
-
-  /** Timer pour le rafraîchissement périodique du funding courant */
   #fundingTimer = null;
 
-  /** Cache de la dernière ligne prix funding */
   #fundingPriceLine = null;
 
   constructor(chart, cSeries, chartsCol, getSymTf) {
@@ -52,19 +47,15 @@ export class ChartFutures {
     this.#getSymTf  = getSymTf;
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Active un indicateur futures.
    * @param {'oi'|'funding'|'lsr'} key
    * @param {Candle[]}             candles
-   * @param {object}               indState — objet { active, s, subChart, panel } de ChartIndicators
+   * @param {object}               indState
    */
   async activate(key, candles, indState) {
     const { symbol, timeframe } = this.#getSymTf();
     const sym = symbol.toUpperCase();
 
-    // Vérification silencieuse : paire disponible sur Futures ?
     const hasFutures = await isFuturesSymbol(sym);
     if (!hasFutures) {
       showToast(`⚠ ${sym} n'a pas de marché Futures perpétuel sur Binance.`, 'warning', 5_000);
@@ -94,7 +85,6 @@ export class ChartFutures {
   }
 
   /**
-   * Désactive un indicateur futures (arrête les timers, nettoie la price line).
    * @param {'oi'|'funding'|'lsr'} key
    */
   deactivate(key) {
@@ -106,7 +96,6 @@ export class ChartFutures {
   }
 
   /**
-   * Recharge les données après une clôture de bougie ou un changement de symbole/TF.
    * @param {'oi'|'funding'|'lsr'} key
    * @param {Candle[]}             candles
    * @param {object}               indState
@@ -122,7 +111,6 @@ export class ChartFutures {
         case 'lsr':     await this.#loadLSR(sym, timeframe, candles, indState);     break;
       }
     } catch (_) {
-      // Erreur silencieuse sur refresh — ne pas spammer l'utilisateur
     }
   }
 
@@ -134,52 +122,41 @@ export class ChartFutures {
     this.#state.clear();
   }
 
-  // ── Open Interest ─────────────────────────────────────────
-
   async #loadOI(sym, tf, candles, ind) {
     if (!ind?.s) return;
     const period = fapiPeriod(tf);
     const data   = await fetchOIHistory(sym, period, 500);
     if (!data.length) return;
 
-    // ── Calcul du delta OI ──────────────────────────────────
-    // delta[i] = oi[i] - oi[i-1]  → positif = nouveau positions ouvertes
     const deltaData = data.slice(1).map((pt, i) => {
       const delta = pt.oi - data[i].oi;
       return {
         time:  pt.time,
         value: delta,
         color: delta >= 0
-          ? 'rgba(0,255,136,0.60)'   // Longs/shorts entrent
-          : 'rgba(255,61,90,0.60)',   // Positions fermées / liquidations
+          ? 'rgba(0,255,136,0.60)'
+          : 'rgba(255,61,90,0.60)',
       };
     });
 
-    // ── Ligne OI absolue (normalisée 0-1 pour co-habiter avec le delta) ──
     const oiValues = data.map(d => d.oi);
     const oiMin    = Math.min(...oiValues);
     const oiMax    = Math.max(...oiValues);
     const oiRange  = oiMax - oiMin || 1;
     const oiLine   = data.map(d => ({
       time:  d.time,
-      value: (d.oi - oiMin) / oiRange,  // 0..1
+      value: (d.oi - oiMin) / oiRange,
     }));
 
     try { ind.s.delta?.setData(deltaData); } catch (_) {}
     try { ind.s.line?.setData(oiLine);  }   catch (_) {}
 
-    // Stocke les données brutes pour le tooltip
     ind.s._oiRaw = data;
     this.#updateOIPriceLine(sym, data.at(-1)?.oi);
   }
 
-  /** Affiche l'OI courant comme label dans le sous-panneau (price line à 0) */
   #updateOIPriceLine(sym, currentOI) {
-    // Affiché dans le titre du panneau — pas de price line (différentes unités)
-    // (réservé pour une future amélioration UI)
   }
-
-  // ── Funding Rate ─────────────────────────────────────────
 
   async #loadFunding(sym, tf, candles, ind) {
     if (!ind?.s) return;
@@ -190,16 +167,14 @@ export class ChartFutures {
 
     if (!history.length) return;
 
-    // ── Barres funding (toutes les 8h / variable selon paire) ──
     const fundingBars = history.map(pt => ({
       time:  pt.time,
       value: pt.rate,
       color: pt.rate >= 0
-        ? `rgba(255,61,90,${Math.min(0.9, 0.3 + Math.abs(pt.rate) * 30)})`  // positif = longs paient → bearish
-        : `rgba(0,255,136,${Math.min(0.9, 0.3 + Math.abs(pt.rate) * 30)})`, // négatif = shorts paient → bullish
+        ? `rgba(255,61,90,${Math.min(0.9, 0.3 + Math.abs(pt.rate) * 30)})`
+        : `rgba(0,255,136,${Math.min(0.9, 0.3 + Math.abs(pt.rate) * 30)})`,
     }));
 
-    // Ligne zéro (référence)
     const t0 = history[0].time;
     const t1 = history.at(-1).time;
     const zeroLine = [{ time: t0, value: 0 }, { time: t1, value: 0 }];
@@ -207,7 +182,6 @@ export class ChartFutures {
     try { ind.s.bars?.setData(fundingBars);  } catch (_) {}
     try { ind.s.zero?.setData(zeroLine);     } catch (_) {}
 
-    // ── Price line funding courant sur le chart principal ───
     this.#removeFundingPriceLine();
     if (current.fundingRate !== 0) {
       this.#applyFundingPriceLine(current);
@@ -218,9 +192,6 @@ export class ChartFutures {
   }
 
   /**
-   * Crée / met à jour la price line "Funding" sur le chart principal.
-   * Utilise le markPrice comme prix de référence (ligne invisible),
-   * mais affiche le funding en titre pour information contextuelle.
    */
   #applyFundingPriceLine(current) {
     if (!this.#cSeries) return;
@@ -231,7 +202,7 @@ export class ChartFutures {
         price:            current.markPrice,
         color:            isPositive ? 'rgba(255,61,90,0.55)' : 'rgba(0,255,136,0.55)',
         lineWidth:        1,
-        lineStyle:        3,  // dotted
+        lineStyle:        3,
         axisLabelVisible: true,
         title:            `${FUNDING_PRICE_LINE_TITLE} ${isPositive ? '+' : ''}${pct}%`,
       });
@@ -263,8 +234,6 @@ export class ChartFutures {
     }
   }
 
-  // ── Long/Short Ratio ──────────────────────────────────────
-
   async #loadLSR(sym, tf, candles, ind) {
     if (!ind?.s) return;
     const period = fapiPeriod(tf);
@@ -276,16 +245,14 @@ export class ChartFutures {
       value: pt.ratio,
     }));
 
-    // Zone au-dessus de 1 = dominance longs (teinte verte subtile via histogram)
     const lsrHist = data.map(pt => ({
       time:  pt.time,
-      value: pt.ratio - 1,  // centré sur 0
+      value: pt.ratio - 1,
       color: pt.ratio >= 1
         ? 'rgba(0,255,136,0.25)'
         : 'rgba(255,61,90,0.25)',
     }));
 
-    // Baseline 1.0
     const t0 = data[0].time;
     const t1 = data.at(-1).time;
     const baseline = [{ time: t0, value: 0 }, { time: t1, value: 0 }];
@@ -298,12 +265,8 @@ export class ChartFutures {
   }
 }
 
-// ── Helpers de construction de sous-panneaux ─────────────────
-// Utilisés par ChartIndicators.js pour créer les séries LW
-
 /**
- * Crée les séries LightweightCharts pour l'OI.
- * @param {IChartApi} ch — sous-chart LW
+ * @param {IChartApi} ch
  * @returns {{ delta: ISeriesApi, line: ISeriesApi }}
  */
 export function mountOISeries(ch) {
@@ -314,7 +277,6 @@ export function mountOISeries(ch) {
     base: 0,
   });
 
-  // Ligne OI normalisée (0..1) sur l'échelle secondaire
   const line = ch.addLineSeries({
     priceScaleId:    'oi_abs',
     color:           'rgba(0,200,255,0.80)',
@@ -339,7 +301,6 @@ export function mountOISeries(ch) {
 }
 
 /**
- * Crée les séries LightweightCharts pour le Funding Rate.
  * @param {IChartApi} ch
  * @returns {{ bars: ISeriesApi, zero: ISeriesApi }}
  */
@@ -368,7 +329,6 @@ export function mountFundingSeries(ch) {
 }
 
 /**
- * Crée les séries LightweightCharts pour le Long/Short Ratio.
  * @param {IChartApi} ch
  * @returns {{ line: ISeriesApi, hist: ISeriesApi, base: ISeriesApi }}
  */

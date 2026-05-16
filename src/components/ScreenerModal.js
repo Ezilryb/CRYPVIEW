@@ -13,7 +13,6 @@ import { fetchScreenerData, filterRows, sortRows } from '../features/Screener.js
 import { fmtPrice, fmtVol }                         from '../utils/format.js';
 import { showToast }                                  from '../utils/toast.js';
 
-// ── Définition des onglets ────────────────────────────────────
 const TABS = [
   { key: 'all',       label: '🌐 Tous'        },
   { key: 'gainers',   label: '🚀 Gainers'      },
@@ -24,7 +23,6 @@ const TABS = [
   { key: 'volatile',  label: '🌪 Volatilité'  },
 ];
 
-// ── Colonnes de la table ──────────────────────────────────────
 const COLS = [
   { key: 'base',       label: 'Paire',     align: 'left',  sortKey: 'base',       fmt: r => `${r.base}<span class="scr-quote">/USDT</span>` },
   { key: 'price',      label: 'Prix',      align: 'right', sortKey: 'price',      fmt: r => fmtPrice(r.price) },
@@ -38,7 +36,6 @@ const COLS = [
   { key: 'posInRange', label: 'Position',  align: 'right', sortKey: 'posInRange', fmt: r => _rangeBar(r.posInRange) },
 ];
 
-/** Génère une mini progress-bar inline SVG */
 function _rangeBar(pos) {
   const pct   = Math.round(pos * 100);
   const color = pos >= 0.8 ? '#ff9900' : pos <= 0.2 ? '#00c8ff' : '#8b949e';
@@ -51,8 +48,8 @@ export class ScreenerModal {
   #overlay;
   #callbacks;
 
-  #data        = [];   // données brutes
-  #filtered    = [];   // données après filtre + tri
+  #data        = [];
+  #filtered    = [];
   #activeTab   = 'all';
   #search      = '';
   #sortKey     = 'vol';
@@ -67,12 +64,9 @@ export class ScreenerModal {
     this.#bindStaticEvents();
   }
 
-  // ── API publique ──────────────────────────────────────────────
-
   async open() {
     if (!this.#overlay) return;
     this.#overlay.style.display = 'block';
-    // Si données fraîches (<2 min), pas de rechargement
     if (!this.#lastUpdate || Date.now() - this.#lastUpdate > 120_000) {
       await this.#refresh();
     } else {
@@ -84,8 +78,6 @@ export class ScreenerModal {
   close() {
     if (this.#overlay) this.#overlay.style.display = 'none';
   }
-
-  // ── Chargement ────────────────────────────────────────────────
 
   async #refresh() {
     if (this.#loading) return;
@@ -107,11 +99,8 @@ export class ScreenerModal {
 
   #applyFilters() {
     const filtered = filterRows(this.#data, this.#activeTab, this.#search);
-    // Tri colonne si différent du tri par défaut de l'onglet
     this.#filtered = sortRows(filtered, this.#sortKey, this.#sortDir);
   }
-
-  // ── Rendu table ───────────────────────────────────────────────
 
   #renderTable() {
     this.#setLoadingState(false);
@@ -128,7 +117,6 @@ export class ScreenerModal {
       return;
     }
 
-    // Limite d'affichage pour les performances DOM
     const rows = this.#filtered.slice(0, 200);
 
     const frag = document.createDocumentFragment();
@@ -137,7 +125,6 @@ export class ScreenerModal {
       tr.className = 'scr-row';
       tr.dataset.sym = row.symbol;
 
-      // Coloration de fond subtile selon position
       if (row.posInRange >= 0.8) tr.style.background = 'rgba(255,153,0,.04)';
       else if (row.posInRange <= 0.2) tr.style.background = 'rgba(0,200,255,.04)';
 
@@ -158,13 +145,11 @@ export class ScreenerModal {
 
     tbody.appendChild(frag);
 
-    // Mise à jour du compteur
     const countEl = document.getElementById('screener-count');
     if (countEl) {
       countEl.textContent = `${this.#filtered.length} paire${this.#filtered.length !== 1 ? 's' : ''}`;
     }
 
-    // Timestamp dernière MAJ
     const tsEl = document.getElementById('screener-ts');
     if (tsEl && this.#lastUpdate) {
       const d = new Date(this.#lastUpdate);
@@ -195,7 +180,6 @@ export class ScreenerModal {
       </th>`;
     }).join('') + '</tr>';
 
-    // Bind sort
     thead.querySelectorAll('.scr-th[data-sort]').forEach(th => {
       th.addEventListener('click', () => {
         const key = th.dataset.sort;
@@ -219,8 +203,6 @@ export class ScreenerModal {
     if (table)  table.style.display  = on ? 'none' : 'block';
   }
 
-  // ── Événements statiques ──────────────────────────────────────
-
   #bindStaticEvents() {
     document.getElementById('screener-close')
       ?.addEventListener('click', () => this.close());
@@ -236,7 +218,6 @@ export class ScreenerModal {
       }
     });
 
-    // Onglets
     document.querySelectorAll('[data-tab]').forEach(btn => {
       if (!btn.closest('#screener-overlay')) return;
       btn.addEventListener('click', () => {
@@ -252,7 +233,6 @@ export class ScreenerModal {
       });
     });
 
-    // Recherche
     const searchEl = document.getElementById('screener-search');
     let searchTimer;
     searchEl?.addEventListener('input', e => {
@@ -264,11 +244,9 @@ export class ScreenerModal {
       }, 120);
     });
 
-    // Bouton refresh
     document.getElementById('screener-refresh')
       ?.addEventListener('click', () => this.#refresh());
 
-    // Init headers (une seule fois, ils seront re-rendus au tri)
     this.#renderHeaders();
   }
 }

@@ -12,7 +12,6 @@
 //    tfBar.getValue(); // → '1h'
 // ============================================================
 
-/** Tous les timeframes supportés par Binance + CrypView. */
 export const ALL_TF = [
   { tf: '1s',  label: '1s'    },
   { tf: '1m',  label: '1m'    },
@@ -37,13 +36,13 @@ export class TimeframeBar {
   #gridEl;
   #currentTf;
   #callbacks;
-  /** @type {boolean} — true si pas de .tf-current-btn (rendu inline, sans toggle). */
+  /** @type {boolean}*/
   #flat = false;
 
   /**
-   * @param {HTMLElement} wrapEl   — div.tf-btn-wrap (gère la classe .open)
-   * @param {HTMLElement} labelEl  — span#tf-label-N (texte du bouton, ignoré en mode flat)
-   * @param {HTMLElement} gridEl   — div#tfgrid-N    (reçoit les boutons)
+   * @param {HTMLElement} wrapEl
+   * @param {HTMLElement} labelEl
+   * @param {HTMLElement} gridEl
    * @param {string}      currentTf
    * @param {{ onChange: function(string) }} callbacks
    */
@@ -54,31 +53,23 @@ export class TimeframeBar {
     this.#currentTf = currentTf;
     this.#callbacks = callbacks;
 
-    // Détection automatique du mode :
-    // Pas de .tf-current-btn → mode flat (barre inline, sans toggle).
     this.#flat = !wrapEl?.querySelector('.tf-current-btn');
 
     this.#buildGrid();
     if (!this.#flat) this.#bindToggle();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   getValue() { return this.#currentTf; }
 
-  /** Met à jour le TF actif sans déclencher onChange. */
   setValue(tf) {
     this.#currentTf = tf;
     if (!this.#flat && this.#labelEl) this.#labelEl.textContent = tf;
     this.#buildGrid();
   }
 
-  /** Ferme le dropdown (sans effet en mode flat). */
   close() {
     if (!this.#flat) this.#wrapEl?.classList.remove('open');
   }
-
-  // ── Construction ─────────────────────────────────────────
 
   #buildGrid() {
     if (!this.#gridEl) return;
@@ -99,7 +90,6 @@ export class TimeframeBar {
       this.#gridEl.appendChild(btn);
     });
 
-    // Centrage automatique du bouton actif
     requestAnimationFrame(() => requestAnimationFrame(() => this.#scrollToActive()));
   }
 
@@ -111,14 +101,10 @@ export class TimeframeBar {
     this.#callbacks.onChange?.(tf);
   }
 
-  // APRÈS
   #scrollToActive() {
     const activeBtn = this.#gridEl?.querySelector('.tf-btn.active, .tf-opt.active');
     if (!activeBtn) return;
 
-    // scrollIntoView avec inline:'center' est la méthode
-    // la plus fiable sur tous les appareils (iOS Safari inclus).
-    // block:'nearest' évite tout scroll vertical parasite.
     activeBtn.scrollIntoView({
       behavior: 'smooth',
       block:    'nearest',

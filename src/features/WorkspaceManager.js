@@ -17,9 +17,9 @@ const MAX_WORKSPACES = 15;
 
 /**
  * @typedef {object} PanelState
- * @property {string}   sym        — ex: 'btcusdt'
- * @property {string}   tf         — ex: '1m'
- * @property {string[]} indicators — clés IND_META actives
+ * @property {string}   sym
+ * @property {string}   tf
+ * @property {string[]} indicators
  */
 
 /**
@@ -32,7 +32,7 @@ const MAX_WORKSPACES = 15;
  * @property {boolean}      syncCrosshair
  * @property {boolean}      syncZoom
  * @property {number}       createdAt
- * @property {number}       [usedAt]    — dernière utilisation
+ * @property {number}       [usedAt]
  */
 
 export class WorkspaceManager {
@@ -43,9 +43,7 @@ export class WorkspaceManager {
     this.#load();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
-  /** @returns {Workspace[]} triés par date d'utilisation (plus récent en tête) */
+  /** @returns {Workspace[]}*/
   getAll() {
     return [...this.#workspaces].sort((a, b) =>
       (b.usedAt ?? b.createdAt) - (a.usedAt ?? a.createdAt)
@@ -59,7 +57,6 @@ export class WorkspaceManager {
   get count() { return this.#workspaces.length; }
 
   /**
-   * Sauvegarde l'état courant comme nouveau workspace.
    * @param {string} name
    * @param {{ layout: string, panels: PanelState[], syncCrosshair?: boolean, syncZoom?: boolean }} state
    * @returns {Workspace|null}
@@ -91,7 +88,6 @@ export class WorkspaceManager {
   }
 
   /**
-   * Retourne le workspace à appliquer (et met à jour usedAt).
    * @param {string} id
    * @returns {Workspace|null}
    */
@@ -100,7 +96,6 @@ export class WorkspaceManager {
     if (!ws) return null;
     ws.usedAt = Date.now();
     this.#persist();
-    // Retourne une copie profonde pour éviter les mutations accidentelles
     return {
       ...ws,
       panels: ws.panels.map(p => ({ ...p, indicators: [...p.indicators] })),
@@ -108,7 +103,6 @@ export class WorkspaceManager {
   }
 
   /**
-   * Supprime un workspace.
    * @param {string} id
    * @returns {boolean}
    */
@@ -123,7 +117,6 @@ export class WorkspaceManager {
   }
 
   /**
-   * Renomme un workspace.
    * @param {string} id
    * @param {string} newName
    */
@@ -135,10 +128,7 @@ export class WorkspaceManager {
     }
   }
 
-  // ── Privé ─────────────────────────────────────────────────
-
   /**
-   * Génère un emoji représentatif basé sur le layout et les symboles.
    * @param {string}       layout
    * @param {PanelState[]} panels
    * @returns {string}

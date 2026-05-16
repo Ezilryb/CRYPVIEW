@@ -19,7 +19,6 @@ export class ContextMenu {
   #currentSymbol = 'btcusdt';
   #lastContextClientY = 0;
 
-  // Fonctions de nettoyage ArrowKeyNav — libérées dans destroy()
   #cleanupArrow = [];
 
   constructor(chartContainer, callbacks) {
@@ -40,10 +39,8 @@ export class ContextMenu {
     };
     this.#callbacks = callbacks;
     this.#bindEvents(chartContainer);
-    this.#bindAriaNav(); // ← patch a11y
+    this.#bindAriaNav();
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   update(activeIndKeys, currentTool) {
     document.querySelectorAll('.ctx-item[data-ind]').forEach(el => {
@@ -66,33 +63,26 @@ export class ContextMenu {
     this.#closeAllSubs();
   }
 
-  /** Libère tous les event listeners — appeler si le menu est démonté. */
   destroy() {
     this.#cleanupArrow.forEach(fn => fn());
     this.#cleanupArrow = [];
   }
 
-  // ── Accessibilité ─────────────────────────────────────────
-
   #bindAriaNav() {
-    // Rôle et label sur le menu principal
     this.#root?.setAttribute('role', 'menu');
     this.#root?.setAttribute('aria-label', 'Options du graphique');
 
-    // Rôle sur les catégories (ouvrent un sous-menu)
     document.querySelectorAll('.ctx-cat').forEach(el => {
       el.setAttribute('role', 'menuitem');
       el.setAttribute('aria-haspopup', 'true');
       el.setAttribute('aria-expanded', 'false');
     });
 
-    // Items simples
     document.querySelectorAll('.ctx-item').forEach(el => {
       el.setAttribute('role', 'menuitem');
       if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
     });
 
-    // Navigation ↑↓ dans le menu principal
     const cleanupMain = ArrowKeyNav(
       this.#root,
       '.ctx-cat, .ctx-item:not([data-ind])',
@@ -100,7 +90,6 @@ export class ContextMenu {
     );
     this.#cleanupArrow.push(cleanupMain);
 
-    // Navigation ↑↓ dans chaque sous-panneau
     Object.entries(this.#subPanels).forEach(([key, panel]) => {
       if (!panel) return;
       panel.setAttribute('role', 'menu');
@@ -118,10 +107,7 @@ export class ContextMenu {
     });
   }
 
-  // ── Événements ───────────────────────────────────────────
-
   #bindEvents(chartContainer) {
-    // Ouverture au clic droit
     chartContainer.addEventListener('contextmenu', e => {
       e.preventDefault();
       this.#lastContextClientY = e.clientY;
@@ -134,13 +120,11 @@ export class ContextMenu {
       this.#root.style.top  = `${y}px`;
       this.#root.classList.add('visible');
 
-      // Focus le premier item pour rendre le menu accessible au clavier
       requestAnimationFrame(() => {
         this.#root.querySelector('.ctx-cat, .ctx-item')?.focus();
       });
     });
 
-    // Fermeture au clic extérieur
     document.addEventListener('click', e => {
       if (!this.#root.contains(e.target) &&
           !Object.values(this.#subPanels).some(p => p?.contains(e.target))) {
@@ -150,14 +134,12 @@ export class ContextMenu {
 
     document.addEventListener('keydown', e => { if (e.key === 'Escape') this.close(); });
 
-    // Sous-panneaux des catégories
     for (const [key, cat] of Object.entries(this.#catEls)) {
       if (!cat) continue;
       cat.addEventListener('click',      e => { e.stopPropagation(); this.#openSubPanel(key); });
       cat.addEventListener('mouseenter', () => { if (this.#openSub !== null) this.#openSubPanel(key); });
     }
 
-    // ── Indicateurs ───────────────────────────────────────
     document.getElementById('ctx-open-ind-modal')?.addEventListener('click', () => {
       this.close();
       this.#callbacks.onOpenIndModal?.();
@@ -200,7 +182,6 @@ export class ContextMenu {
       this.#callbacks.onNavigate?.(`multi1p3.html?sym=${this.#currentSymbol}`);
     });
 
-    // ── Outils de dessin ──────────────────────────────────
     document.querySelectorAll('#sub-draw .ctx-item[data-tool]').forEach(el => {
       el.addEventListener('click', () => {
         this.close();
@@ -212,7 +193,6 @@ export class ContextMenu {
       this.#callbacks.onClearDrawings?.();
     });
 
-    // ── Alertes ───────────────────────────────────────────
     document.getElementById('ctx-add-alert')?.addEventListener('click', () => {
       this.close();
       this.#callbacks.onAddAlert?.(this.#lastContextClientY);
@@ -222,19 +202,16 @@ export class ContextMenu {
       this.#callbacks.onManageAlerts?.();
     });
 
-    // ── Market Screener ───────────────────────────────────
     document.getElementById('ctx-open-screener')?.addEventListener('click', () => {
       this.close();
       this.#callbacks.onOpenScreener?.();
     });
 
-    // ── Profils ───────────────────────────────────────────
     document.getElementById('ctx-open-profiles')?.addEventListener('click', () => {
       this.close();
       this.#callbacks.onOpenProfiles?.();
     });
 
-    // ── Sous-panneau Outils ───────────────────────────────
     document.getElementById('ctx-open-export')?.addEventListener('click', () => {
       this.close();
       this.#callbacks.onOpenExport?.();
@@ -251,9 +228,11 @@ export class ContextMenu {
       this.close();
       this.#callbacks.onOpenBacktest?.();
     });
+    document.getElementById('ctx-open-risk-calc')?.addEventListener('click', () => {
+      this.close();
+      this.#callbacks.onOpenRiskCalc?.();
+    });
   }
-
-  // ── Sous-panneaux ────────────────────────────────────────
 
   #openSubPanel(key) {
     if (!this.#subPanels[key]) return;
@@ -263,13 +242,11 @@ export class ContextMenu {
     this.#catEls[key].classList.add('open');
     this.#subPanels[key].classList.add('visible');
 
-    // ARIA : marque la catégorie comme expanded
     Object.values(this.#catEls).forEach(c => c?.setAttribute('aria-expanded', 'false'));
     this.#catEls[key]?.setAttribute('aria-expanded', 'true');
 
     requestAnimationFrame(() => {
       this.#positionSub(key);
-      // Focus auto sur le premier item du sous-panneau
       this.#subPanels[key]?.querySelector('.ctx-item')?.focus();
     });
   }

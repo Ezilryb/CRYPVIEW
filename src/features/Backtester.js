@@ -43,14 +43,14 @@ const TAKER_FEE = 0.001;
 
 /**
  * @typedef {object} BacktestConfig
- * @property {string}   side           — 'long' | 'short'
- * @property {object[]} entryConditions — [{ type, value?, logic }]
- * @property {object[]} exitConditions  — [{ type, value?, logic }]
+ * @property {string}   side
+ * @property {object[]} entryConditions
+ * @property {object[]} exitConditions
  * @property {'AND'|'OR'} entryLogic
  * @property {'AND'|'OR'} exitLogic
- * @property {number}   stopLossPct     — % depuis entrée (0 = off)
- * @property {number}   takeProfitPct   — % depuis entrée (0 = off)
- * @property {number}   capitalPct      — % du capital engagé par trade (ex: 10)
+ * @property {number}   stopLossPct
+ * @property {number}   takeProfitPct
+ * @property {number}   capitalPct
  * @property {number}   initialBalance
  */
 
@@ -63,7 +63,7 @@ const TAKER_FEE = 0.001;
 
 export class Backtester {
   /**
-   * Lance le backtest.
+
    * @param {Candle[]}       candles
    * @param {BacktestConfig} config
    * @returns {BacktestResult}
@@ -73,10 +73,8 @@ export class Backtester {
       return { trades: [], equity: [], metrics: { error: 'Historique insuffisant (min. 60 bougies).' } };
     }
 
-    // ── 1. Pré-calcul des indicateurs ────────────────────────
     const indicators = Backtester.#buildIndicatorCache(candles);
 
-    // ── 2. Simulation bougie par bougie ──────────────────────
     const trades     = [];
     const equity     = [];
     let balance      = config.initialBalance ?? 10_000;
@@ -88,14 +86,12 @@ export class Backtester {
       const ind  = indicators[i];
       const indP = indicators[i - 1];
 
-      // Mise à jour equity courante
       if (openTrade) {
         const pnl = config.side === 'long'
           ? (c.close - openTrade.entry) * openTrade.qty
           : (openTrade.entry - c.close) * openTrade.qty;
         openTrade.unrealized = pnl;
 
-        // Stop-Loss
         if (config.stopLossPct > 0) {
           const sl = config.side === 'long'
             ? openTrade.entry * (1 - config.stopLossPct / 100)
@@ -109,7 +105,6 @@ export class Backtester {
           }
         }
 
-        // Take-Profit
         if (config.takeProfitPct > 0) {
           const tp = config.side === 'long'
             ? openTrade.entry * (1 + config.takeProfitPct / 100)
@@ -124,7 +119,6 @@ export class Backtester {
         }
       }
 
-      // Signal d'entrée (pas de position ouverte)
       if (!openTrade) {
         const entry = Backtester.#evalConditions(
           config.entryConditions, config.entryLogic,
@@ -145,7 +139,6 @@ export class Backtester {
           };
         }
       }
-      // Signal de sortie (position ouverte)
       else {
         const exit = Backtester.#evalConditions(
           config.exitConditions, config.exitLogic,
@@ -160,7 +153,6 @@ export class Backtester {
       equity.push({ time: c.time, value: balance + (openTrade?.unrealized ?? 0) });
     }
 
-    // Ferme la position restante à la dernière bougie
     if (openTrade) {
       const last = candles.at(-1);
       balance = Backtester.#closeTrade(openTrade, last.close, 'close', balance, trades, config.side);
@@ -174,24 +166,20 @@ export class Backtester {
     };
   }
 
-  // ── Privé — calcul indicateurs ────────────────────────────
 
   static #buildIndicatorCache(candles) {
     const n     = candles.length;
     const cache = new Array(n).fill(null).map(() => ({}));
 
-    // Map time → index (Number() pour absorber string/number selon la source)
     const timeToIdx = new Map(candles.map((c, i) => [Number(c.time), i]));
     const byTime    = pt => timeToIdx.get(Number(pt.time)) ?? -1;
 
-    // RSI
     try {
       calcRSI(candles, 14).forEach(pt => {
         const i = byTime(pt); if (i >= 0) cache[i].rsi = pt.value;
       });
     } catch (_) {}
 
-    // MACD
     try {
       const { macd, signal } = calcMACD(candles);
       macd.forEach((pt, k) => {
@@ -200,26 +188,22 @@ export class Backtester {
       });
     } catch (_) {}
 
-    // MA20 / MA50
     try {
       const { ma20, ma50 } = calcMA(candles);
       ma20.forEach(pt => { const i = byTime(pt); if (i >= 0) cache[i].ma20 = pt.value; });
       ma50.forEach(pt => { const i = byTime(pt); if (i >= 0) cache[i].ma50 = pt.value; });
     } catch (_) {}
 
-    // VWAP — aligné par index (les valeurs ne portent pas forcément de time)
     try {
       calcVWAP(candles).forEach((pt, k) => { if (k < n) cache[k].vwap = pt.value; });
     } catch (_) {}
 
-    // Bollinger
     try {
       const { upper, lower } = calcBB(candles, 20, 2);
       upper.forEach(pt => { const i = byTime(pt); if (i >= 0) cache[i].bbUpper = pt.value; });
       lower.forEach(pt => { const i = byTime(pt); if (i >= 0) cache[i].bbLower = pt.value; });
     } catch (_) {}
 
-    // Momentum
     try {
       calcMom(candles, 10).forEach(pt => {
         const i = byTime(pt); if (i >= 0) cache[i].momentum = pt.value;
@@ -228,8 +212,6 @@ export class Backtester {
 
     return cache;
   }
-
-  // ── Privé — évaluation des conditions ────────────────────
 
   static #evalConditions(conditions, logic, c, prev, ind, indP) {
     if (!conditions?.length) return false;
@@ -270,18 +252,12 @@ export class Backtester {
     return logic === 'OR' ? results.some(Boolean) : results.every(Boolean);
   }
 
-  // ── Privé — clôture de trade ──────────────────────────────
-
   static #closeTrade(open, closePrice, reason, balance, trades, side = 'long') {
     const isLong = side !== 'short';
-    // PnL brut : positif si la direction est correcte
     const pnl    = open.qty * (isLong
-      ? (closePrice - open.entry)   // long  : gain si prix monte
-      : (open.entry - closePrice)); // short : gain si prix baisse
+      ? (closePrice - open.entry)
+      : (open.entry - closePrice));
     const fee    = open.qty * closePrice * TAKER_FEE;
-    // Restitution du capital engagé (qty * entry) + PnL - frais de sortie
-    // Pour long  : qty*entry + qty*(close-entry) - fee = qty*close - fee  ✓
-    // Pour short : qty*entry + qty*(entry-close) - fee = qty*(2*entry-close) - fee ✓
     const recv   = open.qty * open.entry + pnl - fee;
     const newBal = balance + recv;
     trades.push({
@@ -299,8 +275,6 @@ export class Backtester {
     return parseFloat(newBal.toFixed(4));
   }
 
-  // ── Privé — calcul des métriques ──────────────────────────
-
   static #calcMetrics(trades, equity, initial) {
     if (!trades.length) return { trades: 0, message: 'Aucun trade déclenché sur cette période.' };
 
@@ -309,7 +283,6 @@ export class Backtester {
     const totalPnl = trades.reduce((a, t) => a + t.pnl, 0);
     const finalEq  = equity.at(-1)?.value ?? initial;
 
-    // Max Drawdown
     let peak = initial, maxDD = 0;
     for (const pt of equity) {
       if (pt.value > peak) peak = pt.value;
@@ -317,12 +290,10 @@ export class Backtester {
       if (dd > maxDD) maxDD = dd;
     }
 
-    // Profit Factor
     const grossProfit = wins.reduce((a, t) => a + t.pnl, 0);
     const grossLoss   = Math.abs(losses.reduce((a, t) => a + t.pnl, 0));
     const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : 0;
 
-    // Sharpe approximé (annualisé, risk-free = 0)
     const rets = equity.map((pt, i) => i === 0 ? 0 : (pt.value - equity[i - 1].value) / equity[i - 1].value);
     const mean = rets.reduce((a, r) => a + r, 0) / rets.length;
     const std  = Math.sqrt(rets.reduce((a, r) => a + (r - mean) ** 2, 0) / rets.length);

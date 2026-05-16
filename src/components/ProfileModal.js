@@ -21,7 +21,7 @@ export class ProfileModal {
   #overlay;
   #profileManager;
   #callbacks;
-  #activeTab = 'presets'; // 'presets' | 'custom'
+  #activeTab = 'presets';
 
   /**
    * @param {import('../features/ProfileManager').ProfileManager} profileManager
@@ -37,8 +37,6 @@ export class ProfileModal {
     this.#bindStaticEvents();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   open() {
     this.#activeTab = 'presets';
     this.#renderTabs();
@@ -51,12 +49,9 @@ export class ProfileModal {
     this.#overlay.style.display = 'none';
   }
 
-  /** Rafraîchit si ouvert. */
   refresh() {
     if (this.#overlay?.style.display === 'block') this.#render();
   }
-
-  // ── Rendu ─────────────────────────────────────────────────
 
   #renderTabs() {
     ['presets', 'custom'].forEach(tab => {
@@ -64,7 +59,6 @@ export class ProfileModal {
       if (!btn) return;
       btn.classList.toggle('active', tab === this.#activeTab);
       btn.setAttribute('aria-selected', tab === this.#activeTab ? 'true' : 'false');
-      // Badge count
       const badge = btn.querySelector('.tab-badge');
       if (badge && tab === 'custom') {
         const n = this.#profileManager.customCount;
@@ -89,7 +83,6 @@ export class ProfileModal {
 
     profiles.forEach(p => grid.appendChild(this.#buildCard(p)));
 
-    // Bouton save en bas (onglet custom seulement)
     const footer = document.getElementById('profile-modal-footer-actions');
     if (footer) {
       footer.innerHTML = '';
@@ -98,8 +91,6 @@ export class ProfileModal {
       }
     }
   }
-
-  // ── Carte de profil ───────────────────────────────────────
 
   #buildCard(profile) {
     const isCustom = profile.type === 'custom';
@@ -122,7 +113,6 @@ export class ProfileModal {
       card.style.borderColor  = 'var(--border)';
     });
 
-    // Header : icône + nom + TF badge
     const header = document.createElement('div');
     header.style.cssText = 'display:flex;align-items:center;gap:10px;';
 
@@ -166,7 +156,6 @@ export class ProfileModal {
 
     header.append(icon, info, badges);
 
-    // Chips indicateurs
     const chips = document.createElement('div');
     chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;';
     profile.indicators.forEach(key => {
@@ -185,7 +174,6 @@ export class ProfileModal {
       chips.appendChild(chip);
     });
 
-    // Actions
     const actions = document.createElement('div');
     actions.style.cssText = 'display:flex;gap:6px;margin-top:2px;';
 
@@ -238,8 +226,6 @@ export class ProfileModal {
     card.append(header, chips, actions);
     return card;
   }
-
-  // ── Bouton Sauvegarder la vue courante ────────────────────
 
   #buildSaveButton() {
     const wrap = document.createElement('div');
@@ -315,8 +301,6 @@ export class ProfileModal {
     return wrap;
   }
 
-  // ── État vide ─────────────────────────────────────────────
-
   #emptyState() {
     const el = document.createElement('div');
     el.style.cssText = `
@@ -335,8 +319,6 @@ export class ProfileModal {
     `;
     return el;
   }
-
-  // ── Événements statiques ──────────────────────────────────
 
   #bindStaticEvents() {
     document.getElementById('profile-modal-close')

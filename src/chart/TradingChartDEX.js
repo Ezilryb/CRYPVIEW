@@ -26,10 +26,10 @@ import {
 import { showToast } from '../utils/toast.js';
 import { fmtPrice }  from '../utils/format.js';
 
-const REFRESH_INTERVAL_MS = 60_000; // GeckoTerminal rate limit : ~30 req/min
+const REFRESH_INTERVAL_MS = 60_000;
 
 export class TradingChartDEX {
-  symbol;      // format "dex:network:address"
+  symbol;
   timeframe;
   candles = [];
 
@@ -37,7 +37,6 @@ export class TradingChartDEX {
   cSeries = null;
   vSeries = null;
 
-  /** Pool DEX courant */
   #pool;
 
   #refreshTimer   = null;
@@ -58,8 +57,6 @@ export class TradingChartDEX {
     this.#initChart();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   async start() {
     this.#emitStatus('loading');
     await this.#load();
@@ -74,22 +71,20 @@ export class TradingChartDEX {
 
   get poolName()    { return this.#pool.name; }
   get poolNetwork() { return this.#pool.network; }
-  get isLive()      { return false; } // DEX = polling uniquement
+  get isLive()      { return false; }
 
   destroy() {
     document.removeEventListener('crypview:theme:change', this.#themeHandler);
     this.#stopRefresh();
     this.#resizeObserver?.disconnect();
-    this.#badge?.remove();      // ← ajout
-    this.#badge = null;         // ← ajout
+    this.#badge?.remove();
+    this.#badge = null;
     try { this.chart?.remove(); } catch (_) {}
     this.chart   = null;
     this.cSeries = null;
     this.vSeries = null;
     this.candles = [];
   }
-
-  // ── Privé ─────────────────────────────────────────────────
 
   #initChart() {
     if (this.chart) { try { this.chart.remove(); } catch (_) {} }
@@ -115,10 +110,8 @@ export class TradingChartDEX {
       scaleMargins: { top: 0.83, bottom: 0 },
     });
 
-    // Badge DEX visible sur le chart
     this.#addDEXBadge();
 
-    // Thème
     const initTheme = localStorage.getItem('crypview-theme') ?? 'dark';
     this.chart.applyOptions(CHART_THEMES[initTheme] ?? CHART_THEMES.dark);
 
@@ -127,7 +120,6 @@ export class TradingChartDEX {
     };
     document.addEventListener('crypview:theme:change', this.#themeHandler);
 
-    // Resize
     this.#resizeObserver = new ResizeObserver(() => {
       this.chart?.applyOptions({
         width:  this.#container.clientWidth,

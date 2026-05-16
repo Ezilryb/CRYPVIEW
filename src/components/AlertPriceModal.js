@@ -33,15 +33,12 @@ export class AlertPriceModal {
     this.#cancelBtn  = document.getElementById('alert-modal-cancel');
     this.#bindEvents();
   }
-
-  // ── API publique ──────────────────────────────────────────
-
+  
   /**
-   * Ouvre la modale pré-remplie avec le prix suggéré.
-   * @param {string} symbol         — ex: 'btcusdt'
-   * @param {number} suggestedPrice — prix initial (depuis le curseur)
-   * @param {number} currentPrice   — dernier prix de marché (référence direction)
-   * @returns {Promise<number|null>} prix confirmé, ou null si annulé
+   * @param {string} symbol
+   * @param {number} suggestedPrice
+   * @param {number} currentPrice
+   * @returns {Promise<number|null>}
    */
   open(symbol, suggestedPrice, currentPrice) {
     return new Promise(resolve => {
@@ -73,8 +70,6 @@ export class AlertPriceModal {
     this.#resolve = null;
     r(result);
   }
-
-  // ── Privé ─────────────────────────────────────────────────
 
   #updateHint(price) {
     if (!this.#hintEl) return;

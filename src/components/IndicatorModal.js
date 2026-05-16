@@ -26,7 +26,7 @@ export class IndicatorModal {
 
   /**
    * @param {object}   callbacks
-   * @param {() => string[]}    callbacks.getActiveKeys — source de vérité (requis)
+   * @param {() => string[]}    callbacks.getActiveKeys
    * @param {function(string)}  callbacks.onAdd
    * @param {function(string)}  callbacks.onRemove
    * @param {function}          callbacks.onRemoveAll
@@ -39,14 +39,11 @@ export class IndicatorModal {
       ? callbacks.getActiveKeys
       : () => [];
 
-    // Piège de focus + rôle dialog WCAG 2.1
     this.#trap = new FocusTrap(this.#overlay);
     markAsDialog(this.#overlay, this.#overlay?.querySelector('h2, h3'));
 
     this.#bindStaticEvents();
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   open() {
     this.#currentCat  = 'all';
@@ -57,7 +54,6 @@ export class IndicatorModal {
     this.render();
     this.#overlay.style.display = 'block';
 
-    // FocusTrap avec focus initial sur la recherche
     this.#trap.activate(input ?? null);
   }
 
@@ -67,7 +63,6 @@ export class IndicatorModal {
   }
 
   /**
-   * Re-rend la grille avec l'état courant obtenu via le getter.
    */
   render() {
     const activeKeys = this.#getActiveKeys();
@@ -80,7 +75,6 @@ export class IndicatorModal {
     const entries = Object.entries(IND_META).filter(([key, m]) => {
       if (this.#currentCat !== 'all' && m.cat !== this.#currentCat) return false;
       if (q) {
-        // Recherche sur les métadonnées traduites + brutes (robustesse)
         const translated = getIndMeta(key);
         const label = (translated?.label ?? m.label).toLowerCase();
         const desc  = (translated?.desc  ?? m.desc).toLowerCase();
@@ -96,7 +90,6 @@ export class IndicatorModal {
       grid.appendChild(empty);
     } else {
       for (const [key] of entries) {
-        // ── Utilise getIndMeta pour obtenir les labels traduits ──
         const meta = getIndMeta(key);
         if (!meta) continue;
         grid.appendChild(this.#buildCard(key, meta, activeKeys.includes(key)));
@@ -107,8 +100,6 @@ export class IndicatorModal {
     const el    = document.getElementById('ind-active-count');
     if (el) el.textContent = `${count} indicateur${count !== 1 ? 's' : ''} actif${count !== 1 ? 's' : ''}`;
   }
-
-  // ── Construction d'une carte ──────────────────────────────
 
   #buildCard(key, meta, active) {
     const card = document.createElement('div');
@@ -156,8 +147,6 @@ export class IndicatorModal {
     return card;
   }
 
-  // ── Événements statiques (montés une seule fois) ──────────
-
   #bindStaticEvents() {
     document.getElementById('ind-modal-close')?.addEventListener('click', () => this.close());
     this.#overlay?.addEventListener('click', e => { if (e.target === this.#overlay) this.close(); });
@@ -182,7 +171,6 @@ export class IndicatorModal {
   }
 
   /**
-   * Met à jour les attributs aria-selected et la classe active sur les onglets.
    * @param {string} activeCat
    */
   #updateTabAria(activeCat) {

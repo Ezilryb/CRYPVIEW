@@ -57,6 +57,8 @@ import { mountSkipLink }      from '../utils/a11y.js';
 import { initI18n }           from '../i18n/i18n.js';
 import { applyDOMTranslations } from '../utils/i18n-dom.js';
 import { getIndMeta } from '../utils/indMeta.js';
+import { reliabilityManager } from '../utils/reliabilityManager.js';
+import { wsPool }             from '../api/WSPool.js';
 
 // ── MobileToolbar ─────────────────────────────────────────────
 import { MobileToolbar } from '../components/MobileToolbar.js';
@@ -99,6 +101,7 @@ export class MultiChartView {
   #exchAggregator = null;
   #exchBar        = null;
   #objectTree       = null;
+  #riskCalc         = null;   // lazy — instancié au premier onOpenRiskCalc
 
   // ── FIX : callback pour notifier l'ObjectTree lors du
   //    changement de panneau actif (remplace la tentative
@@ -126,6 +129,7 @@ export class MultiChartView {
   }
 
   async init() {
+    reliabilityManager.init({ wsPool });
     await initI18n();
     applyDOMTranslations();
 
@@ -299,6 +303,8 @@ export class MultiChartView {
         onOpenProfiles: () => this.#profileModal?.open(),
         onOpenWorkspaces: () => this.#workspaceModal?.open(),
 
+        onOpenRiskCalc: () => this.#openRiskCalc(),
+
         onOpenExport: () => {
           const inst = this.#activeInst;
           if (!inst) return;
@@ -376,6 +382,17 @@ export class MultiChartView {
       this.#instances.forEach(inst => inst.syncAlertPriceLines());
       this.#alertListModal?.refresh();
     };
+  }
+
+  // ── RiskCalculatorModal — lazy init (dynamic import) ────────
+  async #openRiskCalc() {
+    if (!this.#riskCalc) {
+      const { RiskCalculatorModal } = await import('../components/RiskCalculatorModal.js');
+      this.#riskCalc = new RiskCalculatorModal({
+        getCurrentPrice: () => this.#activeInst?.candles?.at(-1)?.close ?? 0,
+      });
+    }
+    this.#riskCalc.open();
   }
 
   get #activeInst() { return this.#instances[this.#activeIdx]; }
@@ -868,6 +885,7 @@ export class MultiChartView {
           break;
 
         // Indicateurs rapides (Shift + lettre)
+        case 'K': if (e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); this.#openRiskCalc(); } break;
         case 'R': if (e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); inst?.indicators?.isActive('rsi')  ? inst.removeIndicator('rsi')  : inst?.addIndicator('rsi'); }  break;
         case 'M': if (e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); inst?.indicators?.isActive('macd') ? inst.removeIndicator('macd') : inst?.addIndicator('macd'); } break;
         case 'B': if (e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); inst?.indicators?.isActive('bb')   ? inst.removeIndicator('bb')   : inst?.addIndicator('bb'); }   break;
@@ -921,6 +939,7 @@ export class MultiChartView {
     });
 
     window.addEventListener('beforeunload', () => {
+      reliabilityManager.destroy();  
       this.#instances.forEach(inst => inst.destroy());
       this.#settingsModal?.destroy();
       this.#settingsModal = null;

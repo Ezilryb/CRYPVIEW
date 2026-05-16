@@ -14,7 +14,6 @@
 //    search.setSymbols(allSymbols); // met à jour la liste
 // ============================================================
 
-/** Convertit 'btcusdt' → 'BTC' */
 const symBase = sym => sym.replace(/usdt$/i, '').toUpperCase();
 
 function debounce(fn, ms) {

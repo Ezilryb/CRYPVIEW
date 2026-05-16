@@ -16,14 +16,11 @@
 
 import { showToast }  from '../utils/toast.js';
 import { fmtPrice }   from '../utils/format.js';
-
-// ── Clés de stockage ─────────────────────────────────────────
 const STORAGE_KEY         = 'crypview_alerts_v3';
 const HISTORY_STORAGE_KEY = 'crypview_alerts_history_v3';
 const MAX_HISTORY         = 50;
 const CHANNEL_NAME        = 'crypview_alerts_sync';
 
-// ── Catalogue des types de conditions ────────────────────────
 export const CONDITION_TYPE = Object.freeze({
   PRICE_ABOVE:     'price_above',
   PRICE_BELOW:     'price_below',
@@ -41,7 +38,6 @@ export const CONDITION_TYPE = Object.freeze({
 });
 
 /**
- * Métadonnées d'affichage pour chaque type de condition.
  * @type {Record<string, {label:string, sub:string, unit:string, icon:string, noValue?:boolean}>}
  */
 export const CONDITION_META = {
@@ -62,22 +58,22 @@ export const CONDITION_META = {
 
 /**
  * @typedef {object} AlertCondition
- * @property {string}       type    — CONDITION_TYPE key
- * @property {number|null}  value   — seuil ; null pour les types noValue (MACD cross)
+ * @property {string}       type
+ * @property {number|null}  value
  */
 
 /**
  * @typedef {object} AlertV2
  * @property {number}          id
  * @property {string}          symbol
- * @property {string}          name          — label libre
+ * @property {string}          name
  * @property {AlertCondition[]} conditions
  * @property {'AND'|'OR'}      logic
  * @property {boolean}         repeat
- * @property {number}          cooldownMin   — minutes de pause entre déclenchements (repeat)
- * @property {number}          maxTriggers   — 0 = illimité
- * @property {number|null}     expiresAt     — timestamp ms ou null
- * @property {number|null}     snoozedUntil  — timestamp ms ou null
+ * @property {number}          cooldownMin
+ * @property {number}          maxTriggers
+ * @property {number|null}     expiresAt
+ * @property {number|null}     snoozedUntil
  * @property {number}          triggerCount
  * @property {number|null}     lastTriggeredAt
  * @property {boolean}         active
@@ -87,11 +83,11 @@ export const CONDITION_META = {
 /**
  * @typedef {object} MarketSnapshot
  * @property {number}         price
- * @property {number|null}    pctChange24h   — % vs ouverture 24h
- * @property {number|null}    volumeRatio    — volume_current / volume_prev
- * @property {number|null}    rsi            — dernier RSI(14)
+ * @property {number|null}    pctChange24h
+ * @property {number|null}    volumeRatio
+ * @property {number|null}    rsi
  * @property {{macd:number, signal:number}|null} macd
- * @property {Array}          candles        — pour calcul breakout
+ * @property {Array}          candles
  */
 
 function _tlinePriceAt(a1, a2, t) {
@@ -105,7 +101,6 @@ export class AlertManagerV2 {
   /** @type {object[]} */
   #history = [];
 
-  /** Dernière snapshot par symbole — pour détection croisements */
   #lastSnapshot = new Map();
 
   /** @type {BroadcastChannel|null} */
@@ -114,7 +109,6 @@ export class AlertManagerV2 {
   /** @type {AudioContext|null} */
   #audioCtx = null;
 
-  /** Hook UI appelé après toute mutation des alertes */
   onAlertsChange = () => {};
 
   constructor() {
@@ -122,11 +116,7 @@ export class AlertManagerV2 {
     this.#initChannel();
   }
 
-  // ── API publique ────────────────────────────────────────────
-
   /**
-   * Crée et persiste une nouvelle alerte avancée.
-   *
    * @param {object}           cfg
    * @param {string}           cfg.symbol
    * @param {string}           [cfg.name]
@@ -168,7 +158,6 @@ export class AlertManagerV2 {
     return alert;
   }
 
-  /** Supprime une alerte par id. */
   remove(id) {
     const before = this.#alerts.length;
     this.#alerts  = this.#alerts.filter(a => a.id !== id);
@@ -178,7 +167,6 @@ export class AlertManagerV2 {
     this.onAlertsChange();
   }
 
-  /** Supprime toutes les alertes actives. */
   removeAll() {
     this.#alerts = [];
     this.#save();
@@ -186,7 +174,6 @@ export class AlertManagerV2 {
     this.onAlertsChange();
   }
 
-  /** Vide l'historique. */
   clearHistory() {
     this.#history = [];
     this.#saveHistory();
@@ -194,7 +181,6 @@ export class AlertManagerV2 {
   }
 
   /**
-   * Snooze une alerte pour N minutes.
    * @param {number} id
    * @param {number} [minutes=5]
    */
@@ -208,7 +194,6 @@ export class AlertManagerV2 {
     showToast(`💤 Alerte snoozée ${minutes} min`, 'info', 2_500);
   }
 
-  /** Annule le snooze d'une alerte. */
   wakeUp(id) {
     const a = this.#alerts.find(a => a.id === id);
     if (!a || !a.snoozedUntil) return;
@@ -218,7 +203,6 @@ export class AlertManagerV2 {
     this.onAlertsChange();
   }
 
-  /** Demande la permission pour les notifications OS. */
   async requestPermission() {
     if (!('Notification' in window)) {
       showToast('Votre navigateur ne supporte pas les notifications.', 'warning');
@@ -231,15 +215,12 @@ export class AlertManagerV2 {
   }
 
   /**
-   * Point d'entrée principal — appelé à chaque tick de prix ou clôture de bougie.
-   *
    * @param {string}          symbol
    * @param {MarketSnapshot}  data
    */
   check(symbol, data) {
     const sym = symbol.toUpperCase();
 
-    // Sauvegarde snapshot précédent avant écrasement (croisements MACD)
     const prevSnapshot = this.#lastSnapshot.get(sym) ?? null;
     this.#lastSnapshot.set(sym, { ...data });
 
@@ -249,7 +230,6 @@ export class AlertManagerV2 {
       if (!alert.active)            continue;
       if (alert.symbol !== sym)     continue;
 
-      // Vérifications temporelles
       if (alert.snoozedUntil && now < alert.snoozedUntil) continue;
       if (alert.expiresAt   && now > alert.expiresAt)     { this.#expire(alert); continue; }
       if (alert.maxTriggers > 0 && alert.triggerCount >= alert.maxTriggers) {
@@ -260,13 +240,10 @@ export class AlertManagerV2 {
         if (now - alert.lastTriggeredAt < cooldown) continue;
       }
 
-      // Évaluation multi-conditions
       const fired = this.#evaluate(alert, data, prevSnapshot);
       if (fired) this.#trigger(alert, data.price);
     }
   }
-
-  // ── Getters ─────────────────────────────────────────────────
 
   /** @returns {AlertV2[]} */
   getAll()    { return [...this.#alerts]; }
@@ -275,7 +252,6 @@ export class AlertManagerV2 {
   getActive() { return this.#alerts.filter(a => a.active); }
 
   /**
-   * Alertes actives pour un symbole donné.
    * @param {string} symbol
    * @returns {AlertV2[]}
    */
@@ -289,8 +265,6 @@ export class AlertManagerV2 {
 
   /** @returns {boolean} */
   hasActive() { return this.#alerts.some(a => a.active); }
-
-  // ── Évaluation multi-conditions ─────────────────────────────
 
   /**
    * @param {AlertV2}         alert
@@ -307,36 +281,31 @@ export class AlertManagerV2 {
 
   /**
    * @param {AlertCondition}      cond
-   * @param {MarketSnapshot}      d     — snapshot courant
-   * @param {MarketSnapshot|null} p     — snapshot précédent (croisements)
+   * @param {MarketSnapshot}      d
+   * @param {MarketSnapshot|null} p
    * @returns {boolean}
    */
   #evalCondition(cond, d, p) {
     switch (cond.type) {
 
-      // ── Prix absolu ──────────────────────────────────────────
       case CONDITION_TYPE.PRICE_ABOVE:
         return d.price > cond.value;
       case CONDITION_TYPE.PRICE_BELOW:
         return d.price < cond.value;
 
-      // ── Variation % depuis ouverture 24h ─────────────────────
       case CONDITION_TYPE.PRICE_PCT_UP:
         return d.pctChange24h != null && d.pctChange24h >= cond.value;
       case CONDITION_TYPE.PRICE_PCT_DOWN:
         return d.pctChange24h != null && d.pctChange24h <= -(cond.value);
 
-      // ── Volume spike : volume_courant / volume_précédent ─────
       case CONDITION_TYPE.VOLUME_SPIKE:
         return d.volumeRatio != null && d.volumeRatio >= cond.value;
 
-      // ── RSI ──────────────────────────────────────────────────
       case CONDITION_TYPE.RSI_ABOVE:
         return d.rsi != null && d.rsi >= cond.value;
       case CONDITION_TYPE.RSI_BELOW:
         return d.rsi != null && d.rsi <= cond.value;
 
-      // ── Croisements MACD (nécessite snapshot précédent) ──────
       case CONDITION_TYPE.MACD_CROSS_UP:
         return !!(p?.macd && d.macd
           && p.macd.macd  <= p.macd.signal
@@ -346,12 +315,10 @@ export class AlertManagerV2 {
           && p.macd.macd  >= p.macd.signal
           && d.macd.macd  <  d.macd.signal);
 
-      // ── Breakout N-bougies ────────────────────────────────────
-      // cond.value = lookback (ex: 20 bougies)
       case CONDITION_TYPE.BREAKOUT_HIGH: {
         if (!d.candles?.length) return false;
         const lookback = Math.max(2, cond.value || 20);
-        const slice    = d.candles.slice(-lookback - 1, -1); // exclut la bougie courante
+        const slice    = d.candles.slice(-lookback - 1, -1);
         if (!slice.length) return false;
         const high = Math.max(...slice.map(c => c.high));
         return d.price > high;
@@ -369,7 +336,6 @@ export class AlertManagerV2 {
         const [a1, a2]  = cond.anchors;
         const currLine  = _tlinePriceAt(a1, a2, d.currentTime);
         const prevLine  = _tlinePriceAt(a1, a2, p.currentTime ?? d.currentTime - 60);
-        // Croisement haussier : prix était sous la ligne, maintenant au-dessus
         return (p.price <= prevLine) && (d.price > currLine);
       }
       case CONDITION_TYPE.TRENDLINE_CROSS_DOWN: {
@@ -377,15 +343,12 @@ export class AlertManagerV2 {
         const [a1, a2]  = cond.anchors;
         const currLine  = _tlinePriceAt(a1, a2, d.currentTime);
         const prevLine  = _tlinePriceAt(a1, a2, p.currentTime ?? d.currentTime - 60);
-        // Croisement baissier : prix était au-dessus, maintenant sous
         return (p.price >= prevLine) && (d.price < currLine);
       }
       default:
         return false;
     }
   }
-
-  // ── Déclenchement ────────────────────────────────────────────
 
   /**
    * @param {AlertV2} alert
@@ -395,10 +358,8 @@ export class AlertManagerV2 {
     alert.triggerCount++;
     alert.lastTriggeredAt = Date.now();
 
-    // Désactivation si non-répétable
     if (!alert.repeat) alert.active = false;
 
-    // Entrée d'historique
     const entry = {
       alertId:     alert.id,
       symbol:      alert.symbol,
@@ -417,11 +378,9 @@ export class AlertManagerV2 {
     this.#broadcast();
     this.onAlertsChange();
 
-    // Notification visuelle
     const label = alert.name || this.#condSummary(alert.conditions[0]);
     showToast(`🔔 ${alert.symbol} — ${label} @ ${fmtPrice(price)}`, 'warning', 8_000);
 
-    // Signal audio
     const isUp = [
       CONDITION_TYPE.PRICE_ABOVE,
       CONDITION_TYPE.PRICE_PCT_UP,
@@ -431,7 +390,6 @@ export class AlertManagerV2 {
     ].includes(alert.conditions[0]?.type);
     this.#playBeep(isUp ? 'up' : 'dn');
 
-    // Notification OS
     if (Notification.permission === 'granted') {
       try {
         new Notification(`CrypView — ${alert.symbol}`, {
@@ -444,16 +402,12 @@ export class AlertManagerV2 {
       } catch (_) {}
     }
   }
-
-  /** Désactive une alerte expirée. */
   #expire(alert) {
     alert.active = false;
     this.#save();
     this.#broadcast();
     this.onAlertsChange();
   }
-
-  // ── Résumé textuel d'une condition ───────────────────────────
 
   #condSummary(cond) {
     if (!cond) return '';
@@ -465,8 +419,6 @@ export class AlertManagerV2 {
       ? ` bougies` : ` ${meta.unit}`;
     return `${meta.label} ${meta.sub} ${cond.value ?? ''}${unit}`.trim();
   }
-
-  // ── Signal audio ─────────────────────────────────────────────
 
   /**
    * @param {'up'|'dn'} dir
@@ -494,8 +446,6 @@ export class AlertManagerV2 {
     } catch (_) {}
   }
 
-  // ── Persistance localStorage ──────────────────────────────────
-
   #load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -520,8 +470,6 @@ export class AlertManagerV2 {
   #saveHistory() {
     try { localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(this.#history)); } catch (_) {}
   }
-
-  // ── BroadcastChannel (sync cross-onglets) ────────────────────
 
   #initChannel() {
     if (typeof BroadcastChannel === 'undefined') return;

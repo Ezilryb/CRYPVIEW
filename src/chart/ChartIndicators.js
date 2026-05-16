@@ -30,11 +30,8 @@ import {
 } from '../indicators/index.js';
 import { ChartFutures, mountOISeries, mountFundingSeries, mountLSRSeries } from './ChartFutures.js';
 
-// ── Indicateurs déportés vers le Web Worker ───────────────────
 const HEAVY_INDICATORS = new Set(['ichi', 'adx', 'st', 'macd']);
-// ── Indicateurs Futures (gérés par ChartFutures, pas #applyData) ─
 const FUTURES_INDICATORS = new Set(['oi', 'funding', 'lsr']);
-// ── Indicateurs canvas overlay (pas de série LW, gérés via hooks) ─
 const CANVAS_INDICATORS = new Set(['liq']);
 
 let _reqCounter = 0;
@@ -56,7 +53,7 @@ export class ChartIndicators {
    * @param {IChartApi}   chart
    * @param {ISeriesApi}  cSeries
    * @param {HTMLElement} chartsCol
-   * @param {function}    [getSymTf] — () => { symbol: string, timeframe: string }
+   * @param {function}    getSymTf
    */
   constructor(chart, cSeries, chartsCol, getSymTf = () => ({ symbol: '', timeframe: '1h' })) {
     this.#chart     = chart;
@@ -66,8 +63,6 @@ export class ChartIndicators {
     this.#futures   = new ChartFutures(chart, cSeries, chartsCol, getSymTf);
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   add(key, candles, hooks = {}) {
     const meta = IND_META[key];
     if (!meta || this.isActive(key)) return;
@@ -76,7 +71,6 @@ export class ChartIndicators {
     this.#state.set(key, ind);
 
     if (key === 'liq') {
-      // Canvas overlay géré par ChartLiquidations — aucune série LW créée
       hooks.onActivateLiq?.();
 
     } else if (key === 'fp') {
@@ -86,7 +80,6 @@ export class ChartIndicators {
       hooks.onActivateVP?.();
 
     } else if (FUTURES_INDICATORS.has(key)) {
-      // Crée le panneau LW synchrone, charge les données FAPI en async
       this.#mountPanel(key, ind, candles, hooks);
       this.#futures.activate(key, candles, ind).catch(() => {});
 
@@ -109,7 +102,6 @@ export class ChartIndicators {
     const meta = IND_META[key];
 
     if (key === 'liq') {
-      // Délègue la destruction du canvas overlay au hook
       hooks.onDeactivateLiq?.();
 
     } else if (key === 'fp') {
@@ -146,11 +138,9 @@ export class ChartIndicators {
 
     for (const [key, ind] of this.#state) {
       if (!ind.active) continue;
-      // Ces indicateurs gèrent leur propre cycle de vie (canvas / WS)
       if (key === 'fp' || key === 'vp' || key === 'of' || CANVAS_INDICATORS.has(key)) continue;
 
       if (FUTURES_INDICATORS.has(key)) {
-        // Refresh FAPI silencieux à chaque clôture de bougie
         this.#futures.refresh(key, candles, ind).catch(() => {});
       } else {
         this.#applyDataDispatch(key, ind, candles);
@@ -168,7 +158,6 @@ export class ChartIndicators {
     for (const [key, ind] of this.#state) {
       if (!ind.active) continue;
       const meta = IND_META[key];
-      // Canvas overlays et modules avec leur propre cycle de vie
       if (key === 'fp' || key === 'vp' || CANVAS_INDICATORS.has(key)) continue;
       if (FUTURES_INDICATORS.has(key)) {
         this.#futures.deactivate(key);
@@ -191,8 +180,6 @@ export class ChartIndicators {
     }
   }
 
-  // ── Routage calcul : léger (main thread) vs lourd (worker) ─
-
   #applyDataDispatch(key, ind, candles) {
     if (!candles.length) return;
     if (HEAVY_INDICATORS.has(key)) {
@@ -201,8 +188,6 @@ export class ChartIndicators {
       this.#applyData(key, ind, candles);
     }
   }
-
-  // ── Web Worker — cycle de vie ─────────────────────────────
 
   #initWorker() {
     if (this.#worker) return this.#worker;
@@ -262,8 +247,6 @@ export class ChartIndicators {
       }
     } catch (_) {}
   }
-
-  // ── Montage des séries overlay ────────────────────────────
 
   #mountOverlay(key, ind) {
     const C = this.#chart;
@@ -332,8 +315,6 @@ export class ChartIndicators {
     try { Object.values(ind.s).forEach(s => this.#chart.removeSeries(s)); } catch (_) {}
   }
 
-  // ── Montage des panneaux sous-chart ──────────────────────
-
   #mountPanel(key, ind, candles, hooks) {
     const panel     = document.createElement('div');
     panel.className = 'ind-panel';
@@ -349,7 +330,6 @@ export class ChartIndicators {
 
     switch (key) {
 
-      // ── Futures ──────────────────────────────────────────
       case 'oi':
         Object.assign(ind.s, mountOISeries(ch));
         this.#addPanelHeader(panel, '📊 Open Interest', '#00c8ff');
@@ -365,7 +345,6 @@ export class ChartIndicators {
         this.#addPanelHeader(panel, '⚖ Long/Short Ratio', '#f7c948');
         break;
 
-      // ── Indicateurs classiques ────────────────────────────
       case 'rsi':
         ind.s.rsi = ch.addLineSeries({ color:'#c678dd', lineWidth:1.5, priceLineVisible:false, lastValueVisible:true });
         ind.s.ob  = ch.addLineSeries({ color:'rgba(255,61,90,.4)',  lineWidth:1, lineStyle:2, priceLineVisible:false, lastValueVisible:false });
@@ -445,7 +424,6 @@ export class ChartIndicators {
   }
 
   /**
-   * Ajoute un petit header coloré au panneau — distinctif pour les futures.
    * @param {HTMLElement} panel
    * @param {string}      label
    * @param {string}      color
@@ -467,7 +445,6 @@ export class ChartIndicators {
       <span style="margin-left:auto;font-size:7px;color:rgba(139,148,158,.6);">FAPI</span>
     `;
     panel.appendChild(hdr);
-    // Décale le contenu du chart pour ne pas masquer les bougies
     const inner = panel.querySelector('.ind-chart-div');
     if (inner) inner.style.top = '18px';
   }
@@ -476,8 +453,6 @@ export class ChartIndicators {
     if (ind.subChart) { try { ind.subChart.remove(); } catch (_) {} ind.subChart = null; }
     if (ind.panel)    { ind.panel.remove(); ind.panel = null; }
   }
-
-  // ── Calcul synchrone (indicateurs légers) ────────────────
 
   #applyData(key, ind, candles) {
     if (!candles.length) return;
@@ -563,7 +538,6 @@ export class ChartIndicators {
       try { cci.s.ob?.setData([{time:t0,value:100},{time:t1,value:100}]);  } catch(_){}
       try { cci.s.os?.setData([{time:t0,value:-100},{time:t1,value:-100}]); } catch(_){}
     }
-    // Rafraîchit la baseline LSR (temps changeant sur nouvelles bougies)
     const lsr = this.#state.get('lsr');
     if (lsr?.active && lsr.s._lsrRaw?.length) {
       const d0 = lsr.s._lsrRaw[0].time;

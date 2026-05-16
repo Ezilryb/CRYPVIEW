@@ -32,8 +32,6 @@ export class PaperTradingModal {
     this.#bindStaticEvents();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   open() {
     this.#overlay.style.display = 'flex';
     this.#switchTab('portfolio');
@@ -46,8 +44,6 @@ export class PaperTradingModal {
   refresh() {
     if (this.#overlay?.style.display === 'flex') this.#renderContent();
   }
-
-  // ── Rendu ─────────────────────────────────────────────────
 
   #switchTab(tab) {
     this.#activeTab = tab;
@@ -75,8 +71,6 @@ export class PaperTradingModal {
       content.innerHTML = this.#tplHistory();
     }
   }
-
-  // ── Portfolio ─────────────────────────────────────────────
 
   #tplPortfolio() {
     const e       = this.#engine;
@@ -122,7 +116,6 @@ export class PaperTradingModal {
     }).join('');
 
     return `
-      <!-- Barre d'outils portfolio -->
       <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;">
         <button id="pt-toggle-markers"
                 style="display:flex;align-items:center;gap:6px;padding:4px 11px;
@@ -134,7 +127,6 @@ export class PaperTradingModal {
           📍 Chart ${markersOn ? 'ON' : 'OFF'}
         </button>
       </div>
-      <!-- Métriques -->
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px;">
         ${metricCard('Solde disponible', `${e.balance.toFixed(2)} $`)}
         ${metricCard('Equity totale', `${eq.toFixed(2)} $`, color)}
@@ -145,14 +137,10 @@ export class PaperTradingModal {
         ${metricCard('Max Drawdown', `${e.maxDrawdown.toFixed(2)}%`, e.maxDrawdown > 10 ? 'var(--red)' : 'var(--muted)')}
         ${metricCard('Perf. totale', `${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%`, color)}
       </div>
-
-      <!-- Courbe equity mini -->
       <canvas id="pt-equity-canvas" height="70"
               style="width:100%;display:block;border:1px solid var(--border);
                      border-radius:6px;background:rgba(0,0,0,.25);margin-bottom:14px;"
               aria-label="Courbe equity"></canvas>
-
-      <!-- Positions ouvertes -->
       ${e.positions.length ? `
         <div style="font-size:9px;color:var(--muted);text-transform:uppercase;
                     letter-spacing:.8px;margin-bottom:6px;">Positions ouvertes (${e.positions.length})</div>
@@ -209,7 +197,6 @@ export class PaperTradingModal {
       btn.style.color       = now ? 'var(--accent)'       : 'var(--muted)';
     });
 
-    // Dessine la mini courbe equity
     requestAnimationFrame(() => this.#drawEquityCurve());
   }
 
@@ -243,7 +230,6 @@ export class PaperTradingModal {
     const up    = last >= first;
     const color = up ? '#00ff88' : '#ff3d5a';
 
-    // Gradient fill
     const grad = ctx.createLinearGradient(0, 0, 0, H);
     grad.addColorStop(0, up ? 'rgba(0,255,136,0.25)' : 'rgba(255,61,90,0.25)');
     grad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -263,8 +249,6 @@ export class PaperTradingModal {
     ctx.stroke();
   }
 
-  // ── Ordre ─────────────────────────────────────────────────
-
   #tplOrder() {
     const sym   = this.#callbacks.getSymbol?.() ?? 'BTCUSDT';
     const price = this.#callbacks.getCurrentPrice?.() ?? 0;
@@ -278,8 +262,6 @@ export class PaperTradingModal {
         <span style="font-size:13px;font-weight:700;color:var(--text);">${fmtPrice(price)}</span>
         <span style="font-size:9px;color:var(--muted);">Solde: ${this.#engine.balance.toFixed(2)} $</span>
       </div>
-
-      <!-- Côté -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
         <button id="pt-side-long"  data-side="long"  class="pt-side-btn active-side"
                 style="padding:10px;border-radius:6px;cursor:pointer;font-family:'Syne',sans-serif;
@@ -294,8 +276,6 @@ export class PaperTradingModal {
           ▼ SHORT
         </button>
       </div>
-
-      <!-- Montant -->
       <label style="display:block;margin-bottom:10px;">
         <span style="display:block;font-size:9px;color:var(--muted);text-transform:uppercase;
                      letter-spacing:.8px;margin-bottom:4px;">Montant USDT</span>
@@ -313,8 +293,6 @@ export class PaperTradingModal {
           `).join('')}
         </div>
       </label>
-
-      <!-- SL / TP -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
         <label>
           <span style="display:block;font-size:9px;color:var(--muted);text-transform:uppercase;
@@ -374,8 +352,6 @@ export class PaperTradingModal {
         updateBtn();
       });
     });
-
-    // Boutons % du solde
     document.querySelectorAll('.pt-pct-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const pct    = parseInt(btn.dataset.pct);
@@ -404,8 +380,6 @@ export class PaperTradingModal {
       this.#engine.openPosition(currentSide, sym, price, amount, sl, tp);
     });
   }
-
-  // ── Historique ────────────────────────────────────────────
 
   #tplHistory() {
     const trades = this.#engine.trades.filter(t => t.action !== 'open');
@@ -451,8 +425,6 @@ export class PaperTradingModal {
         </table>
       </div>`;
   }
-
-  // ── Événements statiques ──────────────────────────────────
 
   #bindStaticEvents() {
     document.getElementById('paper-trading-close')

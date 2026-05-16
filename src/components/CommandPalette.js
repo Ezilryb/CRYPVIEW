@@ -12,7 +12,6 @@ import { IND_META } from '../config.js';
 import { ALL_TF }   from './TimeframeBar.js';
 import { getIndMeta } from '../utils/indMeta.js';
 
-// ── Labels lisibles pour les timeframes ──────────────────────
 const TF_LABELS = {
   '1s': '1 seconde',  '1m': '1 min',    '3m': '3 min',  '5m': '5 min',
   '15m': '15 min',    '30m': '30 min',  '1h': '1 heure', '2h': '2 h',
@@ -20,7 +19,6 @@ const TF_LABELS = {
   '3d': '3 jours',    '1w': '1 semaine','1M': '1 mois',
 };
 
-// ── Actions prédéfinies ───────────────────────────────────────
 const STATIC_ACTIONS = [
   { id: 'screener', label: 'Market Screener',      icon: '🔍', group: 'Actions' },
   { id: 'profiles', label: 'Profils & Presets',    icon: '📁', group: 'Actions' },
@@ -32,7 +30,6 @@ const STATIC_ACTIONS = [
 ];
 
 /**
- * Fuzzy match minimaliste : tous les chars de `query` dans `label` dans l'ordre.
  */
 function fuzzy(query, label) {
   const q = query.toLowerCase();
@@ -73,8 +70,6 @@ export class CommandPalette {
     this.#bindGlobalShortcut();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   open() {
     if (this.#isOpen) { this.#input.select(); return; }
     this.#isOpen    = true;
@@ -92,10 +87,7 @@ export class CommandPalette {
     this.#overlay.style.display = 'none';
   }
 
-  /** Met à jour la liste de symboles après chargement async. */
   setSymbols(symbols) { this.#symbols = symbols; }
-
-  // ── Injection HTML auto-contenue ──────────────────────────
 
   #inject() {
     if (document.getElementById('cmd-palette-overlay')) {
@@ -191,8 +183,6 @@ export class CommandPalette {
     this.#bindLocalEvents();
   }
 
-  // ── Construction des items ────────────────────────────────
-
   #buildItems() {
     const items  = [];
     const active = this.#getActiveKeys();
@@ -206,7 +196,6 @@ export class CommandPalette {
       volume:     'Indicateurs — Volume',
     };
 
-    // ── Symboles récents ──────────────────────────────────
     for (const sym of (this.#recentSymbols?.all ?? []).slice(0, 8)) {
       const base = sym.replace(/usdt$/i, '').toUpperCase();
       items.push({
@@ -218,7 +207,6 @@ export class CommandPalette {
       });
     }
 
-    // ── Timeframes ────────────────────────────────────────
     for (const { tf } of ALL_TF) {
       items.push({
         type: 'tf', value: tf, group: 'Timeframes',
@@ -229,7 +217,6 @@ export class CommandPalette {
       });
     }
 
-    // ── Indicateurs — labels traduits via getIndMeta ───────
     for (const [key] of Object.entries(IND_META)) {
       const meta = getIndMeta(key);
       if (!meta) continue;
@@ -243,15 +230,12 @@ export class CommandPalette {
       });
     }
 
-    // ── Actions ───────────────────────────────────────────
     for (const a of STATIC_ACTIONS) {
       items.push({ type: 'action', id: a.id, group: a.group, label: a.label, icon: a.icon, sub: '' });
     }
 
     this.#allItems = items;
   }
-
-  // ── Filtrage ──────────────────────────────────────────────
 
   #filter(query) {
     const q = query.trim();
@@ -287,8 +271,6 @@ export class CommandPalette {
     this.#activeIdx = this.#filtered.length ? 0 : -1;
     this.#renderResults();
   }
-
-  // ── Rendu des résultats ───────────────────────────────────
 
   #renderResults() {
     this.#results.innerHTML = '';
@@ -399,8 +381,6 @@ export class CommandPalette {
     if (active) active.scrollIntoView({ block: 'nearest' });
   }
 
-  // ── Exécution ─────────────────────────────────────────────
-
   #execute(item) {
     this.close();
     switch (item.type) {
@@ -410,8 +390,6 @@ export class CommandPalette {
       case 'action':    this.#callbacks.onAction?.(item.id);       break;
     }
   }
-
-  // ── Événements locaux ─────────────────────────────────────
 
   #bindLocalEvents() {
     this.#overlay.addEventListener('click', e => {
@@ -447,8 +425,6 @@ export class CommandPalette {
       }
     });
   }
-
-  // ── Raccourci global ──────────────────────────────────────
 
   #bindGlobalShortcut() {
     document.addEventListener('keydown', e => {

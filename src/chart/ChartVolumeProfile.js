@@ -15,9 +15,6 @@ export class ChartVolumeProfile {
   #cSeries;
   #container;
 
-  // ── Bug #8 : ID du canvas, paramétrable ──────────────────
-  // Valeur par défaut 'vp-canvas' pour la vue simple (page.html).
-  // En multi, passer 'vp-canvas-0', 'vp-canvas-1', etc.
   #canvasId;
 
   #canvas    = null;
@@ -28,8 +25,8 @@ export class ChartVolumeProfile {
   /**
    * @param {IChartApi}   chart
    * @param {ISeriesApi}  cSeries
-   * @param {HTMLElement} container  — div#chart-container
-   * @param {string}      [canvasId='vp-canvas'] — ID unique du canvas overlay
+   * @param {HTMLElement} container
+   * @param {string}      [canvasId='vp-canvas']
    */
   constructor(chart, cSeries, container, canvasId = 'vp-canvas') {
     this.#chart     = chart;
@@ -37,8 +34,6 @@ export class ChartVolumeProfile {
     this.#container = container;
     this.#canvasId  = canvasId;
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   activate(candles) {
     if (this.#active) return;
@@ -83,8 +78,6 @@ export class ChartVolumeProfile {
   }
 
   isActive() { return this.#active; }
-
-  // ── Calcul ────────────────────────────────────────────────
 
   static calc(candles, nBuckets = 80) {
     if (!candles.length) return [];
@@ -143,8 +136,6 @@ export class ChartVolumeProfile {
       pocPrice, vahPrice, valPrice,
     }));
   }
-
-  // ── Rendu canvas ──────────────────────────────────────────
 
   #draw(candles) {
     if (!this.#canvas || !candles.length) return;
@@ -217,9 +208,6 @@ export class ChartVolumeProfile {
     ctx.fillText(text, 8, labelBelow ? y + 11 : y - 2);
   }
 
-  // ── Bug #8 corrigé ────────────────────────────────────────
-  // Cherche le canvas dans this.#container (scope local) plutôt
-  // que via document.getElementById() (scope global).
   #ensureCanvas() {
     let canvas = this.#container.querySelector(`#${this.#canvasId}`);
     if (!canvas) {

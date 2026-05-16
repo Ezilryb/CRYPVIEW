@@ -15,11 +15,10 @@
 // ============================================================
 
 const GT_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.DEV)
-  ? '/api/gecko/api/v2'                      // proxy Vite en dev local uniquement
-  : 'https://api.geckoterminal.com/api/v2';  // direct — GitHub Pages, Vercel, etc.
+  ? '/api/gecko/api/v2'
+  : 'https://api.geckoterminal.com/api/v2';
 const GT_HDRS  = { Accept: 'application/json;version=20230302' };
 
-/** Réseaux pris en charge (identifiants GeckoTerminal). */
 export const SUPPORTED_NETWORKS = {
   eth:       { label: 'Ethereum',  icon: 'Ξ' },
   bsc:       { label: 'BSC',       icon: '⬡' },
@@ -32,9 +31,7 @@ export const SUPPORTED_NETWORKS = {
 };
 
 /**
- * Recherche de pools DEX par nom de token.
- *
- * @param {string} query  — ex: 'PEPE', 'SHIB', '0xabc...'
+ * @param {string} query
  * @param {number} [page=1]
  * @returns {Promise<DEXPool[]>}
  */
@@ -51,10 +48,8 @@ export async function searchDEXPools(query, page = 1) {
 }
 
 /**
- * Charge les N derniers OHLCV d'un pool DEX.
- *
- * @param {string}  network     — ex: 'eth', 'bsc', 'solana'
- * @param {string}  poolAddress — adresse du pool
+ * @param {string}  network
+ * @param {string}  poolAddress
  * @param {'minute'|'hour'|'day'} [timeframe='hour']
  * @param {number}  [limit=300]
  * @returns {Promise<Candle[]>}
@@ -74,15 +69,13 @@ export async function fetchDEXOHLCV(network, poolAddress, timeframe = 'hour', li
 }
 
 /**
- * Récupère les top pools d'un réseau.
  * @param {string} network
  * @param {number} [page=1]
  * @returns {Promise<DEXPool[]>}
  */
 export async function fetchTopPools(network, page = 1) {
   const url = `${GT_BASE}/networks/${network}/trending_pools?page=${page}`;
-  const res = await fetch(url, { headers: GT_HDRS, signal: AbortSignal.timeout(8_000) });
-  // 404 = réseau non supporté pour le trending (ex: polygon) → retour vide silencieux
+  const res = await fetch(url, { headers: GT_HDRS, signal: AbortSignal.timeout(8_000) }); 
   if (res.status === 404) return [];
   if (!res.ok) throw new Error(`GeckoTerminal trending HTTP ${res.status}`);
   const json = await res.json();
@@ -90,7 +83,6 @@ export async function fetchTopPools(network, page = 1) {
 }
 
 /**
- * Récupère les pools pour un token spécifique (par adresse de contrat).
  * @param {string} network
  * @param {string} tokenAddress
  * @returns {Promise<DEXPool[]>}
@@ -103,10 +95,7 @@ export async function fetchTokenPools(network, tokenAddress) {
   return (json.data ?? []).map(parseDEXPool);
 }
 
-// ── Parsers ───────────────────────────────────────────────────
-
 /**
- * Convertit un item de l'API GeckoTerminal en DEXPool normalisé.
  * @param {object} item
  * @returns {DEXPool}
  */
@@ -114,10 +103,8 @@ function parseDEXPool(item) {
   const attr = item.attributes ?? {};
   const rel  = item.relationships ?? {};
 
-  // GeckoTerminal structure les IDs pools en "{network}_{address}".
-  // Pour /search/pools, relationships.network peut être absent → fallback sur item.id.
   const networkFromId = attr.address
-    ? (item.id ?? '').replace(`_${attr.address}`, '')   // ex: "eth_0xabc" → "eth"
+    ? (item.id ?? '').replace(`_${attr.address}`, '')
     : (item.id ?? '').split('_')[0];
   const networkId = rel.network?.data?.id ?? networkFromId ?? 'unknown';
   const dexId     = rel.dex?.data?.id     ?? '';
@@ -147,7 +134,6 @@ function parseDEXPool(item) {
 }
 
 /**
- * Convertit les données OHLCV GeckoTerminal en Candle[] CrypView.
  * @param {object} json
  * @returns {Candle[]}
  */
@@ -157,7 +143,7 @@ export function parseDEXOHLCV(json) {
 
   return list
     .map(([ts, o, h, l, c, v]) => ({
-      time:   Math.floor(ts),   // GeckoTerminal retourne déjà en secondes Unix
+      time:   Math.floor(ts),
       open:   parseFloat(o),
       high:   parseFloat(h),
       low:    parseFloat(l),
@@ -168,10 +154,7 @@ export function parseDEXOHLCV(json) {
     .sort((a, b) => a.time - b.time);
 }
 
-// ── Helpers ───────────────────────────────────────────────────
-
 /**
- * Convertit le timeframe CrypView → paramètre GeckoTerminal.
  * @param {string} tf
  * @returns {'minute'|'hour'|'day'}
  */
@@ -187,8 +170,6 @@ export function toGTTimeframe(tf) {
 }
 
 /**
- * Construit un identifiant unique pour un pool DEX.
- * Format : "network:address" — utilisé comme symbol dans l'app.
  * @param {DEXPool} pool
  * @returns {string}
  */
@@ -197,7 +178,6 @@ export function poolToSymbol(pool) {
 }
 
 /**
- * Parse un identifiant pool depuis le format "dex:network:address".
  * @param {string} symbol
  * @returns {{ network: string, address: string } | null}
  */
@@ -207,19 +187,17 @@ export function parsePoolSymbol(symbol) {
   return network && address ? { network, address } : null;
 }
 
-// ── JSDoc typedefs ────────────────────────────────────────────
-
 /**
  * @typedef {object} DEXPool
  * @property {string}  id
  * @property {string}  address
  * @property {string}  network
  * @property {string}  dex
- * @property {string}  name        — ex: 'PEPE / WETH'
+ * @property {string}  name
  * @property {string}  symbol
  * @property {string}  baseSymbol
  * @property {string}  quoteSymbol
- * @property {number}  price       — en USD
+ * @property {number}  price
  * @property {number}  priceNative
  * @property {number}  volume24h
  * @property {number}  liquidity

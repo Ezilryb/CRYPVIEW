@@ -12,7 +12,6 @@
 const BYBIT_REST = 'https://api.bybit.com/v5/market';
 
 /**
- * Convertit le symbol CrypView (btcusdt) → format Bybit (BTCUSDT).
  * @param {string} symbol
  * @returns {string}
  */
@@ -21,10 +20,7 @@ function toBybitSymbol(symbol) {
 }
 
 /**
- * Récupère le ticker spot Bybit pour un symbole donné.
- * Retourne null si la paire n'existe pas sur Bybit.
- *
- * @param {string} symbol — ex: 'btcusdt'
+ * @param {string} symbol
  * @returns {Promise<ExchangeTicker|null>}
  */
 export async function fetchBybitTicker(symbol) {
@@ -35,7 +31,6 @@ export async function fetchBybitTicker(symbol) {
   if (!res.ok) throw new Error(`Bybit HTTP ${res.status}`);
   const data = await res.json();
 
-  // retCode 0 = succès ; liste vide = paire inconnue
   if (data.retCode !== 0 || !data.result?.list?.length) return null;
 
   const t = data.result.list[0];
@@ -46,16 +41,12 @@ export async function fetchBybitTicker(symbol) {
     bid:       parseFloat(t.bid1Price),
     ask:       parseFloat(t.ask1Price),
     volume24h: parseFloat(t.volume24h),
-    pct24h:    parseFloat(t.price24hPcnt) * 100, // Bybit retourne en décimal (ex: 0.0245)
+    pct24h:    parseFloat(t.price24hPcnt) * 100,
     timestamp: Date.now(),
   };
 }
 
 /**
- * Récupère les tickers de plusieurs symboles en un seul appel.
- * Bybit ne supporte pas encore la liste multi-symboles en spot V5,
- * donc on effectue des requêtes parallèles.
- *
  * @param {string[]} symbols
  * @returns {Promise<ExchangeTicker[]>}
  */
@@ -76,6 +67,6 @@ export async function fetchBybitTickers(symbols) {
  * @property {number} bid
  * @property {number} ask
  * @property {number} volume24h
- * @property {number} pct24h    — en pourcentage (ex: 2.45)
+ * @property {number} pct24h
  * @property {number} timestamp
  */

@@ -37,12 +37,9 @@ export class WorkspaceModal {
     this.#bindStaticEvents();
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   open() {
     this.#render();
     if (this.#overlay) this.#overlay.style.display = 'block';
-    // Focus sur le champ de nom après rendu
     requestAnimationFrame(() => {
       document.getElementById('ws-name-input')?.focus();
     });
@@ -51,8 +48,6 @@ export class WorkspaceModal {
   close() {
     if (this.#overlay) this.#overlay.style.display = 'none';
   }
-
-  // ── Rendu ─────────────────────────────────────────────────
 
   #render() {
     const grid    = document.getElementById('ws-modal-grid');
@@ -82,7 +77,6 @@ export class WorkspaceModal {
       workspaces.forEach(ws => grid.appendChild(this.#buildCard(ws)));
     }
 
-    // Section sauvegarde
     const saveSection = document.getElementById('ws-save-section');
     if (saveSection) {
       if (this.#manager.isFull) {
@@ -92,13 +86,10 @@ export class WorkspaceModal {
           </div>`;
       } else {
         saveSection.innerHTML = this.#tplSaveSection();
-        // Bind après que le DOM soit mis à jour
         requestAnimationFrame(() => this.#bindSaveEvents());
       }
     }
   }
-
-  // ── Carte workspace ───────────────────────────────────────
 
   #buildCard(ws) {
     const card = document.createElement('div');
@@ -118,7 +109,6 @@ export class WorkspaceModal {
       card.style.background  = 'rgba(255,255,255,.02)';
     });
 
-    // Header
     const header = document.createElement('div');
     header.style.cssText = 'display:flex;align-items:center;gap:10px;';
 
@@ -155,7 +145,6 @@ export class WorkspaceModal {
     info.append(name, meta);
     header.append(icon, info);
 
-    // Chips panneaux
     const chips = document.createElement('div');
     chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;';
     (ws.panels ?? []).forEach(p => {
@@ -171,14 +160,12 @@ export class WorkspaceModal {
       chips.appendChild(chip);
     });
 
-    // Sync badges
     const syncRow = document.createElement('div');
     syncRow.style.cssText = 'display:flex;gap:5px;flex-wrap:wrap;';
     if (ws.syncCrosshair) syncRow.appendChild(this.#miniChip('🎯 Crosshair'));
     if (ws.syncZoom)      syncRow.appendChild(this.#miniChip('🔍 Zoom'));
     if (syncRow.children.length) chips.appendChild(syncRow);
 
-    // Actions
     const actions = document.createElement('div');
     actions.style.cssText = 'display:flex;gap:6px;';
 
@@ -238,8 +225,6 @@ export class WorkspaceModal {
     el.textContent = text;
     return el;
   }
-
-  // ── Section sauvegarde ────────────────────────────────────
 
   #tplSaveSection() {
     return `
@@ -313,8 +298,6 @@ export class WorkspaceModal {
       if (e.key === 'Enter') { e.preventDefault(); doSave(); }
     });
   }
-
-  // ── Événements statiques ──────────────────────────────────
 
   #bindStaticEvents() {
     document.getElementById('workspace-modal-close')

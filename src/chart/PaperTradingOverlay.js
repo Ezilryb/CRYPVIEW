@@ -33,14 +33,9 @@ export class PaperTradingOverlay {
     this.#cSeries = cSeries;
   }
 
-  // ── API publique ──────────────────────────────────────────
-
   /**
-   * Reconstruit les markers depuis l'historique des trades.
-   * Filtre par symbole pour n'afficher que la paire courante.
-   *
    * @param {import('../features/PaperTrading').PaperTrade[]} trades
-   * @param {string} [symbol] — ex: 'btcusdt'. Si absent, tous les trades.
+   * @param {string} [symbol]
    */
   syncFromTrades(trades, symbol) {
     const sym = symbol?.toUpperCase();
@@ -54,7 +49,6 @@ export class PaperTradingOverlay {
   }
 
   /**
-   * Bascule la visibilité.
    * @returns {boolean} nouvel état
    */
   toggle() {
@@ -75,7 +69,6 @@ export class PaperTradingOverlay {
   get visible() { return this.#visible; }
 
   /**
-   * Efface tous les markers (ex : changement de symbole).
    */
   clear() {
     this.#markers = [];
@@ -83,8 +76,6 @@ export class PaperTradingOverlay {
   }
 
   /**
-   * Mise à jour de la série après reconnexion chart.
-   * L'ancienne série reçoit setMarkers([]) avant remplacement.
    * @param {import('lightweight-charts').ISeriesApi<any>} cSeries
    */
   updateSeries(cSeries) {
@@ -99,14 +90,11 @@ export class PaperTradingOverlay {
     this.#markers = [];
   }
 
-  // ── Privé — conversion trade → marker ────────────────────
-
   /**
    * @param {import('../features/PaperTrading').PaperTrade} t
    * @returns {LWMarker|null}
    */
   #tradeToMarker(t) {
-    // LightweightCharts attend des timestamps Unix en secondes
     const time = Math.floor(t.timestamp / 1_000);
     if (!time || !t.price) return null;
 
@@ -124,7 +112,6 @@ export class PaperTradingOverlay {
       };
     }
 
-    // Clôture (close, sl, tp)
     const label = t.action === 'sl' ? '⛔ SL'
                 : t.action === 'tp' ? '🎯 TP'
                 : '✕ CLOSE';
@@ -139,8 +126,6 @@ export class PaperTradingOverlay {
       size:     1,
     };
   }
-
-  // ── Privé — rendu ─────────────────────────────────────────
 
   #render() {
     if (!this.#cSeries) return;

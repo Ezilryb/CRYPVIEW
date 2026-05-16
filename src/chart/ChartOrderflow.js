@@ -20,9 +20,6 @@ export class ChartOrderflow {
   #container;
   #getSymTf;
 
-  // ── Bug #5 : ID du canvas, paramétrable ──────────────────
-  // Valeur par défaut 'of-canvas' pour la vue simple (page.html).
-  // En multi, passer 'of-canvas-0', 'of-canvas-1', etc.
   #canvasId;
 
   #data          = new Map();
@@ -40,8 +37,8 @@ export class ChartOrderflow {
    * @param {IChartApi}   chart
    * @param {ISeriesApi}  cSeries
    * @param {HTMLElement} container
-   * @param {function}    getSymTf     — () => { symbol, timeframe }
-   * @param {string}      [canvasId='of-canvas'] — ID unique du canvas overlay
+   * @param {function}    getSymTf
+   * @param {string}      [canvasId='of-canvas']
    */
   constructor(chart, cSeries, container, getSymTf, canvasId = 'of-canvas') {
     this.#chart     = chart;
@@ -50,8 +47,6 @@ export class ChartOrderflow {
     this.#getSymTf  = getSymTf;
     this.#canvasId  = canvasId;
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   activate(candles, indState) {
     if (this.#active) return;
@@ -120,8 +115,6 @@ export class ChartOrderflow {
     this.#canvas = null;
   }
 
-  // ── Seed historique ───────────────────────────────────────
-
   #seed(candles) {
     this.#data.clear();
     for (const c of candles) {
@@ -135,8 +128,6 @@ export class ChartOrderflow {
       this.#data.set(c.time, { askVol, bidVol, delta: askVol - bidVol, trades: 1 });
     }
   }
-
-  // ── WebSocket aggTrades via WSPool ────────────────────────
 
   #connectWS(candles, indState) {
     const { symbol } = this.#getSymTf();
@@ -186,8 +177,6 @@ export class ChartOrderflow {
     d.trades++;
   }
 
-  // ── Construction séries CVD ───────────────────────────────
-
   #buildCVDSeries(candles) {
     let cvd = 0;
     const cvdLine   = [];
@@ -204,8 +193,6 @@ export class ChartOrderflow {
     }
     return { cvdLine, deltaHist };
   }
-
-  // ── Overlay canvas ────────────────────────────────────────
 
   #draw(candles) {
     if (!this.#canvas || !candles.length) return;
@@ -272,8 +259,6 @@ export class ChartOrderflow {
     }
   }
 
-  // ── Abonnements de redessins ──────────────────────────────
-
   #subscribeRedraws(candles) {
     if (this.#redrawSubs) return;
     this.#redrawSubs = true;
@@ -310,9 +295,6 @@ export class ChartOrderflow {
     }, RENDER_THROTTLE_MS);
   }
 
-  // ── Bug #5 corrigé ────────────────────────────────────────
-  // Cherche le canvas dans this.#container (scope local) plutôt
-  // que via document.getElementById() (scope global).
   #ensureCanvas() {
     let c = this.#container.querySelector(`#${this.#canvasId}`);
     if (!c) {

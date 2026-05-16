@@ -9,10 +9,8 @@
 //    — Tracé, aperçu et drag des ancres disponibles sur mobile/tablette
 // ============================================================
 
-// ── Singleton "instance active" — partagé entre tous les panneaux ─
 let _activeDrawingInstance = null;
 
-// ── Couleurs par outil ─────────────────────────────────────────
 const STROKE = {
   trendline: '#00ff88',
   fibonacci: '#00c8ff',
@@ -64,7 +62,6 @@ const TOOL_LABELS = {
 const ALPHA_FINAL   = 0.65;
 const ALPHA_PREVIEW = 0.40;
 
-/** Rayon (px) de détection pour le survol / clic sur une ancre */
 const ANCHOR_HIT_RADIUS = 9;
 
 export class ChartDrawing {
@@ -78,16 +75,11 @@ export class ChartDrawing {
   #mousePixel  = { x: 0, y: 0 };
   #storageKey;
 
-  /** Appelé après toute modification des tracés (add/remove/hide/lock). */
   onItemsChange = null;
 
-  // ── État édition ──────────────────────────────────────────────
-  /** Ancre actuellement survolée : { drawingId, anchorIdx } | null */
   #hoverAnchor = null;
-  /** Ancre en cours de drag : { drawingId, anchorIdx } | null */
   #dragging    = null;
 
-  // ── Observers & handlers ─
   #resizeObs  = null;
   #mutObs     = null;
   #editMoveFn = null;
@@ -105,8 +97,6 @@ export class ChartDrawing {
     this.#subscribeChartRedraws();
     this.#redraw();
   }
-
-  // ── API publique ──────────────────────────────────────────────
 
   setTool(tool) {
     if (this.#currentTool === tool) { this.cancel(); return; }
@@ -229,8 +219,6 @@ export class ChartDrawing {
     while (this.#svg.firstChild) this.#svg.removeChild(this.#svg.firstChild);
   }
 
-  // ── Privé — singleton ─────────────────────────────────────────
-
   #silentCancel() {
     this.#currentTool = null;
     this.#tempAnchors = [];
@@ -239,8 +227,6 @@ export class ChartDrawing {
     this.#hideToolbar();
     this.#redraw();
   }
-
-  // ── Privé — synchronisation bounds ───────────────────────────
 
   #syncCanvasBounds() {
     try {
@@ -254,8 +240,6 @@ export class ChartDrawing {
     }
   }
 
-  // ── Privé — persistance ───────────────────────────────────────
-
   #load() {
     try { this.#drawings = JSON.parse(localStorage.getItem(this.#storageKey) ?? '[]'); }
     catch (_) { this.#drawings = []; }
@@ -265,8 +249,6 @@ export class ChartDrawing {
     try { localStorage.setItem(this.#storageKey, JSON.stringify(this.#drawings)); } catch (_) {}
     this.onItemsChange?.();
   }
-
-  // ── Privé — détection des ancres ─────────────────────────────
 
   #findAnchorAt(mx, my, radius = ANCHOR_HIT_RADIUS) {
     for (let di = this.#drawings.length - 1; di >= 0; di--) {
@@ -284,9 +266,6 @@ export class ChartDrawing {
     return null;
   }
 
-  // ── Privé — événements (tracé nouveau) ───────────────────────
-  // v2.9.2 : support tactile ajouté (touchmove + touchend)
-
   #bindEvents() {
     const cancelBtn = document.getElementById('draw-toolbar-cancel');
     if (cancelBtn) {
@@ -302,13 +281,11 @@ export class ChartDrawing {
       if (e.key === 'Escape' && _activeDrawingInstance === this) this.cancel();
     });
 
-    // ── Helper : coordonnées unifiées souris / touch ──────────
     const clientXY = (e) => {
       const src = e.touches?.[0] ?? e.changedTouches?.[0] ?? e;
       return { clientX: src.clientX, clientY: src.clientY };
     };
 
-    // ── mousemove + touchmove → aperçu du tracé en cours ─────
     const onMove = (e) => {
       const { clientX, clientY } = clientXY(e);
       const r = this.#canvas.getBoundingClientRect();
@@ -317,8 +294,7 @@ export class ChartDrawing {
     };
     this.#canvas.addEventListener('mousemove', onMove);
     this.#canvas.addEventListener('touchmove', e => { e.preventDefault(); onMove(e); }, { passive: false });
-
-    // ── click + touchend → pose d'une ancre ──────────────────
+  
     const onTap = (e) => {
       if (!this.#currentTool || this.#dragging) return;
       const { clientX, clientY } = clientXY(e);
@@ -356,9 +332,6 @@ export class ChartDrawing {
     });
   }
 
-  // ── Privé — événements (édition par drag) ────────────────────
-  // v2.9.2 : touchstart / touchmove / touchend ajoutés pour le drag mobile
-
   #bindEditEvents() {
     this.#editMoveFn = (e) => {
       if (this.#currentTool) return;
@@ -367,14 +340,11 @@ export class ChartDrawing {
       const mx = e.clientX - r.left;
       const my = e.clientY - r.top;
 
-      // ── Drag souris actif ─────────────────────────────────────
       if (this.#dragging) {
         const newCoords = this.#pixelToAnchor({ x: mx, y: my });
         if (newCoords) {
           const drawing = this.#drawings.find(d => d.id === this.#dragging.drawingId);
           if (drawing) {
-            // FIX v2.9.1 : préserve toutes les propriétés de l'ancre
-            // (notamment `text` pour l'outil texte annoté)
             const existing = drawing.anchors[this.#dragging.anchorIdx];
             drawing.anchors[this.#dragging.anchorIdx] = { ...existing, ...newCoords };
             this.#redraw();
@@ -383,7 +353,6 @@ export class ChartDrawing {
         return;
       }
 
-      // ── Vérification des limites du canvas ────────────────────
       const inBounds = mx >= 0 && my >= 0 && mx <= r.width && my <= r.height;
 
       if (!inBounds) {
@@ -396,7 +365,6 @@ export class ChartDrawing {
         return;
       }
 
-      // ── Détection du survol d'une ancre ──────────────────────
       const hit = this.#findAnchorAt(mx, my);
 
       if (hit) {
@@ -424,7 +392,6 @@ export class ChartDrawing {
       this.#redraw();
     };
 
-    // ── mousedown + touchstart → début de drag d'ancre ───────
     const onDragStart = (e) => {
       if (this.#currentTool || !this.#hoverAnchor) return;
       const targetDrawing = this.#drawings.find(d => d.id === this.#hoverAnchor.drawingId);
@@ -440,9 +407,6 @@ export class ChartDrawing {
     document.addEventListener('mousemove', this.#editMoveFn);
     document.addEventListener('mouseup',   this.#editUpFn);
 
-    // ── touchmove sur canvas → drag de l'ancre (mobile) ──────
-    // { passive: false } obligatoire pour pouvoir appeler preventDefault()
-    // et bloquer le scroll pendant le déplacement d'une ancre.
     this.#canvas.addEventListener('touchmove', (e) => {
       if (!this.#dragging) return;
       e.preventDefault();
@@ -459,7 +423,6 @@ export class ChartDrawing {
       }
     }, { passive: false });
 
-    // ── touchend sur canvas → fin de drag (mobile) ───────────
     this.#canvas.addEventListener('touchend', () => {
       if (!this.#dragging) return;
       this.#save();
@@ -468,8 +431,6 @@ export class ChartDrawing {
       this.#redraw();
     });
   }
-
-  // ── Privé — abonnements de redessins chart ────────────────────
 
   #subscribeChartRedraws() {
     const redraw = () => this.#redraw();
@@ -498,8 +459,6 @@ export class ChartDrawing {
       subtree:         true,
     });
   }
-
-  // ── Privé — rendu SVG ─────────────────────────────────────────
 
   #redraw() {
     this.#syncCanvasBounds();
@@ -531,7 +490,6 @@ export class ChartDrawing {
       this.#svg.appendChild(el);
     }
 
-    // ── Aperçu du tracé en cours ──────────────────────────────
     if (this.#currentTool && this.#tempAnchors.length > 0) {
       const pxTemp = this.#tempAnchors.map(a => this.#anchorToPixel(a)).filter(Boolean);
       this.#svg.appendChild(
@@ -539,7 +497,6 @@ export class ChartDrawing {
       );
     }
 
-    // ── Highlight de l'ancre survolée / draguée ───────────────
     const highlightTarget = this.#dragging ?? this.#hoverAnchor;
     if (highlightTarget) {
       const drawing = this.#drawings.find(d => d.id === highlightTarget.drawingId);
@@ -648,8 +605,6 @@ export class ChartDrawing {
     setTimeout(() => document.addEventListener('click', dismiss, true), 0);
   }
 
-  // ── Privé — rendu d'une forme ─────────────────────────────────
-
   #renderShape(type, pts, isPreview, chartW = 800, drawing = null) {
     const stroke = STROKE[type] ?? '#00ff88';
     const fill   = FILL[type]   ?? 'none';
@@ -659,7 +614,6 @@ export class ChartDrawing {
       opacity: alpha,
     });
 
-    // ── TRENDLINE ─────────────────────────────────────────────
     if (type === 'trendline' && pts.length >= 2) {
       const [p1, p2] = pts;
       const dx = p2.x - p1.x, dy = p2.y - p1.y;
@@ -673,7 +627,6 @@ export class ChartDrawing {
       [p1, p2].forEach(p => g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 4, fill: stroke })));
     }
 
-    // ── FIBONACCI ─────────────────────────────────────────────
     if (type === 'fibonacci' && pts.length >= 2) {
       const [p1, p2] = pts;
       const levels   = [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1];
@@ -698,7 +651,6 @@ export class ChartDrawing {
       [p1, p2].forEach(p => g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 4, fill: stroke })));
     }
 
-    // ── ZONE ─────────────────────────────────────────────────
     if (type === 'zone' && pts.length >= 2) {
       const [p1, p2] = pts;
       g.appendChild(this.#svgEl('rect', {
@@ -709,7 +661,6 @@ export class ChartDrawing {
       [p1, p2].forEach(p => g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 4, fill: stroke })));
     }
 
-    // ── RECTANGLE ────────────────────────────────────────────
     if (type === 'rectangle' && pts.length >= 2) {
       const [p1, p2] = pts;
       const x = Math.min(p1.x, p2.x), y = Math.min(p1.y, p2.y);
@@ -718,14 +669,12 @@ export class ChartDrawing {
       [p1, p2].forEach(p => g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 4, fill: stroke })));
     }
 
-    // ── PITCHFORK ─────────────────────────────────────────────
   if (type === 'pitchfork' && pts.length >= 3) {
     const [p1, p2, p3] = pts;
     const midX = (p2.x + p3.x) / 2, midY = (p2.y + p3.y) / 2;
     const dx = midX - p1.x, dy = midY - p1.y;
     const ext = 5000;
 
-    // Calcule les points extrêmes des 3 branches pour le remplissage
     const branches = [
       { a: p1, b: { x: midX, y: midY } },
       { a: p2, b: { x: p2.x + dx, y: p2.y + dy } },
@@ -736,7 +685,6 @@ export class ChartDrawing {
       return { x: a.x + (b.x - a.x) / len * d, y: a.y + (b.y - a.y) / len * d };
     };
 
-    // Remplissage entre la branche centrale et les deux branches latérales
     const dist = Math.sqrt(dx * dx + dy * dy) * 3 || ext;
     const cEnd = extend(branches[0], dist);
     const l2End = extend(branches[1], dist);
@@ -747,7 +695,6 @@ export class ChartDrawing {
       stroke: 'none',
     }));
 
-    // Trace les 3 lignes
     branches.forEach(({ a, b }) => {
       const len = Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2) || 1;
       const ux  = (b.x - a.x) / len, uy = (b.y - a.y) / len;
@@ -757,7 +704,6 @@ export class ChartDrawing {
       }));
     });
 
-    // Ligne transversale entre p2 et p3
     g.appendChild(this.#svgEl('line', {
       x1: p2.x, y1: p2.y, x2: p3.x, y2: p3.y,
       stroke, 'stroke-width': 1, 'stroke-dasharray': '4 3',
@@ -766,7 +712,6 @@ export class ChartDrawing {
     [p1, p2, p3].forEach(p => g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 4, fill: stroke })));
   }
 
-    // ── FLÈCHE ───────────────────────────────────────────────
     if (type === 'arrow' && pts.length >= 2) {
       const [p1, p2] = pts;
       const dx  = p2.x - p1.x, dy = p2.y - p1.y;
@@ -781,8 +726,6 @@ export class ChartDrawing {
       g.appendChild(this.#svgEl('circle', { cx: p1.x, cy: p1.y, r: 4, fill: stroke }));
     }
 
-    // ── TEXTE ANNOTÉ ─────────────────────────────────────────
-    // FIX : priorité à drawing.anchors[0].text (survit au drag)
     if (type === 'text' && pts.length >= 1) {
       const [p]  = pts;
       const text = drawing?.anchors?.[0]?.text ?? (isPreview ? '…' : '—');
@@ -805,7 +748,6 @@ export class ChartDrawing {
       g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 3, fill: stroke }));
     }
 
-    // ── OUTIL MESURE ─────────────────────────────────────────
     if (type === 'measure' && pts.length >= 2) {
       const [p1, p2] = pts;
       const x = Math.min(p1.x, p2.x), y = Math.min(p1.y, p2.y);
@@ -830,7 +772,6 @@ export class ChartDrawing {
       [p1, p2].forEach(p => g.appendChild(this.#svgEl('circle', { cx: p.x, cy: p.y, r: 3, fill: stroke })));
     }
 
-    // ── CANAL PARALLÈLE ──────────────────────────────────────
     if (type === 'channel' && pts.length >= 3) {
       const [p1, p2, p3] = pts;
       const dx  = p2.x - p1.x, dy = p2.y - p1.y;
@@ -853,8 +794,6 @@ export class ChartDrawing {
     return g;
   }
 
-  // ── Privé — conversions coordonnées ──────────────────────────
-
   #pixelToAnchor(px) {
     try {
       const time  = this.#chart.timeScale().coordinateToTime(px.x);
@@ -873,15 +812,11 @@ export class ChartDrawing {
     } catch (_) { return null; }
   }
 
-  // ── Privé — SVG helper ────────────────────────────────────────
-
   #svgEl(tag, attrs) {
     const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
     for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
     return el;
   }
-
-  // ── Privé — toolbar ───────────────────────────────────────────
 
   #showToolbar(label) {
     const tb  = document.getElementById('draw-toolbar');

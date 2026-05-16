@@ -31,7 +31,6 @@ export class ExportModal {
   #activeTab  = 'image';
   #trap;
 
-  // État courant
   #symbol     = '';
   #tf         = '';
   #indicators = [];
@@ -43,14 +42,11 @@ export class ExportModal {
   constructor() {
     this.#overlay = document.getElementById('export-modal-overlay');
 
-    // Piège de focus + rôle dialog WCAG 2.1
     this.#trap = new FocusTrap(this.#overlay);
     markAsDialog(this.#overlay, this.#overlay?.querySelector('h2, h3'));
 
     this.#bindStaticEvents();
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   /**
    * @param {{ symbol:string, tf:string, indicators:string[],
@@ -70,10 +66,8 @@ export class ExportModal {
     this.#renderTabs();
     this.#renderContent();
 
-    // Activation du piège après rendu du contenu
     this.#trap.activate();
 
-    // Lance la génération de l'aperçu en arrière-plan
     this.#generatePreview();
   }
 
@@ -82,8 +76,6 @@ export class ExportModal {
     this.#overlay.style.display = 'none';
     this.#previewUrl = null;
   }
-
-  // ── Rendu ─────────────────────────────────────────────────
 
   #renderMeta() {
     const symEl = document.getElementById('export-modal-sym');
@@ -129,8 +121,6 @@ export class ExportModal {
     }
   }
 
-  // ── Génération de l'aperçu (async) ───────────────────────
-
   async #generatePreview() {
     if (this.#generating || !this.#container) return;
     this.#generating = true;
@@ -167,8 +157,6 @@ export class ExportModal {
       btn.textContent   = '📷 Télécharger PNG';
     }
   }
-
-  // ── Templates HTML ────────────────────────────────────────
 
   #tplImage() {
     const hasPreview = !!this.#previewUrl;
@@ -295,8 +283,6 @@ export class ExportModal {
       </div>`;
   }
 
-  // ── Binding d'événements par onglet ───────────────────────
-
   #bindImageEvents() {
     document.getElementById('export-btn-image')?.addEventListener('click', () => {
       if (!this.#previewUrl) return;
@@ -340,8 +326,6 @@ export class ExportModal {
     });
   }
 
-  // ── Événements statiques ──────────────────────────────────
-
   #bindStaticEvents() {
     document.getElementById('export-modal-close')
       ?.addEventListener('click', () => this.close());
@@ -357,7 +341,6 @@ export class ExportModal {
       }
     });
 
-    // Onglets
     ['image', 'data', 'share'].forEach(tab => {
       document.getElementById(`export-tab-${tab}`)
         ?.addEventListener('click', () => {

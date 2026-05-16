@@ -17,15 +17,13 @@ export class AlertListModal {
   #alertManager;
 
   /**
-   * @param {AlertManager} alertManager — instance partagée de la page
+   * @param {AlertManager} alertManager
    */
   constructor(alertManager) {
     this.#alertManager = alertManager;
     this.#overlay      = document.getElementById('alert-list-modal-overlay');
     this.#bindEvents();
   }
-
-  // ── API publique ──────────────────────────────────────────
 
   open() {
     this.#render();
@@ -37,12 +35,9 @@ export class AlertListModal {
     this.#overlay.style.display = 'none';
   }
 
-  /** Rafraîchit le rendu si la modal est déjà ouverte. */
   refresh() {
     if (this.#overlay?.style.display === 'block') this.#render();
   }
-
-  // ── Rendu ─────────────────────────────────────────────────
 
   #render() {
     const list    = document.getElementById('alert-list-items');
@@ -71,7 +66,6 @@ export class AlertListModal {
       return;
     }
 
-    // Tri : up d'abord, puis par prix décroissant
     const sorted = [...alerts].sort((a, b) => {
       if (a.direction !== b.direction) return a.direction === 'up' ? -1 : 1;
       return b.price - a.price;
@@ -96,12 +90,10 @@ export class AlertListModal {
       const dirIcon  = isUp ? '⬆' : '⬇';
       const dirLabel = isUp ? 'Si prix ≥' : 'Si prix ≤';
 
-      // Icône direction
       const icon = document.createElement('div');
       icon.style.cssText = `width:28px;height:28px;border-radius:50%;background:${dirColor}18;border:1px solid ${dirColor}44;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:${dirColor};`;
       icon.textContent = dirIcon;
 
-      // Infos
       const info = document.createElement('div');
       info.style.cssText = 'flex:1;min-width:0;';
 
@@ -119,7 +111,6 @@ export class AlertListModal {
 
       info.append(sym, price, hint);
 
-      // Bouton supprimer
       const del = document.createElement('button');
       del.style.cssText = [
         'background:rgba(255,61,90,.08)',
@@ -140,15 +131,13 @@ export class AlertListModal {
 
       del.addEventListener('click', () => {
         this.#alertManager.remove(alert.id);
-        this.#render();  // rafraîchit la liste en place
+        this.#render();
       });
 
       row.append(icon, info, del);
       list.appendChild(row);
     });
   }
-
-  // ── Événements statiques ──────────────────────────────────
 
   #bindEvents() {
     document.getElementById('alert-list-modal-close')
