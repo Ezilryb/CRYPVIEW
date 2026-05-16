@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' https://esm.sh https://fonts.googleapis.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data: https:;
+    connect-src 'self' https://api.binance.com wss://stream.binance.com:9443 https://api.geckoterminal.com https://crypview-proxy.vercel.app;
+    frame-ancestors 'none';
+    base-uri 'self';
+  ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Anti-flash theme -->
+  <script>
+    (function () {
+      var saved = localStorage.getItem('crypview-theme');
+      var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'light' || (!saved && !prefersDark)) {
+        document.documentElement.classList.add('light-theme');
+      }
+    })();
+  </script>
+
+  <title>CrypView — Tableau de bord</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- PWA -->
+  <link rel="manifest" href="public/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+  <link rel="shortcut icon" href="public/favicon.ico">
+  <meta name="theme-color" content="#070a0f" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f2f5" media="(prefers-color-scheme: light)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="CrypView">
+
+  <style>
+    /* ── Variables ── */
+    :root {
+      --bg:      #070a0f;
+      --bg2:     #0b0f17;
+      --panel:   #0d1117;
+      --border:  #1a2235;
+      --accent:  #00ff88;
+      --accent2: #00c8ff;
+      --red:     #ff3d5a;
+      --text:    #e2e8f0;
+      --muted:   #4a5568;
+      --dim:     #2d3748;
+      --glow:    rgba(0,255,136,0.12);
+    }
+    .light-theme {
+      --bg:     #f7f9fc;
+      --bg2:    #eef1f6;
+      --panel:  #ffffff;
+      --border: #dbe3ee;
+      --accent: #005c30;
+      --accent2:#0057a8;
+      --red:    #c4203c;
+      --text:   #0d1117;
+      --muted:  #4a5568;
+      --dim:    #c5ccd8;
+    }
+    .light-theme .panel-block { box-shadow:0 1px 3px rgba(0,0,0,.05); }
+    .light-theme .launch-card { box-shadow:0 1px 2px rgba(0,0,0,.04); }
+    .light-theme .launch-card:hover { background:#f0f6ff; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+
+    /* ── Reset ── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+
+    /* ── Scanlines ── */
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,136,0.005) 2px, rgba(0,255,136,0.005) 4px);
+      pointer-events:none; z-index:998;
+    }
+    .light-theme body::before {
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.015) 2px, rgba(0,0,0,0.015) 4px);
+    }
+
+    /* ── NAV ── */
+    nav#nav {
+      position: sticky; top:0; left:0; right:0; z-index:200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 60px;
+      background: rgba(7,10,15,0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      transition: background .3s;
+    }
+    .light-theme nav#nav { background: rgba(240,242,245,0.97); }
+
+    .nav-logo {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:18px;
+      letter-spacing:.04em; color:var(--text); text-decoration:none;
+      display:flex; align-items:center;
+    }
+    .nav-logo .accent { color:var(--accent); }
+
+    .nav-center {
+      display:flex; align-items:center; gap:6px;
+    }
+    .nav-badge-greet {
+      font-size:11px; color:var(--muted);
+      letter-spacing:.08em; text-transform:uppercase;
+    }
+    .nav-badge-visits {
+      display:inline-flex; align-items:center; gap:5px;
+      padding:3px 10px;
+      background:rgba(0,255,136,.07);
+      border:1px solid rgba(0,255,136,.2);
+      border-radius:20px;
+      font-size:9px; color:var(--accent); letter-spacing:.1em;
+    }
+    .nav-badge-dot { width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite; }
+
+    .nav-right { display:flex; align-items:center; gap:10px; }
+
+    .nav-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      font-family:'DM Mono',monospace; font-size:11px;
+      letter-spacing:.08em; text-transform:uppercase;
+      color:var(--bg); background:var(--accent);
+      border:none; padding:9px 20px; text-decoration:none;
+      cursor:pointer; transition:background .2s, box-shadow .2s;
+    }
+    .nav-btn:hover { background:#00e57a; box-shadow:0 0 20px rgba(0,255,136,.3); }
+
+    .nav-ghost {
+      background:none; border:1px solid var(--border); color:var(--muted);
+      padding:8px 14px; font-family:'DM Mono',monospace; font-size:10px;
+      letter-spacing:.06em; text-transform:uppercase; text-decoration:none;
+      transition:border-color .2s, color .2s; cursor:pointer;
+    }
+    .nav-ghost:hover { border-color:var(--muted); color:var(--text); }
+
+    /* Theme toggle */
+    .nav-theme-btn {
+      background:none; border:1px solid var(--border); color:var(--muted);
+      width:34px; height:34px; border-radius:6px; cursor:pointer;
+      font-size:14px; display:flex; align-items:center; justify-content:center;
+      transition:border-color .2s, background .2s;
+    }
+    .nav-theme-btn:hover { border-color:var(--accent); background:rgba(0,255,136,.07); }
+
+    /* Lang selector */
+    .lang-select {
+      background:none; border:1px solid var(--border); color:var(--muted);
+      padding:5px 28px 5px 10px; font-family:'DM Mono',monospace; font-size:10px;
+      cursor:pointer; border-radius:4px; transition:border-color .2s;
+      appearance:none; -webkit-appearance:none; outline:none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat:no-repeat; background-position:right 8px center;
+    }
+    .lang-select:hover, .lang-select:focus { border-color:var(--accent); color:var(--accent); }
+    .light-theme .lang-select { background-color:#fff; color:#4a5568; }
+
+    /* hstat CTA (empty state) */
+    .hstat-cta {
+      display:inline-flex; align-items:center;
+      font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--accent); background:rgba(0,255,136,.06);
+      border:1px dashed rgba(0,255,136,.3); padding:4px 10px;
+      text-decoration:none; cursor:pointer; font-family:'DM Mono',monospace;
+      transition:background .2s, border-color .2s; margin-top:2px;
+      white-space:nowrap;
+    }
+    .hstat-cta:hover { background:rgba(0,255,136,.14); border-color:rgba(0,255,136,.6); }
+
+    @media(max-width:768px) {
+      nav#nav { padding:0 16px; }
+      .nav-center { display:none; }
+      .nav-badge-greet { display:none; }
+    }
+
+    /* ── TICKER STRIP ── */
+    .ticker-strip {
+      width:100%; border-bottom:1px solid var(--border);
+      background:rgba(13,17,23,.6); overflow:hidden; padding:8px 0;
+    }
+    .light-theme .ticker-strip { background:rgba(255,255,255,.6); }
+    .ticker-track { display:flex; white-space:nowrap; animation:ticker 90s linear infinite; }
+    .ticker-track:hover { animation-play-state:paused; }
+    .ticker-item { display:inline-flex; align-items:center; gap:8px; padding:0 24px; border-inline-end:1px solid var(--border); font-size:11px; }
+    .t-sym { color:var(--muted); letter-spacing:.1em; font-weight:500; }
+    .t-price { color:var(--text); }
+    .t-chg.up { color:var(--accent); }
+    .t-chg.down { color:var(--red); }
+    @keyframes ticker { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+
+    /* ── HERO SECTION ── */
+    .hero-dash {
+      padding: 56px 40px 40px;
+      max-width: 1300px;
+      margin: 0 auto;
+      position: relative;
+      transition: padding .4s ease;
+    }
+    .hero-dash.scrolled {
+      padding-top: 24px;
+      padding-bottom: 16px;
+    }
+
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+      transition: margin-bottom .4s ease;
+    }
+    .hero-dash.scrolled .hero-top { margin-bottom: 0; }
+
+    .hero-left {}
+
+    /* Halo de bienvenue – couleur injectée par JS via --halo-color */
+    .hero-greeting {
+      font-size: 11px; letter-spacing:.18em; text-transform:uppercase;
+      color:var(--muted); margin-bottom:8px;
+      position: relative;
+    }
+    .hero-greeting::after {
+      content: '';
+      position: absolute;
+      top: 50%; left: -20px;
+      width: 260px; height: 260px;
+      background: var(--halo-color, var(--accent));
+      filter: blur(110px);
+      opacity: 0.13;
+      z-index: -1;
+      transform: translateY(-50%);
+      pointer-events: none;
+      transition: opacity .6s ease, background .8s ease;
+    }
+    .hero-dash.scrolled .hero-greeting::after { opacity: 0; }
+
+    .hero-title-dash {
+      font-family:'Syne',sans-serif; font-weight:800;
+      font-size: clamp(2.4rem, 7.5vw, 4.6rem);
+      line-height: 0.92; letter-spacing:-.04em;
+      margin-bottom: 20px;
+      background: linear-gradient(160deg, var(--text) 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: font-size .4s ease, opacity .4s ease;
+    }
+    .hero-dash.scrolled .hero-title-dash {
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      opacity: 0.7;
+    }
+    .hero-title-dash .hl {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub-dash {
+      font-size:12px; color:var(--muted); line-height:1.8;
+      letter-spacing:.04em; max-width:480px;
+      transition: opacity .4s ease, max-height .4s ease;
+      overflow: hidden;
+    }
+    .hero-dash.scrolled .hero-sub-dash { opacity: 0; max-height: 0; margin: 0; }
+
+    /* Stats rapides hero */
+    .hero-stats-row {
+      display:flex; gap:1px; background:var(--border);
+      border:1px solid var(--border); align-self:flex-start;
+      flex-shrink:0;
+    }
+    .hstat-cell {
+      background:var(--panel); padding:20px 28px;
+      display:flex; flex-direction:column; gap:4px; min-width:110px;
+    }
+    .hstat-cell-val {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:22px;
+      color:var(--text);
+    }
+    .hstat-cell-val em { font-style:normal; font-size:13px; color:var(--accent); }
+    .hstat-cell-lbl { font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+
+    /* ── QUICK LAUNCH ── */
+    .section-block {
+      padding:0 40px 48px;
+      max-width:1300px;
+      margin:0 auto;
+    }
+
+    .block-label {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:10px; letter-spacing:.2em; text-transform:uppercase;
+      color:var(--accent); margin-bottom:12px;
+    }
+    .block-label::before { content:''; width:20px; height:1px; background:var(--accent); }
+
+    .block-title {
+      font-family:'Syne',sans-serif; font-weight:700;
+      font-size:clamp(18px,2.5vw,28px); color:var(--text);
+      letter-spacing:-.01em; margin-bottom:24px;
+    }
+    .block-title span { color:var(--accent); }
+
+    /* Grille de lancement */
+    .launch-grid {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:1px; background:var(--border);
+      border:1px solid var(--border);
+      margin-bottom:12px;
+    }
+    @media(max-width:900px) { .launch-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:480px) { .launch-grid { grid-template-columns:1fr; } }
+
+    .launch-card {
+      background:var(--panel); padding:28px 24px;
+      text-decoration:none; display:flex; flex-direction:column; gap:14px;
+      position:relative; overflow:hidden;
+      transition:background .2s, transform .2s, box-shadow .2s;
+      cursor:pointer;
+    }
+    .launch-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(to right, var(--accent), var(--accent2));
+      transform:scaleX(0); transform-origin:left;
+      transition:transform .35s ease;
+    }
+    .launch-card:hover { background:rgba(13,17,23,.85); transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.18); }
+    .launch-card:hover::before { transform:scaleX(1); }
+
+    .launch-card-icon {
+      font-size:22px; width:44px; height:44px;
+      border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      transition:border-color .3s;
+    }
+    .launch-card:hover .launch-card-icon { border-color:var(--accent); }
+
+    .launch-card-badge {
+      position:absolute; top:16px; inset-inline-end:16px;
+      font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--muted); background:var(--bg2);
+      border:1px solid var(--border); padding:2px 7px;
+    }
+
+    .launch-card-title {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:15px;
+      color:var(--text); letter-spacing:.01em;
+    }
+    .launch-card-desc { font-size:11px; color:var(--muted); line-height:1.75; letter-spacing:.03em; }
+
+    .launch-card-cta {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--accent); margin-top:auto; transition:gap .2s;
+    }
+    .launch-card:hover .launch-card-cta { gap:10px; }
+
+    /* Grille secondaire (layouts additionnels) */
+    .launch-grid-sm {
+      display:grid; grid-template-columns:repeat(5,1fr);
+      gap:1px; background:var(--border);
+      border:1px solid var(--border);
+    }
+    @media(max-width:900px) { .launch-grid-sm { grid-template-columns:repeat(3,1fr); } }
+    @media(max-width:480px) { .launch-grid-sm { grid-template-columns:repeat(2,1fr); } }
+
+    .launch-sm {
+      background:var(--panel); padding:14px 16px;
+      text-decoration:none; display:flex; align-items:center; gap:10px;
+      transition:background .2s; color:var(--muted); font-size:11px;
+      letter-spacing:.04em;
+    }
+    .launch-sm:hover { background:rgba(0,255,136,.06); color:var(--accent); }
+    .launch-sm-icon { font-size:14px; flex-shrink:0; }
+
+    /* ── RECENTS + INFOS ── */
+    .two-col {
+      display:grid; grid-template-columns:1fr 1.2fr; gap:1px;
+      background:var(--border); border:1px solid var(--border);
+    }
+    @media(max-width:900px) { .two-col { grid-template-columns:1fr; } }
+
+    .panel-block {
+      background:var(--panel); padding:28px 24px;
+    }
+    .panel-block-title {
+      font-family:'Syne',sans-serif; font-weight:700; font-size:13px;
+      color:var(--text); letter-spacing:.04em; margin-bottom:18px;
+      padding-bottom:10px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; gap:8px;
+    }
+    .panel-block-title .ptag {
+      margin-inline-start:auto; font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--muted); font-family:'DM Mono',monospace; font-weight:300;
+    }
+
+    /* Recents list */
+    .recent-list { display:flex; flex-direction:column; gap:8px; }
+    .recent-item {
+      display:flex; align-items:center; gap:12px;
+      padding:10px 14px;
+      background:rgba(255,255,255,.02); border:1px solid var(--border);
+      text-decoration:none; transition:background .15s, border-color .15s;
+    }
+    .recent-item:hover { background:rgba(0,255,136,.05); border-color:rgba(0,255,136,.25); }
+    .recent-sym {
+      font-family:'Syne',sans-serif; font-weight:800; font-size:13px;
+      color:var(--accent); min-width:80px;
+    }
+    .recent-tf { font-size:10px; color:var(--muted); letter-spacing:.06em; }
+    .recent-arrow { margin-inline-start:auto; color:var(--muted); font-size:11px; transition:color .15s, transform .15s; }
+    .recent-item:hover .recent-arrow { color:var(--accent); transform:translateX(4px); }
+    .recent-empty { font-size:11px; color:var(--muted); line-height:1.7; letter-spacing:.04em; padding:8px 0; }
+
+    /* Infos rapides */
+    .info-grid { display:flex; flex-direction:column; gap:10px; }
+    .info-row {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 14px; background:rgba(255,255,255,.02);
+      border:1px solid var(--border);
+    }
+    .info-icon { font-size:16px; flex-shrink:0; }
+    .info-text { font-size:11px; color:var(--muted); line-height:1.65; letter-spacing:.03em; }
+    .info-text strong { color:var(--text); font-weight:400; }
+
+    /* ── TIPS SECTION ── */
+    .tips-grid {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:1px; background:var(--border); border:1px solid var(--border);
+    }
+    @media(max-width:900px) { .tips-grid { grid-template-columns:1fr; } }
+
+    .tip-card {
+      background:var(--bg2); padding:22px 20px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .light-theme .tip-card { background:#e8eaf0; }
+    .tip-card-num { font-size:9px; color:var(--dim); letter-spacing:.1em; }
+    .tip-card-title { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); }
+    .tip-card-text { font-size:11px; color:var(--muted); line-height:1.75; letter-spacing:.03em; }
+    .tip-card code {
+      font-family:'DM Mono',monospace; color:var(--accent);
+      background:rgba(0,255,136,.08); padding:1px 5px; border-radius:3px; font-size:10px;
+    }
+
+    /* ── ALERT STATUS ── */
+    .alert-status-bar {
+      display:flex; align-items:center; gap:12px;
+      padding:14px 20px;
+      background:rgba(0,255,136,.04);
+      border:1px solid rgba(0,255,136,.15);
+      margin-bottom:1px;
+    }
+    .ast-dot { width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.5s infinite;flex-shrink:0; }
+    .ast-text { font-size:11px; color:var(--muted); letter-spacing:.04em; flex:1; }
+    .ast-text strong { color:var(--accent); }
+    .ast-link {
+      font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--accent); text-decoration:none;
+      border-bottom:1px solid rgba(0,255,136,.3); transition:border-color .2s;
+    }
+    .ast-link:hover { border-color:var(--accent); }
+
+    /* ── FOOTER ── */
+    .footer-ret {
+      padding:24px 40px;
+      border-top:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:16px;
+      background:var(--bg2);
+    }
+    .footer-ret-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:16px; color:var(--text); text-decoration:none; }
+    .footer-ret-logo .accent { color:var(--accent); }
+    .footer-ret-links { display:flex; gap:20px; flex-wrap:wrap; }
+    .footer-ret-links a { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); text-decoration:none; transition:color .2s; }
+    .footer-ret-links a:hover { color:var(--text); }
+    .footer-ret-copy { font-size:10px; color:var(--muted); letter-spacing:.06em; }
+
+    /* ── CONTINUE BAR ── */
+    @keyframes continuePulse {
+      0%, 100% { border-color: rgba(0,255,136,.2); box-shadow: none; }
+      50% { border-color: rgba(0,255,136,.55); box-shadow: 0 0 14px rgba(0,255,136,.12); }
+    }
+    .continue-bar {
+      display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+      padding:16px 22px;
+      background:rgba(0,255,136,.06);
+      border:1px solid rgba(0,255,136,.2);
+      margin-top:24px;
+      transition:background .2s;
+      animation: continuePulse 2.8s ease-in-out infinite;
+    }
+    .continue-bar:hover { background:rgba(0,255,136,.1); animation:none; border-color:rgba(0,255,136,.55); }
+    .continue-bar-label { font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
+    .continue-bar-session { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); flex:1; min-width:120px; }
+    .continue-bar-session em { font-style:normal; color:var(--muted); font-family:'DM Mono',monospace; font-weight:300; font-size:11px; margin-inline-start:8px; }
+    .continue-bar-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      font-family:'DM Mono',monospace; font-size:11px;
+      letter-spacing:.08em; text-transform:uppercase;
+      color:var(--bg); background:var(--accent);
+      border:none; padding:9px 18px; text-decoration:none;
+      cursor:pointer; transition:background .2s, box-shadow .2s; flex-shrink:0;
+    }
+    .continue-bar-btn:hover { background:#00e57a; box-shadow:0 0 20px rgba(0,255,136,.3); }
+
+    /* ── MOBILE ── */
+    @media(max-width:768px) {
+      .hide-mobile { display:none !important; }
+      .hero-stats-row { width:100%; }
+    }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    .anim-1 { animation:fadeUp .5s ease .1s both; }
+    .anim-2 { animation:fadeUp .5s ease .2s both; }
+    .anim-3 { animation:fadeUp .5s ease .3s both; }
+    .anim-4 { animation:fadeUp .5s ease .4s both; }
+    .anim-5 { animation:fadeUp .5s ease .5s both; }
+    .anim-6 { animation:fadeUp .5s ease .6s both; }
+
+    /* ── RESPONSIVE NAV ── */
+    @media(max-width:480px) {
+      .hero-dash { padding:32px 16px 24px; }
+      .section-block { padding:0 16px 32px; }
+      .footer-ret { padding:20px 16px; }
+      nav#nav { padding:0 14px; }
+    }
+  </style>
+
+<!-- Breadcrumb structuré — à personnaliser par page -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "CrypView — Tracker Crypto Temps Réel",
+        "item": "https://ezilryb.github.io/CRYPVIEW/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "FAQ",  /* ← adapter : Wiki / Risques / Cookies / Conditions */
+        "item": "https://ezilryb.github.io/CRYPVIEW/faq.html"
+      }
+    ]
+  }
+</script>
+
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav" role="navigation">
+  <a class="nav-logo" href="index.html?force_landing=1" aria-label="CrypView — Accueil">CRYP<span class="accent">VIEW</span></a>
+
+  <div class="nav-center">
+    <span class="nav-badge-greet" id="nav-greeting">Bon retour</span>
+    <span class="nav-badge-visits">
+      <span class="nav-badge-dot"></span>
+      <span id="nav-visits-label">1 visite</span>
+    </span>
+  </div>
+
+  <div class="nav-right">
+    <select class="lang-select" id="lang-selector" aria-label="Langue">
+      <option value="fr">🇫🇷 FR</option>
+      <option value="en">🇬🇧 EN</option>
+      <option value="zh">🇨🇳 ZH</option>
+      <option value="ar">🇸🇦 AR</option>
+    </select>
+    <button class="nav-theme-btn" id="theme-toggle" aria-label="Basculer le thème">
+      <span id="theme-icon">☀️</span>
+    </button>
+    <a class="nav-btn" href="page.html" id="nav-launch-btn">▶ Lancer</a>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker-strip" role="marquee" aria-label="Cours en temps réel" aria-live="off">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<!-- HERO -->
+<div class="hero-dash">
+  <div class="hero-top">
+    <div class="hero-left anim-1">
+      <div class="hero-greeting" id="hero-greeting-label">Bon retour,</div>
+      <h1 class="hero-title-dash">
+        <span id="hero-title-1">Prêt à</span><br>
+        <span class="hl" id="hero-title-2">analyser.</span>
+      </h1>
+      <p class="hero-sub-dash" id="hero-sub">
+        Accède directement à tes graphiques. Ton historique et tes alertes sont toujours là.
+      </p>
+
+      <!-- Continue bar (filled by JS) -->
+      <div class="continue-bar" id="continue-bar" style="display:none;">
+        <span class="continue-bar-label" id="continue-bar-label">Dernière session</span>
+        <span class="continue-bar-session" id="continue-bar-session">—</span>
+        <a class="continue-bar-btn" id="continue-bar-btn" href="page.html">▶ Reprendre</a>
+      </div>
+
+      </div>
+    </div>
+
+    <div class="hero-stats-row anim-2" aria-label="Statistiques">
+      <div class="hstat-cell">
+        <div class="hstat-cell-val" id="stat-visits">1</div>
+        <div class="hstat-cell-lbl" id="stat-visits-lbl">Visites</div>
+      </div>
+      <div class="hstat-cell">
+        <div class="hstat-cell-val" id="stat-alerts">0</div>
+        <div class="hstat-cell-lbl" id="stat-alerts-lbl">Alertes</div>
+      </div>
+      <div class="hstat-cell">
+        <div class="hstat-cell-val" id="stat-recents">0</div>
+        <div class="hstat-cell-lbl" id="stat-recents-lbl">Symboles</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK LAUNCH -->
+<div class="section-block anim-3">
+  <div class="block-label" id="launch-label">Lancement rapide</div>
+  <div class="block-title" id="launch-title">Ouvrir un <span id="launch-title-hl">layout</span></div>
+
+  <div class="launch-grid" id="launch-grid">
+    <!-- rempli par JS -->
+  </div>
+
+  <div class="launch-grid-sm" id="launch-grid-sm" style="margin-top:1px;">
+    <!-- rempli par JS -->
+  </div>
+</div>
+
+<!-- RECENTS + INFOS -->
+<div class="section-block anim-4">
+  <div class="block-label" id="recents-label">Activité récente</div>
+  <div class="block-title" id="recents-title">Reprendre <span id="recents-title-hl">où tu t'es arrêté</span></div>
+
+  <!-- Alerte status -->
+  <div class="alert-status-bar" id="alert-bar">
+    <span class="ast-dot"></span>
+    <span class="ast-text" id="alert-bar-text">Tes <strong id="alert-count">0</strong> alerte(s) sont actives et surveillent le marché.</span>
+    <a href="page.html" class="ast-link" id="alert-bar-link">Gérer →</a>
+  </div>
+
+  <div class="two-col">
+    <div class="panel-block">
+      <div class="panel-block-title">
+        <span>📌</span> <span id="recent-panel-title">Derniers symboles</span>
+        <span class="ptag" id="recent-panel-tag">Clique pour relancer</span>
+      </div>
+      <div class="recent-list" id="recent-list">
+        <p class="recent-empty" id="recent-empty-msg">Aucun historique encore. Lance un graphique pour commencer.</p>
+      </div>
+    </div>
+
+    <div class="panel-block">
+      <div class="panel-block-title">
+        <span>⚡</span> <span id="shortcutsTitle">Raccourcis clavier</span>
+      </div>
+      <div class="info-grid" id="shortcuts-list">
+        <!-- rempli par JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TIPS -->
+<div class="section-block anim-5 hide-mobile">
+  <div class="block-label" id="tips-section-label">Conseils</div>
+  <div class="block-title" id="tips-section-title">Pour aller <span id="tips-title-hl">plus loin</span></div>
+  <div class="tips-grid" id="tips-grid">
+    <!-- rempli par JS -->
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer-ret">
+  <a class="footer-ret-logo" href="index.html?force_landing=1">CRYP<span class="accent">VIEW</span></a>
+  <nav class="footer-ret-links">
+    <a href="index.html?force_landing=1" id="footer-landing">Présentation</a>
+    <a href="page.html" id="footer-app">Application</a>
+    <a href="faq.html" id="footer-faq">FAQ</a>
+    <a href="changelog.html" id="footer-changelog">Changelog</a>
+  </nav>
+  <span class="footer-ret-copy" id="footer-copy">© 2026 CrypView — MIT License</span>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   CRYPVIEW — returning.html
+   Tableau de bord habitués · i18n FR/EN/ZH/AR · localStorage
+   ══════════════════════════════════════════════════════════ */
+
+/* ── i18n ── */
+const LANGS = {
+  fr: {
+    dir: 'ltr',
+    navGreet: 'Bon retour',
+    navVisits: n => n <= 1 ? '1 visite' : `${n} visites`,
+    heroGreeting: 'Bon retour,',
+    heroGreetingMorning: 'Bon réveil,',
+    heroGreetingDay: 'Bonjour,',
+    heroGreetingEvening: 'Bonsoir,',
+    heroTitle1: 'Prêt à',
+    heroTitle2: 'analyser.',
+    heroSub: 'Accède directement à tes graphiques. Ton historique et tes alertes sont toujours là.',
+    heroSubMorning: 'Bon réveil. Les marchés asiatiques ont déjà bougé — prêt pour la session du jour ?',
+    heroSubEvening: 'Bonsoir. On jette un œil aux marchés avant de clore la journée ?',
+    heroSubWeekend: 'C\'est le weekend. Le marché crypto ne dort jamais, mais n\'oublie pas de souffler.',
+    heroSubDynamic: (sym, tf, when) => `Tu suivais ${sym} en ${tf} ${when}.`,
+    heroSubLastSeen: when => `Dernière visite ${when}.`,
+    lastSeenSoon: 'il y a moins d\'une heure',
+    lastSeenHours: h => `il y a ${h}h`,
+    lastSeenDays: d => `il y a ${d} jour${d > 1 ? 's' : ''}`,
+    continueLabel: 'Dernière session',
+    continueBtn: '▶ Reprendre',
+    statAlertsNone: 'Aucune alerte',
+    statRecentsNone: 'Aucun symbole',
+    statAlertsCta: '+ Créer',
+    statRecentsCta: '+ Ouvrir',
+    statVisitsLbl: 'Visites',
+    statAlertsLbl: 'Alertes',
+    statRecentsLbl: 'Symboles',
+    launchLabel: 'Lancement rapide',
+    launchTitle: 'Ouvrir un', launchTitleHl: 'layout',
+    recentsLabel: 'Activité récente',
+    recentsTitle: 'Reprendre', recentsTitleHl: "où tu t'es arrêté",
+    alertBarText: n => `Tes <strong>${n}</strong> alerte(s) surveillent le marché.`,
+    alertBarLink: 'Gérer →',
+    recentPanelTitle: 'Derniers symboles',
+    recentPanelTag: 'Clique pour relancer',
+    recentEmpty: 'Aucun historique encore. Lance un graphique pour commencer.',
+    shortcutsTitle: 'Raccourcis clavier',
+    tipsLabel: 'Conseils',
+    tipsTitle: 'Pour aller', tipsTitleHl: 'plus loin',
+    navLaunch: '▶ Lancer',
+    footerLanding: 'Présentation', footerApp: 'Application', footerFaq: 'FAQ', footerChangelog: 'Changelog',
+    footerCopy: '© 2026 CrypView — MIT License',
+    modeCards: [
+      { icon:'📊', badge:'Simple', title:'Vue Simple',     desc:'1 graphique. BTC/USDT par défaut. Idéal pour focus total.', href:'page.html',    cta:'Ouvrir →' },
+      { icon:'🔲', badge:'Multi',  title:'Multi 2 Charts', desc:'2 actifs côte à côte. Synchronisation crosshair.',           href:'multi2.html', cta:'Ouvrir →' },
+      { icon:'⊞',  badge:'Multi',  title:'Multi 4 Charts', desc:'Grille 2×2. Compare 4 marchés simultanément.',              href:'multi4.html', cta:'Ouvrir →' },
+      { icon:'⊟',  badge:'Pro',    title:'Multi 9 Charts', desc:'9 panneaux. Analyse macroéconomique complète.',              href:'multi9.html', cta:'Ouvrir →' },
+    ],
+    modeSmall: [
+      { icon:'↕', label:'Vertical 2',  href:'multiv2.html'  },
+      { icon:'↕', label:'Vertical 3',  href:'multiv3.html'  },
+      { icon:'⬛', label:'1 + 2',       href:'multi1p2.html' },
+      { icon:'⬛', label:'1 + 3',       href:'multi1p3.html' },
+      { icon:'🔍', label:'Screener',    href:'page.html'     },
+    ],
+    shortcuts: [
+      { icon:'⌨️', text: '<strong>Ctrl + K</strong> — Palette de commandes' },
+      { icon:'🖱️', text: '<strong>Clic droit</strong> — Menu contextuel & alertes' },
+      { icon:'📐', text: '<strong>Échap</strong> — Annuler tracé en cours' },
+      { icon:'🔎', text: '<strong>Scroll</strong> — Zoom avant / arrière sur le chart' },
+    ],
+    tips: [
+      { num:'01', title:'Footprint en temps réel', text:'Active le Footprint via le menu indicateurs pour voir la pression acheteur/vendeur à l\'intérieur de chaque bougie via <code>aggTrade</code>.' },
+      { num:'02', title:'Alerte en 2 clics',       text:'Depuis n\'importe quel graphique : <code>clic droit</code> → Alertes → Nouvelle alerte. Notification OS native sans inscription.' },
+      { num:'03', title:'Installer en PWA',         text:'Chrome : icône <code>⊕</code> dans la barre d\'adresse. Safari iOS : Partager → Sur l\'écran d\'accueil. Alertes actives en arrière-plan.' },
+    ],
+  },
+
+  en: {
+    dir: 'ltr',
+    navGreet: 'Welcome back',
+    navVisits: n => n <= 1 ? '1 visit' : `${n} visits`,
+    heroGreeting: 'Welcome back,',
+    heroGreetingMorning: 'Good morning,',
+    heroGreetingDay: 'Hello,',
+    heroGreetingEvening: 'Good evening,',
+    heroTitle1: 'Ready to',
+    heroTitle2: 'analyse.',
+    heroSub: 'Jump straight into your charts. Your history and alerts are right where you left them.',
+    heroSubMorning: 'Morning. Asian markets have already moved — ready for today\'s session?',
+    heroSubEvening: 'Good evening. Want to check the markets before calling it a day?',
+    heroSubWeekend: 'It\'s the weekend. Crypto never sleeps, but you should too.',
+    heroSubDynamic: (sym, tf, when) => `You were watching ${sym} on ${tf} ${when}.`,
+    heroSubLastSeen: when => `Last visit ${when}.`,
+    lastSeenSoon: 'less than an hour ago',
+    lastSeenHours: h => `${h}h ago`,
+    lastSeenDays: d => `${d} day${d > 1 ? 's' : ''} ago`,
+    continueLabel: 'Last session',
+    continueBtn: '▶ Resume',
+    statAlertsNone: 'No alerts',
+    statRecentsNone: 'No symbols',
+    statAlertsCta: '+ Create',
+    statRecentsCta: '+ Open',
+    statVisitsLbl: 'Visits',
+    statAlertsLbl: 'Alerts',
+    statRecentsLbl: 'Symbols',
+    launchLabel: 'Quick launch',
+    launchTitle: 'Open a', launchTitleHl: 'layout',
+    recentsLabel: 'Recent activity',
+    recentsTitle: 'Continue', recentsTitleHl: 'where you left off',
+    alertBarText: n => `Your <strong>${n}</strong> alert(s) are monitoring the market.`,
+    alertBarLink: 'Manage →',
+    recentPanelTitle: 'Recent symbols',
+    recentPanelTag: 'Click to reopen',
+    recentEmpty: 'No history yet. Launch a chart to get started.',
+    shortcutsTitle: 'Keyboard shortcuts',
+    tipsLabel: 'Tips',
+    tipsTitle: 'Go', tipsTitleHl: 'further',
+    navLaunch: '▶ Launch',
+    footerLanding: 'Landing', footerApp: 'Application', footerFaq: 'FAQ', footerChangelog: 'Changelog',
+    footerCopy: '© 2026 CrypView — MIT License',
+    modeCards: [
+      { icon:'📊', badge:'Simple', title:'Simple View',     desc:'1 chart. BTC/USDT by default. Perfect for focused trading.',  href:'page.html',   cta:'Open →' },
+      { icon:'🔲', badge:'Multi',  title:'Multi 2 Charts',  desc:'2 assets side by side. Synchronized crosshair.',              href:'multi2.html', cta:'Open →' },
+      { icon:'⊞',  badge:'Multi',  title:'Multi 4 Charts',  desc:'2×2 grid. Compare 4 markets simultaneously.',                href:'multi4.html', cta:'Open →' },
+      { icon:'⊟',  badge:'Pro',    title:'Multi 9 Charts',  desc:'9 panels. Complete macro-economic analysis.',                 href:'multi9.html', cta:'Open →' },
+    ],
+    modeSmall: [
+      { icon:'↕', label:'Vertical 2',  href:'multiv2.html'  },
+      { icon:'↕', label:'Vertical 3',  href:'multiv3.html'  },
+      { icon:'⬛', label:'1 + 2',       href:'multi1p2.html' },
+      { icon:'⬛', label:'1 + 3',       href:'multi1p3.html' },
+      { icon:'🔍', label:'Screener',   href:'page.html'     },
+    ],
+    shortcuts: [
+      { icon:'⌨️', text: '<strong>Ctrl + K</strong> — Command palette' },
+      { icon:'🖱️', text: '<strong>Right click</strong> — Context menu & alerts' },
+      { icon:'📐', text: '<strong>Escape</strong> — Cancel active drawing' },
+      { icon:'🔎', text: '<strong>Scroll</strong> — Zoom in / out on chart' },
+    ],
+    tips: [
+      { num:'01', title:'Real-time Footprint', text:'Enable Footprint from the indicator menu to see buyer/seller pressure inside each candle via <code>aggTrade</code> stream.' },
+      { num:'02', title:'Alert in 2 clicks',   text:'From any chart: <code>right-click</code> → Alerts → New Alert. Native OS notification, no sign-up required.' },
+      { num:'03', title:'Install as PWA',       text:'Chrome: <code>⊕</code> icon in address bar. Safari iOS: Share → Add to Home Screen. Alerts stay active in the background.' },
+    ],
+  },
+
+  zh: {
+    dir: 'ltr',
+    navGreet: '欢迎回来',
+    navVisits: n => `${n} 次访问`,
+    heroGreeting: '欢迎回来，',
+    heroGreetingMorning: '早上好，',
+    heroGreetingDay: '你好，',
+    heroGreetingEvening: '晚上好，',
+    heroTitle1: '准备好',
+    heroTitle2: '分析了。',
+    heroSub: '直接进入你的图表。你的历史记录和价格提醒都还在。',
+    heroSubMorning: '早上好。亚洲市场已开盘波动——准备好迎接今天的交易了吗？',
+    heroSubEvening: '晚上好。在收盘前看看市场行情如何？',
+    heroSubWeekend: '周末了。加密市场永不眠，但别忘了让自己休息一下。',
+    heroSubDynamic: (sym, tf, when) => `你${when}正在查看 ${sym}（${tf}）。`,
+    heroSubLastSeen: when => `上次访问：${when}。`,
+    lastSeenSoon: '不到一小时前',
+    lastSeenHours: h => `${h}小时前`,
+    lastSeenDays: d => `${d}天前`,
+    continueLabel: '上次会话',
+    continueBtn: '▶ 继续',
+    statAlertsNone: '无提醒',
+    statRecentsNone: '无交易对',
+    statAlertsCta: '+ 创建',
+    statRecentsCta: '+ 打开',
+    statVisitsLbl: '访问次数',
+    statAlertsLbl: '提醒数',
+    statRecentsLbl: '交易对',
+    launchLabel: '快速启动',
+    launchTitle: '选择', launchTitleHl: '工作区',
+    recentsLabel: '最近活动',
+    recentsTitle: '继续', recentsTitleHl: '上次未完成的',
+    alertBarText: n => `你有 <strong>${n}</strong> 个提醒正在监控市场。`,
+    alertBarLink: '管理 →',
+    recentPanelTitle: '最近交易对',
+    recentPanelTag: '点击重新打开',
+    recentEmpty: '暂无历史记录。启动图表开始使用吧。',
+    shortcutsTitle: '键盘快捷键',
+    tipsLabel: '使用技巧',
+    tipsTitle: '进一步', tipsTitleHl: '探索',
+    navLaunch: '▶ 启动',
+    footerLanding: '介绍页', footerApp: '应用', footerFaq: '常见问题', footerChangelog: '更新日志',
+    footerCopy: '© 2026 CrypView — MIT 许可证',
+    modeCards: [
+      { icon:'📊', badge:'简单', title:'单图模式',   desc:'1个图表，默认BTC/USDT，专注分析的最佳选择。',  href:'page.html',   cta:'打开 →' },
+      { icon:'🔲', badge:'多图', title:'双图模式',   desc:'两个资产并排显示，十字线同步。',                href:'multi2.html', cta:'打开 →' },
+      { icon:'⊞',  badge:'多图', title:'四图模式',   desc:'2×2网格，同时比较4个市场。',                   href:'multi4.html', cta:'打开 →' },
+      { icon:'⊟',  badge:'专业', title:'九图模式',   desc:'9个面板，完整的宏观经济分析。',                 href:'multi9.html', cta:'打开 →' },
+    ],
+    modeSmall: [
+      { icon:'↕', label:'垂直2图', href:'multiv2.html'  },
+      { icon:'↕', label:'垂直3图', href:'multiv3.html'  },
+      { icon:'⬛', label:'1+2',    href:'multi1p2.html' },
+      { icon:'⬛', label:'1+3',    href:'multi1p3.html' },
+      { icon:'🔍', label:'扫描器', href:'page.html'     },
+    ],
+    shortcuts: [
+      { icon:'⌨️', text: '<strong>Ctrl + K</strong> — 命令面板' },
+      { icon:'🖱️', text: '<strong>右键单击</strong> — 右键菜单和提醒' },
+      { icon:'📐', text: '<strong>Escape</strong> — 取消当前绘图' },
+      { icon:'🔎', text: '<strong>滚轮</strong> — 图表缩放' },
+    ],
+    tips: [
+      { num:'01', title:'实时足迹图', text:'在指标菜单中启用足迹图，通过 <code>aggTrade</code> 数据流查看每根K线内的买卖压力。' },
+      { num:'02', title:'两步设置提醒', text:'在任意图表中：<code>右键单击</code> → 提醒 → 新建提醒。原生系统通知，无需注册。' },
+      { num:'03', title:'安装为PWA', text:'Chrome：点击地址栏 <code>⊕</code> 图标。Safari iOS：分享 → 添加到主屏幕。提醒在后台持续运行。' },
+    ],
+  },
+
+  ar: {
+    dir: 'rtl',
+    navGreet: 'مرحباً بعودتك',
+    navVisits: n => `${n} زيارة`,
+    heroGreeting: 'مرحباً بعودتك،',
+    heroGreetingMorning: 'صباح الخير،',
+    heroGreetingDay: 'مرحباً،',
+    heroGreetingEvening: 'مساء الخير،',
+    heroTitle1: 'جاهز',
+    heroTitle2: 'للتحليل.',
+    heroSub: 'انتقل مباشرةً إلى مخططاتك. سجلّك وتنبيهاتك لا تزال في مكانها.',
+    heroSubMorning: 'صباح الخير. الأسواق الآسيوية تحركت بالفعل — هل أنت مستعد لجلسة اليوم؟',
+    heroSubEvening: 'مساء الخير. هل نلقي نظرة على الأسواق قبل نهاية اليوم؟',
+    heroSubWeekend: 'إنه عطلة نهاية الأسبوع. سوق العملات المشفرة لا ينام، لكن لا تنسَ أخذ قسط من الراحة.',
+    heroSubDynamic: (sym, tf, when) => `كنت تتابع ${sym} على ${tf} ${when}.`,
+    heroSubLastSeen: when => `آخر زيارة ${when}.`,
+    lastSeenSoon: 'منذ أقل من ساعة',
+    lastSeenHours: h => `منذ ${h} ساعة`,
+    lastSeenDays: d => `منذ ${d} يوم`,
+    continueLabel: 'آخر جلسة',
+    continueBtn: '▶ استئناف',
+    statAlertsNone: 'لا تنبيهات',
+    statRecentsNone: 'لا رموز',
+    statAlertsCta: '+ إنشاء',
+    statRecentsCta: '+ فتح',
+    statVisitsLbl: 'الزيارات',
+    statAlertsLbl: 'التنبيهات',
+    statRecentsLbl: 'الرموز',
+    launchLabel: 'تشغيل سريع',
+    launchTitle: 'فتح', launchTitleHl: 'مساحة عمل',
+    recentsLabel: 'النشاط الأخير',
+    recentsTitle: 'أكمل', recentsTitleHl: 'من حيث توقفت',
+    alertBarText: n => `لديك <strong>${n}</strong> تنبيه نشط يراقب السوق.`,
+    alertBarLink: 'إدارة ←',
+    recentPanelTitle: 'آخر الرموز',
+    recentPanelTag: 'انقر لإعادة الفتح',
+    recentEmpty: 'لا يوجد سجل بعد. افتح مخططاً للبدء.',
+    shortcutsTitle: 'اختصارات لوحة المفاتيح',
+    tipsLabel: 'نصائح',
+    tipsTitle: 'استكشف', tipsTitleHl: 'المزيد',
+    navLaunch: '▶ تشغيل',
+    footerLanding: 'الصفحة الرئيسية', footerApp: 'التطبيق', footerFaq: 'الأسئلة الشائعة', footerChangelog: 'سجل التغييرات',
+    footerCopy: '© 2026 CrypView — رخصة MIT',
+    modeCards: [
+      { icon:'📊', badge:'بسيط', title:'عرض بسيط',      desc:'مخطط واحد. BTC/USDT افتراضياً. مثالي للتركيز الكامل.',   href:'page.html',   cta:'فتح ←' },
+      { icon:'🔲', badge:'متعدد', title:'مخططان',        desc:'أصلان جنباً إلى جنب. تزامن المؤشر.',                    href:'multi2.html', cta:'فتح ←' },
+      { icon:'⊞',  badge:'متعدد', title:'أربعة مخططات', desc:'شبكة 2×2. قارن 4 أسواق في آنٍ واحد.',                  href:'multi4.html', cta:'فتح ←' },
+      { icon:'⊟',  badge:'احترافي', title:'تسعة مخططات', desc:'9 لوحات. تحليل اقتصادي كلي شامل.',                   href:'multi9.html', cta:'فتح ←' },
+    ],
+    modeSmall: [
+      { icon:'↕', label:'عمودي 2', href:'multiv2.html'  },
+      { icon:'↕', label:'عمودي 3', href:'multiv3.html'  },
+      { icon:'⬛', label:'1+2',    href:'multi1p2.html' },
+      { icon:'⬛', label:'1+3',    href:'multi1p3.html' },
+      { icon:'🔍', label:'الماسح', href:'page.html'     },
+    ],
+    shortcuts: [
+      { icon:'⌨️', text: '<strong>Ctrl + K</strong> — لوحة الأوامر' },
+      { icon:'🖱️', text: '<strong>النقر الأيمن</strong> — القائمة السياقية والتنبيهات' },
+      { icon:'📐', text: '<strong>Escape</strong> — إلغاء الرسم الحالي' },
+      { icon:'🔎', text: '<strong>التمرير</strong> — تكبير/تصغير المخطط' },
+    ],
+    tips: [
+      { num:'01', title:'الفوتبرينت الفوري', text:'فعّل الفوتبرينت من قائمة المؤشرات لرؤية ضغط المشترين/البائعين داخل كل شمعة عبر <code>aggTrade</code>.' },
+      { num:'02', title:'تنبيه بنقرتين', text:'من أي مخطط: <code>النقر الأيمن</code> → التنبيهات → تنبيه جديد. إشعار نظام أصلي دون تسجيل.' },
+      { num:'03', title:'التثبيت كـ PWA', text:'Chrome: أيقونة <code>⊕</code> في شريط العنوان. Safari iOS: مشاركة → إضافة إلى الشاشة الرئيسية. التنبيهات تعمل في الخلفية.' },
+    ],
+  },
+};
+
+/* ── State ── */
+const LS = {
+  visits:   'crypview_visits',
+  lastSeen: 'crypview_last_seen',
+  lang:     'crypview-lang',
+  theme:    'crypview-theme',
+  recents:  'crypview_recent_syms',
+  alerts:   'crypview_alerts',
+};
+
+let currentLang = 'fr';
+
+/* ── Helpers ── */
+function getLang() {
+  const stored = localStorage.getItem(LS.lang);
+  if (stored && LANGS[stored]) return stored;
+  const browser = (navigator.language || 'fr').split('-')[0].toLowerCase();
+  return LANGS[browser] ? browser : 'fr';
+}
+
+function t(key, ...args) {
+  const val = LANGS[currentLang]?.[key] ?? LANGS['fr'][key];
+  return typeof val === 'function' ? val(...args) : (val ?? key);
+}
+
+function setDir(dir) {
+  document.documentElement.dir = dir;
+  document.documentElement.lang = currentLang;
+}
+
+/* ── Visits counter ── */
+let _prevLastSeen = null;
+function trackVisit() {
+  _prevLastSeen = localStorage.getItem(LS.lastSeen); // save BEFORE overwriting
+  const visits = parseInt(localStorage.getItem(LS.visits) || '0') + 1;
+  localStorage.setItem(LS.visits, visits);
+  localStorage.setItem(LS.lastSeen, new Date().toISOString());
+  return visits;
+}
+
+/* ── Relative time since last visit ── */
+function getRelativeLastSeen() {
+  if (!_prevLastSeen) return null;
+  const diff = Date.now() - new Date(_prevLastSeen).getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return t('lastSeenSoon');
+  if (h < 24) return t('lastSeenHours', h);
+  const d = Math.floor(h / 24);
+  return t('lastSeenDays', d);
+}
+
+/* ── Last session from recents ── */
+function getLastSession() {
+  const recents = getRecents();
+  if (!recents.length) return null;
+  const r = recents[0];
+  return {
+    sym: (r.sym || 'BTC/USDT').replace('USDT', '/USDT'),
+    tf: r.tf || '—',
+    href: 'page.html?sym=' + (r.sym || 'btcusdt').toLowerCase()
+  };
+}
+
+/* ── Read alerts from localStorage ── */
+function getAlertCount() {
+  try {
+    const raw = localStorage.getItem(LS.alerts);
+    if (!raw) return 0;
+    const data = JSON.parse(raw);
+    if (!Array.isArray(data)) return 0;
+    return data.filter(a =>
+      a !== null &&
+      typeof a === 'object' &&
+      a.active !== false &&
+      typeof a.price === 'number' && // rejet si price est une string HTML
+      isFinite(a.price)
+    ).length;
+  } catch { return 0; }
+}
+
+/* ── Read recent symbols ── */
+const SYM_RE = /^[A-Z0-9]{2,20}$/;  // uniquement majuscules et chiffres
+const TF_RE  = /^(1s|1m|3m|5m|15m|30m|1h|2h|4h|6h|12h|1d|3d|1w|1M)$/;
+
+function getRecents() {
+  try {
+    const raw = localStorage.getItem(LS.recents);
+    if (!raw) return [];
+    return JSON.parse(raw)
+      .filter(r =>
+        r && typeof r.sym === 'string' && SYM_RE.test(r.sym) &&
+        typeof r.tf  === 'string' && TF_RE.test(r.tf)
+      )
+      .slice(0, 6);
+  } catch { return []; }
+}
+
+/* ── Render ── */
+function render(visits) {
+  const L = LANGS[currentLang];
+  setDir(L.dir);
+
+  /* NAV */
+  document.getElementById('nav-greeting').textContent   = t('navGreet');
+  document.getElementById('nav-visits-label').textContent = t('navVisits', visits);
+  document.getElementById('nav-launch-btn').textContent  = t('navLaunch');
+
+  /* HERO */
+  const hour = new Date().getHours();
+  const dow  = new Date().getDay(); // 0=Sun, 6=Sat
+  const isWeekend = dow === 0 || dow === 6;
+  let greetKey = 'heroGreetingDay';
+  if (hour >= 5 && hour < 12) greetKey = 'heroGreetingMorning';
+  else if (hour >= 18 || hour < 5) greetKey = 'heroGreetingEvening';
+  document.getElementById('hero-greeting-label').textContent = t(greetKey);
+  document.getElementById('hero-title-1').textContent        = t('heroTitle1');
+  document.getElementById('hero-title-2').textContent        = t('heroTitle2');
+
+  /* Halo color injection — orangé matin, violet nuit, vert/teal journée */
+  let haloColor;
+  if (isWeekend) {
+    haloColor = '#7c5cfc';                         /* violet weekend */
+  } else if (hour >= 5 && hour < 9) {
+    haloColor = '#ff8c42';                         /* orangé aube */
+  } else if (hour >= 9 && hour < 18) {
+    haloColor = 'var(--accent)';                   /* vert journée */
+  } else if (hour >= 18 && hour < 21) {
+    haloColor = '#f2994a';                         /* doré crépuscule */
+  } else {
+    haloColor = '#0090ff';                         /* bleu nuit */
+  }
+  document.documentElement.style.setProperty('--halo-color', haloColor);
+
+  // Dynamic hero subtitle — contextual by time + weekend
+  const lastSeen = getRelativeLastSeen();
+  const lastSession = getLastSession();
+  let heroSubText;
+  if (lastSeen && lastSession) {
+    heroSubText = t('heroSubDynamic', lastSession.sym, lastSession.tf, lastSeen);
+  } else if (lastSeen) {
+    heroSubText = t('heroSubLastSeen', lastSeen);
+  } else if (isWeekend && L.heroSubWeekend) {
+    heroSubText = L.heroSubWeekend;
+  } else if ((hour >= 5 && hour < 12) && L.heroSubMorning) {
+    heroSubText = L.heroSubMorning;
+  } else if ((hour >= 18 || hour < 5) && L.heroSubEvening) {
+    heroSubText = L.heroSubEvening;
+  } else {
+    heroSubText = t('heroSub');
+  }
+  document.getElementById('hero-sub').textContent = heroSubText;
+
+  /* Continue bar */
+  if (lastSession) {
+    const bar = document.getElementById('continue-bar');
+    bar.style.display = 'flex';
+    document.getElementById('continue-bar-label').textContent = t('continueLabel');
+    document.getElementById('continue-bar-session').innerHTML =
+      lastSession.sym + ' <em>' + lastSession.tf + '</em>';
+    const btn = document.getElementById('continue-bar-btn');
+    btn.textContent = t('continueBtn');
+    btn.href = lastSession.href;
+  }
+
+  /* Stats – hide/soften when 0 */
+  const alerts  = getAlertCount();
+  const recents = getRecents();
+  document.getElementById('stat-visits').textContent      = visits;
+  document.getElementById('stat-visits-lbl').textContent  = t('statVisitsLbl');
+
+  // Conditional alerts stat
+  const alertCell = document.getElementById('stat-alerts').closest('.hstat-cell');
+  if (alerts === 0) {
+    document.getElementById('stat-alerts').innerHTML = `<a class="hstat-cta" href="page.html">${t('statAlertsCta')}</a>`;
+    document.getElementById('stat-alerts-lbl').textContent = t('statAlertsNone');
+  } else {
+    document.getElementById('stat-alerts').textContent     = alerts;
+    document.getElementById('stat-alerts-lbl').textContent = t('statAlertsLbl');
+  }
+
+  // Conditional recents stat
+  if (recents.length === 0) {
+    document.getElementById('stat-recents').innerHTML = `<a class="hstat-cta" href="page.html">${t('statRecentsCta')}</a>`;
+    document.getElementById('stat-recents-lbl').textContent = t('statRecentsNone');
+  } else {
+    document.getElementById('stat-recents').textContent     = recents.length;
+    document.getElementById('stat-recents-lbl').textContent = t('statRecentsLbl');
+  }
+
+  /* Launch section */
+  document.getElementById('launch-label').textContent    = t('launchLabel');
+  document.getElementById('launch-title').childNodes[0].textContent = t('launchTitle') + ' ';
+  document.getElementById('launch-title-hl').textContent  = t('launchTitleHl');
+  renderLaunchGrid(L);
+
+  /* Recents section */
+  document.getElementById('recents-label').textContent       = t('recentsLabel');
+  document.getElementById('recents-title').childNodes[0].textContent = t('recentsTitle') + ' ';
+  document.getElementById('recents-title-hl').textContent    = t('recentsTitleHl');
+  
+
+
+  const alertBarEl = document.getElementById('alert-bar-text');
+  const strongEl = alertBarEl.querySelector('strong') || document.createElement('strong');
+  strongEl.id = 'alert-count';
+  strongEl.textContent = String(alerts); // nombre uniquement, pas de HTML
+  if (!alertBarEl.querySelector('strong')) {
+  // Reconstruit le texte sans innerHTML sur données externes
+    alertBarEl.textContent = '';
+    const prefix = document.createTextNode(
+      getLocale() === 'fr' ? 'Tes ' : getLocale() === 'en' ? 'Your ' : ''
+    );
+    const suffix = document.createTextNode(
+    getLocale() === 'fr' ? ' alerte(s) surveillent le marché.' : ' alert(s) are monitoring the market.'
+    );
+    alertBarEl.appendChild(prefix);
+    alertBarEl.appendChild(strongEl);
+    alertBarEl.appendChild(suffix);
+  } else {
+    strongEl.textContent = String(alerts);
+  }
+
+
+
+
+  document.getElementById('alert-bar-link').textContent      = t('alertBarLink');
+  document.getElementById('recent-panel-title').textContent  = t('recentPanelTitle');
+  document.getElementById('recent-panel-tag').textContent    = t('recentPanelTag');
+  renderRecents(recents);
+  renderShortcuts(L);
+
+  /* Tips */
+  document.getElementById('tips-section-label').textContent = t('tipsLabel');
+  document.getElementById('tips-section-title').childNodes[0].textContent = t('tipsTitle') + ' ';
+  document.getElementById('tips-title-hl').textContent      = t('tipsTitleHl');
+  document.getElementById('shortcutsTitle').textContent     = t('shortcutsTitle');
+  renderTips(L);
+
+  /* Footer */
+  document.getElementById('footer-landing').textContent   = t('footerLanding');
+  document.getElementById('footer-app').textContent       = t('footerApp');
+  document.getElementById('footer-faq').textContent       = t('footerFaq');
+  document.getElementById('footer-changelog').textContent = t('footerChangelog');
+  document.getElementById('footer-copy').textContent      = t('footerCopy');
+}
+
+function renderLaunchGrid(L) {
+  /* Cards principales */
+  const grid = document.getElementById('launch-grid');
+  grid.innerHTML = L.modeCards.map(c => `
+    <a class="launch-card" href="${c.href}">
+      <div class="launch-card-badge">${c.badge}</div>
+      <div class="launch-card-icon">${c.icon}</div>
+      <div class="launch-card-title">${c.title}</div>
+      <div class="launch-card-desc">${c.desc}</div>
+      <span class="launch-card-cta">${c.cta}</span>
+    </a>`).join('');
+
+  /* Petits raccourcis */
+  const sm = document.getElementById('launch-grid-sm');
+  sm.innerHTML = L.modeSmall.map(s => `
+    <a class="launch-sm" href="${s.href}">
+      <span class="launch-sm-icon">${s.icon}</span>${s.label}
+    </a>`).join('');
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+function renderRecents(recents) {
+  const list = document.getElementById('recent-list');
+  if (!recents.length) {
+    list.innerHTML = '';
+    const p = document.createElement('p');
+    p.className = 'recent-empty';
+    p.textContent = t('recentEmpty');
+    list.appendChild(p);
+    return;
+  }
+  list.innerHTML = ''; // vide d'abord
+  recents.forEach(r => {
+    const sym = (r.sym || 'BTCUSDT').toUpperCase().replace('USDT', '/USDT');
+    const tf  = r.tf || '1m';
+    const href = 'page.html?sym=' + encodeURIComponent((r.sym || 'btcusdt').toLowerCase());
+
+    const a = document.createElement('a');
+    a.className = 'recent-item';
+    a.href = href;
+
+    const symSpan = document.createElement('span');
+    symSpan.className = 'recent-sym';
+    symSpan.textContent = sym; // textContent — XSS impossible
+
+    const tfSpan = document.createElement('span');
+    tfSpan.className = 'recent-tf';
+    tfSpan.textContent = tf;
+
+    const arrow = document.createElement('span');
+    arrow.className = 'recent-arrow';
+    arrow.textContent = '→';
+
+    a.append(symSpan, tfSpan, arrow);
+    list.appendChild(a);
+  });
+}
+
+function renderShortcuts(L) {
+  const el = document.getElementById('shortcuts-list');
+  el.innerHTML = L.shortcuts.map(s => `
+    <div class="info-row">
+      <span class="info-icon">${s.icon}</span>
+      <span class="info-text">${s.text}</span>
+    </div>`).join('');
+}
+
+function renderTips(L) {
+  const el = document.getElementById('tips-grid');
+  el.innerHTML = L.tips.map(tip => `
+    <div class="tip-card">
+      <div class="tip-card-num">${tip.num}</div>
+      <div class="tip-card-title">${tip.title}</div>
+      <div class="tip-card-text">${tip.text}</div>
+    </div>`).join('');
+}
+
+/* ── TICKER (same logic as index.html) ── */
+const TICKER_SYMS = [
+  { sym:'BTCUSDT', label:'BTC/USDT' },{ sym:'ETHUSDT', label:'ETH/USDT' },
+  { sym:'BNBUSDT', label:'BNB/USDT' },{ sym:'SOLUSDT', label:'SOL/USDT' },
+  { sym:'XRPUSDT', label:'XRP/USDT' },{ sym:'DOGEUSDT',label:'DOGE/USDT'},
+  { sym:'ADAUSDT', label:'ADA/USDT' },{ sym:'MATICUSDT',label:'MATIC/USDT'},
+];
+
+async function loadTicker() {
+  try {
+    const syms = TICKER_SYMS.map(s => `"${s.sym}"`).join(',');
+    const res  = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${syms}]`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const track = document.getElementById('ticker-track');
+    let html = '';
+    data.forEach(d => {
+      const lbl  = TICKER_SYMS.find(s => s.sym === d.symbol)?.label || d.symbol;
+      const pct  = parseFloat(d.priceChangePercent);
+      const sign = pct >= 0 ? '+' : '';
+      const cls  = pct >= 0 ? 'up' : 'down';
+      const price = parseFloat(d.lastPrice).toLocaleString('en-US', { maximumFractionDigits: 2 });
+      html += `<div class="ticker-item"><span class="t-sym">${lbl}</span><span class="t-price">${price}</span><span class="t-chg ${cls}">${sign}${pct.toFixed(2)}%</span></div>`;
+    });
+    /* Duplicate for seamless loop */
+    track.innerHTML = html + html;
+  } catch { /* silent */ }
+}
+
+/* ── THEME ── */
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  const isLight = document.documentElement.classList.toggle('light-theme');
+  localStorage.setItem(LS.theme, isLight ? 'light' : 'dark');
+  document.getElementById('theme-icon').textContent = isLight ? '🌙' : '☀️';
+});
+
+function syncThemeIcon() {
+  const isLight = document.documentElement.classList.contains('light-theme');
+  document.getElementById('theme-icon').textContent = isLight ? '🌙' : '☀️';
+}
+
+/* ── LANG SELECTOR ── */
+const langSel = document.getElementById('lang-selector');
+langSel.addEventListener('change', function() {
+  currentLang = this.value;
+  localStorage.setItem(LS.lang, currentLang);
+  const visits = parseInt(localStorage.getItem(LS.visits) || '1');
+  render(visits);
+});
+
+/* ── SCROLL SHRINK HERO ── */
+(function initScrollShrink() {
+  const hero = document.querySelector('.hero-dash');
+  if (!hero) return;
+  const THRESHOLD = 80;
+  window.addEventListener('scroll', () => {
+    hero.classList.toggle('scrolled', window.scrollY > THRESHOLD);
+  }, { passive: true });
+})();
+
+/* ── INIT ── */
+(function init() {
+  currentLang = getLang();
+  langSel.value = currentLang;
+  syncThemeIcon();
+  const visits = trackVisit();
+  render(visits);
+  loadTicker();
+})();
+</script>
+
+</body>
+</html>

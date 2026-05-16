@@ -4,11 +4,9 @@
 //  Exécuté avant chaque fichier de test (setupFiles dans vitest.config).
 // ============================================================
 
-// ── window / dispatchEvent ───────────────────────────────────
 global.window = global;
 global.dispatchEvent = () => {};
 
-// ── CustomEvent ───────────────────────────────────────────────
 global.CustomEvent = class CustomEvent {
   constructor(type, opts = {}) {
     this.type    = type;
@@ -17,7 +15,6 @@ global.CustomEvent = class CustomEvent {
   }
 };
 
-// ── localStorage ──────────────────────────────────────────────
 const _ls = Object.create(null);
 global.localStorage = {
   getItem:    (k)    => _ls[k] ?? null,
@@ -28,20 +25,17 @@ global.localStorage = {
   get length() { return Object.keys(_ls).length; },
 };
 
-// ── BroadcastChannel ─────────────────────────────────────────
 global.BroadcastChannel = class BroadcastChannel {
   onmessage = null;
   postMessage() {}
   close() {}
 };
 
-// ── Web Notifications ─────────────────────────────────────────
 global.Notification = Object.assign(
   class Notification { constructor() {} },
   { permission: 'denied', requestPermission: async () => 'denied' }
 );
 
-// ── Web Audio API ─────────────────────────────────────────────
 const _audioNode = () => ({
   connect() {},
   type: 'sine',
@@ -58,7 +52,6 @@ global.AudioContext = class AudioContext {
 };
 global.webkitAudioContext = global.AudioContext;
 
-// ── WebSocket — mock contrôlable ──────────────────────────────
 class FakeWebSocket {
   static CONNECTING = 0;
   static OPEN       = 1;
@@ -74,7 +67,6 @@ class FakeWebSocket {
     FakeWebSocket.instances.push(this);
   }
 
-  // Helpers for tests
   _open()          { this.readyState = FakeWebSocket.OPEN;   this.onopen?.(); }
   _message(data)   { this.onmessage?.({ data: typeof data === 'string' ? data : JSON.stringify(data) }); }
   _error()         { this.onerror?.(); }
@@ -88,7 +80,6 @@ class FakeWebSocket {
 }
 global.WebSocket = FakeWebSocket;
 
-// ── document minimal (pour ExportManager / templates) ─────────
 if (typeof global.document === 'undefined') {
   global.document = {
     createElement: () => ({ style: {}, href: '', download: '', click() {}, setAttribute() {} }),
@@ -102,13 +93,11 @@ if (typeof global.document === 'undefined') {
   };
 }
 
-// ── location (ExportManager.buildShareURL) ────────────────────
 Object.defineProperty(global, 'location', {
   value: { pathname: '/page.html', origin: 'https://crypview.test', href: '', search: '' },
   writable: true, configurable: true,
 });
 
-// ── navigator ─────────────────────────────────────────────────
 global.navigator = global.navigator ?? {};
 global.navigator.clipboard = { writeText: async () => {} };
 global.navigator.share = undefined;

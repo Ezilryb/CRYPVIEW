@@ -14,7 +14,7 @@
         }
       })();
     </script>
-
+ 
     <title>CrypView — Graphiques Crypto Temps Réel | BTCUSDT, ETHUSDT, 500+ Paires</title>
     <meta name="description"
           content="Graphiques crypto en temps réel (1s à 1M) avec 34 indicateurs avancés, Footprint, Orderflow et Drawing Tools. Données live Binance WebSocket.">
@@ -23,7 +23,7 @@
     <meta property="og:type"        content="website">
     <meta property="og:url"         content="https://crypview.betacapital.enterprise/page.html">
     <meta property="og:title"       content="CrypView — Un outil d'analyse Technique Crypto OPEN-SOURCE">
-    <meta property="og:description" content="CRYPVIEW est une plateforme d’analyse crypto en temps réel permettant de visualiser, comparer et analyser les marchés via des graphiques connectés à Binance.">
+    <meta property="og:description" content="CRYPVIEW est une plateforme d'analyse crypto en temps réel permettant de visualiser, comparer et analyser les marchés via des graphiques connectés à Binance.">
     <meta property="og:image" content="https://ezilryb.github.io/CRYPVIEW/og-image.png">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width"  content="1200">
@@ -35,7 +35,7 @@
     <meta name="twitter:card"        content="summary_large_image">
     <meta name="twitter:site"        content="@BetaCapital">
     <meta name="twitter:title"       content="CrypView — Un outil d'analyse Technique Crypto OPEN-SOURCE">
-    <meta name="twitter:description" content="CRYPVIEW est une plateforme d’analyse crypto en temps réel permettant de visualiser, comparer et analyser les marchés via des graphiques connectés à Binance.">
+    <meta name="twitter:description" content="CRYPVIEW est une plateforme d'analyse crypto en temps réel permettant de visualiser, comparer et analyser les marchés via des graphiques connectés à Binance.">
     <meta name="twitter:image" content="https://ezilryb.github.io/CRYPVIEW/og-image.png">
     <meta name="twitter:image:alt"   content="CrypView — interface de trading">
 
@@ -54,11 +54,6 @@
     <meta name="msapplication-TileColor"           content="#070a0f">
     <meta name="msapplication-config"              content="public/browserconfig.xml">
 
-    <!--
-      Import map — requis quand le projet est servi sans bundler
-      (npx serve, serveur statique, etc.). Vite prend la priorité
-      sur cet import map lors du dev/build et résout depuis node_modules.
-    -->
     <script type="importmap">
     {
       "imports": {
@@ -88,6 +83,44 @@
     <link rel="stylesheet" href="styles/components.css">
     <link rel="stylesheet" href="styles/charts.css">
     <link rel="stylesheet" href="styles/mobile-charts.css">
+
+<!-- Breadcrumb structuré — à personnaliser par page -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "CrypView — Tracker Crypto Temps Réel",
+        "item": "https://ezilryb.github.io/CRYPVIEW/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "FAQ",  /* ← adapter : Wiki / Risques / Cookies / Conditions */
+        "item": "https://ezilryb.github.io/CRYPVIEW/faq.html"
+      }
+    ]
+  }
+</script>
+
+<style>
+  #sw-trigger {
+    opacity        : 0;
+    pointer-events : none;
+    transform      : scale(0.92);
+    transition     : opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  #sw-trigger:hover {
+    opacity        : 1;
+    pointer-events : auto;
+    transform      : scale(1);
+  }
+</style>
+
   </head>
 <body>
 
@@ -95,6 +128,7 @@
 
   <header role="banner">
     <a class="logo" href="index.html" aria-label="CrypView — Accueil"><span>CRYP</span>VIEW</a>
+
     <div class="sym-search-wrap">
       <input id="sym-input" type="text" placeholder="Rechercher BTC..."
              data-i18n-ph="search.placeholder"
@@ -102,13 +136,33 @@
       <span class="sym-search-icon" aria-hidden="true">⌕</span>
       <div id="sym-dropdown" role="listbox" aria-label="Résultats de recherche"></div>
     </div>
+
     <div class="tf-scroll-wrapper" role="group" aria-label="Sélection du timeframe">
       <div class="tf-scroll" id="tf-scroll"></div>
     </div>
+
+    <!-- ── Tabs discrets : Sentiment / News / Fondamentaux / Order Book ── -->
+    <nav id="panel-tabs" class="panel-tabs" aria-label="Panneaux d'analyse">
+      <button class="panel-tab active" data-panel="sentiment" aria-pressed="true">
+        Sentiment
+      </button>
+      <button class="panel-tab" data-panel="news" aria-pressed="false">
+        News
+      </button>
+      <button class="panel-tab" data-panel="fondamentaux" aria-pressed="false">
+        Fondamentaux
+      </button>
+      <button class="panel-tab" data-panel="orderbook" aria-pressed="false">
+        Order Book
+      </button>
+    </nav>
+    <!-- ────────────────────────────────────────────────────────────────── -->
+
     <div class="price-display">
       <div id="live-price" aria-live="polite" aria-label="Prix actuel">—</div>
       <div id="price-change" aria-live="polite"></div>
     </div>
+
     <div class="status" role="status" aria-live="polite">
       <div class="dot" id="dot" aria-hidden="true"></div>
       <span id="status-text">Connexion…</span>
@@ -153,9 +207,22 @@
     </aside>
   </main>
 
-  <!-- ── Menu contextuel ───────────────────────────────────── -->
-
   <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+  <!-- ════════════════════════════════════════════════════════
+       📌 HISTORIQUE DES SYMBOLES RÉCENTS
+       Appelé par page.js via : window.saveRecentSym(sym, tf)
+       ════════════════════════════════════════════════════════ -->
+  <script>
+    window.saveRecentSym = function saveRecentSym(sym, tf) {
+      var KEY = 'crypview_recent_syms';
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch {}
+      list = list.filter(function (r) { return r.sym !== sym.toUpperCase(); });
+      list.unshift({ sym: sym.toUpperCase(), tf: tf || '1m' });
+      localStorage.setItem(KEY, JSON.stringify(list.slice(0, 6)));
+    };
+  </script>
 
   <script type="module" src="src/pages/page.js"></script>
 
@@ -179,6 +246,8 @@
 <noscript>
   <p>CrypView nécessite JavaScript pour afficher les graphiques en temps réel. Activez JavaScript dans votre navigateur pour accéder aux graphiques crypto, indicateurs techniques et alertes de prix.</p>
 </noscript>
+
+<script type="module" src="src/search-widget.js"></script>
 
 </body>
 </html>

@@ -33,7 +33,7 @@ const TERMS_I18N = {
 
     // Notices
     noticeWarn: 'Using CrypView implies full and unreserved acceptance of these terms. If you do not accept these terms, please stop using the application immediately.',
-    noticeInfo: 'CrypView is a <strong>free, registration-free</strong> application provided for informational purposes only. It does not constitute a regulated investment advisory service in any way.',
+    noticeInfo: 'CrypView is a <strong>free, no mandatory registration</strong> application provided for informational purposes only. It does not constitute a regulated investment advisory service in any way.',
 
     // Article 1
     art1Title: 'Article 1 — Purpose',
@@ -42,7 +42,7 @@ const TERMS_I18N = {
 
     // Article 2
     art2Title: 'Article 2 — Access to the service',
-    art2p1: 'Access to CrypView is <strong>free, unrestricted and requires no registration</strong>. No user account is required. Use of the service requires a modern web browser and an internet connection.',
+    art2p1: 'Access to CrypView is <strong>free, unrestricted and requires no mandatory registration</strong>. No user account is required. Use of the service requires a modern web browser and an internet connection.',
     art2p2: 'Beta Capital Enterprise reserves the right to suspend, modify or discontinue all or part of the service at any time, without notice and without any obligation to compensate users.',
 
     // Article 3
@@ -119,14 +119,14 @@ const TERMS_I18N = {
     pageMeta: 'Dernière mise à jour : Avril 2026 · CrypView — Beta Capital Enterprise',
 
     noticeWarn: 'L\'utilisation de CrypView implique l\'acceptation pleine et entière des présentes conditions. Si vous n\'acceptez pas ces conditions, veuillez cesser d\'utiliser l\'application immédiatement.',
-    noticeInfo: 'CrypView est une application <strong>gratuite, sans inscription</strong>, fournie à titre purement informatif. Elle ne constitue en aucun cas un service de conseil en investissement réglementé.',
+    noticeInfo: 'CrypView est une application <strong>gratuite, sans inscription obligatoire</strong>, fournie à titre purement informatif. Elle ne constitue en aucun cas un service de conseil en investissement réglementé.',
 
     art1Title: 'Article 1 — Objet',
     art1p1: 'Les présentes Conditions Générales d\'Utilisation (CGU) régissent l\'accès et l\'utilisation de l\'application web CrypView, accessible à l\'adresse <strong>crypview.betacapital.enterprise</strong>, éditée par Beta Capital Enterprise.',
     art1p2: 'CrypView est un outil de visualisation de données financières en temps réel. Il affiche des graphiques de cours de crypto-actifs, des indicateurs techniques et des outils d\'analyse, à des fins exclusivement <strong>informatives et éducatives</strong>.',
 
     art2Title: 'Article 2 — Accès au service',
-    art2p1: 'L\'accès à CrypView est <strong>libre, gratuit et sans inscription</strong>. Aucun compte utilisateur n\'est requis. L\'utilisation du service implique la disponibilité d\'un navigateur web moderne et d\'une connexion internet.',
+    art2p1: 'L\'accès à CrypView est <strong>libre, gratuit et sans inscription obligatoire</strong>. Aucun compte utilisateur n\'est requis. L\'utilisation du service implique la disponibilité d\'un navigateur web moderne et d\'une connexion internet.',
     art2p2: 'Beta Capital Enterprise se réserve le droit de suspendre, modifier ou interrompre tout ou partie du service à tout moment, sans préavis et sans obligation d\'indemnisation envers les utilisateurs.',
 
     art3Title: 'Article 3 — Nature du service — Ce que CrypView n\'est pas',

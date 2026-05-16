@@ -16,6 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/faq.html">
   <style>
     :root {
       --bg:     #070a0f;
@@ -187,6 +188,28 @@
   <link rel="shortcut icon" 
     href="https://ezilryb.github.io/CRYPVIEW/public/favicon.ico">
 
+<!-- Breadcrumb structuré — à personnaliser par page -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "CrypView — Tracker Crypto Temps Réel",
+        "item": "https://ezilryb.github.io/CRYPVIEW/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "FAQ",  /* ← adapter : Wiki / Risques / Cookies / Conditions */
+        "item": "https://ezilryb.github.io/CRYPVIEW/faq.html"
+      }
+    ]
+  }
+</script>
+
 </head>
 <body>
 
@@ -198,7 +221,7 @@
     {
       "@type": "Question",
       "name": "CrypView est-il gratuit ?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Oui, entièrement gratuit, sans inscription." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Oui, entièrement gratuit, sans inscription obligatoire." }
     },
     {
       "@type": "Question",
@@ -213,7 +236,10 @@
   <a class="nav-logo" href="index.html">CRYP<span class="accent">VIEW</span></a>
   <div class="nav-right">
     <!-- lang switcher injected here by JS -->
-    <a class="nav-back" href="index.html" data-i18n="navBack">← Retour à l'accueil</a>
+    <a class="nav-back" href="index.html" 
+      title="CrypView — Tracker crypto en temps réel">
+      ← CrypView
+    </a>
   </div>
 </nav>
 
@@ -259,7 +285,7 @@
 
     <div class="faq-item">
       <div class="faq-question"><span class="faq-question-text" data-i18n="q_registration">Dois-je créer un compte ?</span><span class="faq-item-icon">+</span></div>
-      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_registration">Non. CrypView ne requiert aucune inscription…</div></div>
+      <div class="faq-answer"><div class="faq-answer-inner" data-i18n="a_registration">Non. CrypView ne requiert aucune inscription obligatoire…</div></div>
     </div>
 
     <div class="faq-item">
@@ -436,14 +462,29 @@
 </div><!-- /page-wrap -->
 
 <footer>
-  <span data-i18n="footerCopy">© 6 CrypView — Beta Capital Enterprise</span>
-  <nav aria-label="Liens légaux" style="display:flex;gap:16px">
-    <a href="cookies.html"  data-i18n="footCookies">Cookies</a>
-    <a href="privacy.html"  data-i18n="footPrivacy">Confidentialité</a>
-    <a href="terms.html"    data-i18n="footTerms">Conditions</a>
-    <a href="risks.html"    data-i18n="footRisks">Risques</a>
-    <a href="index.html"    data-i18n="footHome">Accueil</a>
-  </nav>
+  <div style="max-width:760px;margin:0 auto;padding:0 0 16px">
+    <!-- Lien principal vers l'accueil — ancre riche -->
+    <div style="margin-bottom:12px;font-size:11px;color:var(--muted)">
+      <a href="index.html" 
+         style="color:var(--accent);text-decoration:none;font-weight:500"
+         title="CrypView — Graphiques crypto en temps réel, 34 indicateurs techniques">
+        ← CrypView — Tracker Crypto Temps Réel
+      </a>
+    </div>
+    <!-- Liens contextuels vers d'autres pages clés -->
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <a href="index.html"    style="color:var(--muted);text-decoration:none;font-size:10px" 
+         title="Lancer CrypView — Graphiques crypto Binance live">Accueil</a>
+      <a href="wiki.html"     style="color:var(--muted);text-decoration:none;font-size:10px"
+         title="Documentation CrypView — Guide complet des indicateurs">Documentation</a>
+      <a href="changelog.html"style="color:var(--muted);text-decoration:none;font-size:10px">Changelog</a>
+      <a href="cookies.html"  style="color:var(--muted);text-decoration:none;font-size:10px">Cookies</a>
+      <a href="privacy.html"  style="color:var(--muted);text-decoration:none;font-size:10px">Confidentialité</a>
+      <a href="terms.html"    style="color:var(--muted);text-decoration:none;font-size:10px">Conditions</a>
+      <a href="risks.html"    style="color:var(--muted);text-decoration:none;font-size:10px">Risques</a>
+    </div>
+  </div>
+  <span>© 2026 CrypView — Beta Capital Enterprise</span>
 </footer>
 
 <script src="public/faq.i18n.js"></script>
@@ -516,9 +557,20 @@
     });
 
     // data-i18n-html → innerHTML
+    function sanitizeI18nHtml(html) {
+      const allowed = /<(\/?(a|strong|code|em|br)(\s[^>]*)?)>/gi;
+      // Échappe tout, puis réintroduit uniquement les balises autorisées
+      const escaped = html
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+      return escaped
+        .replace(/&lt;(\/?(a|strong|code|em|br)(\s[^>]*)?)&gt;/gi, '<$1>');
+    }
+
     document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
       var key = el.dataset.i18nHtml;
-      if (T[key] !== undefined) el.innerHTML = T[key];
+      if (T[key] !== undefined) el.innerHTML = sanitizeI18nHtml(T[key]);
     });
 
     // data-i18n-placeholder → placeholder

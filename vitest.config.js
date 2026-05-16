@@ -19,30 +19,20 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // ── Globals ────────────────────────────────────────────
-    // Injecte describe / it / expect / beforeEach / afterEach
-    // sans import explicite dans chaque fichier de test.
+
     globals: true,
 
-    // ── Environnement ──────────────────────────────────────
-    // Les indicateurs sont des fonctions pures (pas de DOM).
-    // 'node' est plus rapide que 'jsdom' et suffit ici.
-    // Changer en 'jsdom' si des tests de composants UI sont ajoutés.
     environment: 'node',
 
-    // ── Fichiers de tests ──────────────────────────────────
     include: ['tests/**/*.test.{js,ts}'],
     exclude: ['node_modules', 'dist'],
 
-    // ── Couverture (v8) ────────────────────────────────────
     coverage: {
       provider: 'v8',
 
-      // Fichiers analysés — uniquement les fonctions pures d'indicateurs
       include: ['src/indicators/**/*.js'],
-      exclude: ['src/indicators/index.js'], // barrel file, pas de logique
+      exclude: ['src/indicators/index.js'],
 
-      // Seuils minimaux globaux (bloquants en CI)
       thresholds: {
         lines:      80,
         functions:  80,
@@ -50,14 +40,10 @@ export default defineConfig({
         statements: 80,
       },
 
-      // Formats de rapport
       reporter: ['text', 'lcov', 'html'],
       reportsDirectory: './coverage',
     },
 
-    // ── Timeout ────────────────────────────────────────────
-    // Les calculs d'indicateurs sur 200 bougies restent < 100 ms.
-    // Un timeout serré détecte les régressions de performance.
     testTimeout: 5_000,
   },
 });

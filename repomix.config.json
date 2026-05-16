@@ -1,0 +1,22 @@
+{
+  "output": {
+    "filePath": "crypview-lite.txt",
+    "removeComments": true,
+    "removeEmptyLines": true,
+    "showLineNumbers": false
+  },
+  "ignore": {
+    "customPatterns": [
+      "node_modules/**",
+      ".git/**",
+      "dist/**",
+      "build/**",
+      "*.log",
+      "package-lock.json",
+      "*.html", 
+      "public/search-widget.js",
+      "repomix-output.*",
+      "crypview-*.txt"
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "name": "CrypView — Graphiques Crypto Temps Réel",
+  "short_name": "CrypView",
+  "description": "Tracker crypto en temps réel : 32 indicateurs, Footprint, Orderflow, alertes. Données live Binance.",
+  "start_url": "/CRYPVIEW/returning.html?utm_source=pwa&utm_medium=homescreen",
+  "id": "/CRYPVIEW/",
+  "scope": "/CRYPVIEW/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "theme_color": "#070a0f",
+  "background_color": "#070a0f",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    { "src": "/CRYPVIEW/public/icons/icon-72.png",  "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/icons/icon-96.png",  "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/icons/icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/icons/icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/icons/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/icons/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/CRYPVIEW/public/favicon.svg",        "sizes": "any",      "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    {
+      "src": "/CRYPVIEW/public/screenshots/desktop.png",
+      "sizes": "1280x720", "type": "image/png",
+      "form_factor": "wide", "label": "CrypView — Vue graphique desktop"
+    },
+    {
+      "src": "/CRYPVIEW/public/screenshots/mobile.png",
+      "sizes": "390x844", "type": "image/png",
+      "form_factor": "narrow", "label": "CrypView — Vue mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vue Simple",
+      "short_name": "Simple",
+      "description": "Graphique simple BTC/USDT",
+      "url": "/CRYPVIEW/page.html?sym=btcusdt&utm_source=pwa_shortcut",
+      "icons": [{ "src": "/CRYPVIEW/public/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Multi 2 Charts",
+      "short_name": "Multi 2",
+      "description": "Deux graphiques côte à côte",
+      "url": "/CRYPVIEW/multi2.html?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/CRYPVIEW/public/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Multi 4 Charts",
+      "short_name": "Multi 4",
+      "description": "Grille 2×2 de graphiques",
+      "url": "/CRYPVIEW/multi4.html?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/CRYPVIEW/public/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Tableau de bord",
+      "short_name": "Dashboard",
+      "description": "Vue habitués avec lancement rapide",
+      "url": "/CRYPVIEW/returning.html?utm_source=pwa_shortcut",
+      "icons": [{ "src": "/CRYPVIEW/public/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 480
+  }
+}

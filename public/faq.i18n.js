@@ -53,7 +53,7 @@ const FAQ_I18N = {
     a_is_free:    'Yes, completely. CrypView is free and open-source (MIT license). No subscription, no premium plan, no hidden fees. The source code is available on GitHub.',
 
     q_registration: 'Do I need to create an account?',
-    a_registration: 'No. CrypView requires no registration, no email and no password. Open the page and you\'re ready to go — all settings are saved locally in your browser.',
+    a_registration: 'No. CrypView requires no mandatory registration, no email and no password. Open the page and you\'re ready to go — all settings are saved locally in your browser.',
 
     q_install: 'Can I install CrypView on my device?',
     a_install: 'Yes. CrypView is a Progressive Web App (PWA). In Chrome/Edge, click the ⊞ icon in the address bar → Install. On iOS Safari, tap Share → Add to Home Screen. It will open in a standalone window just like a native app.',
@@ -190,7 +190,7 @@ const FAQ_I18N = {
     a_is_free:    'Oui, entièrement. CrypView est gratuit et open-source (licence MIT). Aucun abonnement, aucun plan premium, aucun frais caché. Le code source est disponible sur GitHub.',
 
     q_registration: 'Dois-je créer un compte ?',
-    a_registration: 'Non. CrypView ne requiert aucune inscription, aucune adresse e-mail et aucun mot de passe. Ouvrez la page et vous êtes prêt — tous les réglages sont sauvegardés localement dans votre navigateur.',
+    a_registration: 'Non. CrypView ne requiert aucune inscription obligatoire, aucune adresse e-mail et aucun mot de passe. Ouvrez la page et vous êtes prêt — tous les réglages sont sauvegardés localement dans votre navigateur.',
 
     q_install: 'Puis-je installer CrypView sur mon appareil ?',
     a_install: 'Oui. CrypView est une Progressive Web App (PWA). Sur Chrome/Edge, cliquez sur l\'icône ⊞ dans la barre d\'adresse → Installer. Sur iOS Safari, appuyez sur Partager → Sur l\'écran d\'accueil. Il s\'ouvrira dans une fenêtre autonome comme une application native.',

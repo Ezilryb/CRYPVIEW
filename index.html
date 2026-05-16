@@ -2,6 +2,15 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://esm.sh https://fonts.googleapis.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: https:;
+      connect-src 'self' https://api.binance.com wss://stream.binance.com:9443 https://api.geckoterminal.com https://crypview-proxy.vercel.app;
+      base-uri 'self';
+    ">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
    
     <!-- ════════════════════════════════════════════════════════
@@ -16,6 +25,59 @@
         }
       })();
     </script>
+
+    <!-- ════════════════════════════════════════════════════════
+         🔁 REDIRECTION HABITUÉS — À placer juste après le
+         script anti-flash existant dans index.html
+         ════════════════════════════════════════════════════════ -->
+         <script>
+          (function () {
+            var VISITS_KEY    = 'crypview_visits';
+            var LAST_SEEN_KEY = 'crypview_last_seen';
+            var RETURNING_URL = 'returning.html';
+         
+            var isBot = /bot|crawl|spider|google|bing|baidu|duckduck|yandex|slurp|ia_archiver/i
+            .test(navigator.userAgent);
+
+            /* Incrémenter le compteur */
+            var visits = parseInt(localStorage.getItem(VISITS_KEY) || '0');
+         
+            /* 
+              ★ RÈGLE DE REDIRECTION ★
+              - 1ère visite  → landing (index.html) normale, on pose juste le compteur
+              - 2ème visite+ → tableau de bord habitués (returning.html)
+              - EXCEPTION    : ?force_landing=1 dans l'URL force toujours la landing
+            */
+            var forceLanding = window.location.search.indexOf('force_landing=1') !== -1;
+            /* Referrer interne (page.html, multi*.html, returning.html…) → ne pas rediriger */
+            var ref = document.referrer;
+            var internalReferrer = ref.length > 0 && ref.indexOf(window.location.hostname) !== -1;
+
+            if (!isBot && !forceLanding && !internalReferrer && visits >= 1) {
+              window.location.replace(RETURNING_URL);
+            } else {
+            localStorage.setItem(VISITS_KEY,    visits + 1);
+            localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
+            }
+            
+            var isPwa        = window.matchMedia('(display-mode: standalone)').matches
+                            || window.navigator.standalone === true;
+         
+            if (!forceLanding && !internalReferrer && visits >= 1) {
+              /* Déjà venu au moins une fois → rediriger */
+              window.location.replace(RETURNING_URL);
+            } else {
+              /* Première visite ou mode forcé → incrémenter et rester */
+              localStorage.setItem(VISITS_KEY,    visits + 1);
+              localStorage.setItem(LAST_SEEN_KEY, new Date().toISOString());
+            }
+          })();
+        </script>
+    <!--
+      NOTE : Si tu veux que l'utilisateur puisse toujours revenir
+      à la landing depuis le tableau de bord, ajoute ce lien :
+        <a href="index.html?force_landing=1">Voir la présentation</a>
+    -->
    
     <!-- ════════════════════════════════════════════════════════
          🔑 SEO PRINCIPAL
@@ -190,7 +252,6 @@
          ════════════════════════════════════════════════════════ -->
     <link rel="stylesheet" href="styles/index.css">
     <link rel="stylesheet" href="styles/mobile-index.css">
-    <link rel="stylesheet" href="styles/a11y-contrast-light.css">
     <link rel="stylesheet" href="styles/ai-drawer.css">
     <style>
       .hstat { display: flex; flex-direction: row; align-items: center; gap: 10px; }
@@ -286,7 +347,7 @@
       <span class="hero-title-line hl" data-i18n="hero.title.line3">differently.</span>
     </h1>
 
-    <p class="hero-sub">
+    <p class="hero-sub" data-i18n="hero.sub">
       Real-time crypto charts. Footprint, Orderflow, native alerts. Pro-grade interface — no signup, no limits.
     </p>
 
@@ -334,10 +395,6 @@
         <div class="hstat-text">
           <div class="hstat-val">32<em>+</em></div>
           <div class="hstat-label" data-i18n="hero.stats.indicators">Indicateurs</div>
-          <div class="hstat-ai-badge" aria-label="AI-Powered Insights">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="flex-shrink:0"><path d="M12 2a1 1 0 01.894.553l2.618 5.302 5.85.85a1 1 0 01.555 1.705l-4.234 4.126.999 5.825a1 1 0 01-1.451 1.054L12 18.902l-5.231 2.513a1 1 0 01-1.451-1.054l.999-5.825L2.083 10.41a1 1 0 01.555-1.705l5.85-.85L11.106 2.553A1 1 0 0112 2z"/></svg>
-            AI-Powered Insights
-          </div>
         </div>
       </div>
 
@@ -407,7 +464,7 @@
   <div class="features-grid" role="list">
 
     <!-- 01 — Temps réel -->
-    <article class="feat-card" role="listitem">
+    <article class="feat-card feat-card--highlight" role="listitem">
       <div class="feat-num" aria-hidden="true">01</div>
       <div class="feat-icon" aria-hidden="true">⚡</div>
       <h3 class="feat-title" data-i18n="features.cards.realtime.title">Temps réel à la seconde</h3>
@@ -420,7 +477,7 @@
     </article>
 
     <!-- 02 — Indicateurs -->
-    <article class="feat-card" role="listitem">
+    <article class="feat-card feat-card--highlight" role="listitem">
       <div class="feat-num" aria-hidden="true">02</div>
       <div class="feat-icon" aria-hidden="true">📊</div>
       <h3 class="feat-title" data-i18n="features.cards.indicators.title"32 Indicateurs techniques</h3>
@@ -434,7 +491,7 @@
     </article>
 
     <!-- 03 — Recherche -->
-    <article class="feat-card" role="listitem">
+    <article class="feat-card feat-card--highlight" role="listitem">
       <div class="feat-num" aria-hidden="true">03</div>
       <div class="feat-icon" aria-hidden="true">🔍</div>
       <h3 class="feat-title" data-i18n="features.cards.search.title">Recherche universelle</h3>
@@ -446,7 +503,7 @@
     </article>
 
     <!-- 04 — Multi-charts -->
-    <article class="feat-card" role="listitem">
+    <article class="feat-card feat-card--highlight" role="listitem">
       <div class="feat-num" aria-hidden="true">04</div>
       <div class="feat-icon" aria-hidden="true">🔲</div>
       <h3 class="feat-title" data-i18n="features.cards.multi.title">Multi-graphiques</h3>
@@ -459,7 +516,7 @@
     </article>
 
     <!-- 05 — Drawing Tools -->
-    <article class="feat-card" role="listitem">
+    <article class="feat-card feat-card--highlight" role="listitem">
       <div class="feat-num" aria-hidden="true">05</div>
       <div class="feat-icon" aria-hidden="true">✏️</div>
       <h3 class="feat-title" data-i18n="features.cards.drawing.title">Drawing Tools</h3>
@@ -472,7 +529,7 @@
     </article>
 
     <!-- 06 — Flux de trades -->
-    <article class="feat-card" role="listitem">
+    <article class="feat-card feat-card--highlight" role="listitem">
       <div class="feat-num" aria-hidden="true">06</div>
       <div class="feat-icon" aria-hidden="true">📋</div>
       <h3 class="feat-title" data-i18n="features.cards.trades.title">Flux de trades en direct</h3>
@@ -537,9 +594,9 @@
         <span data-i18n="advanced.title.line1">Voir ce que</span><br>
         <span data-i18n="advanced.title.line2">les autres ne voient pas.</span>
       </h2>
-      <p class="adv-intro" data-i18n="advanced.intro">
-        Footprint, Orderflow et Volume Profile fonctionnent en temps réel via les flux
-        <code>aggTrade</code> Binance — chaque transaction est décomposée instantanément.
+      <p class="adv-intro">
+        <span data-i18n="advanced.intro">Footprint, Orderflow et Volume Profile fonctionnent en temps réel via les flux</span>
+        <code>aggTrade</code> <span data-i18n="advanced.intro1">Binance — chaque transaction est décomposée instantanément.</span>
       </p>
     </div>
 
@@ -834,6 +891,96 @@
   </div>
 </section>
 
+<!-- ══ SECTION SÉMANTIQUE — Visible + indexable ═══════════════ -->
+<section class="section-about" id="about" aria-labelledby="about-title"
+         style="background:var(--bg2);border-top:1px solid var(--border);
+                padding:56px 40px;max-width:100%">
+  <div style="max-width:900px;margin:0 auto">
+
+    <h2 id="about-title" 
+        style="font-family:'Syne',sans-serif;font-weight:800;
+               font-size:clamp(20px,3vw,28px);margin-bottom:24px;
+               color:var(--text)">
+      <span data-i18n="semantique.titre">CrypView — Plateforme d'analyse technique crypto open-source</span>
+    </h2>
+
+    <p style="font-size:13px;color:var(--muted);line-height:1.9;
+              max-width:680px;margin-bottom:20px">
+      <span data-i18n="semantique.txt1">CrypView est une application web gratuite d'analyse des marchés de crypto-actifs 
+      en temps réel. Elle connecte directement votre navigateur à l'API publique Binance 
+      via WebSocket pour afficher des graphiques en chandeliers japonais mis à jour 
+      à la seconde sur plus de 500 paires USDT.</span>
+    </p>
+
+    <p style="font-size:13px;color:var(--muted);line-height:1.9;
+              max-width:680px;margin-bottom:20px">
+      <span data-i18n="semantique.txt2">La plateforme intègre 34 indicateurs techniques — dont le RSI, le MACD, 
+      les Bandes de Bollinger, l'Ichimoku Cloud, le SuperTrend et le VWAP — 
+      ainsi que des outils avancés comme le Footprint Chart, 
+      l'Orderflow Delta, le Volume Profile et une Liquidation Heatmap 
+      en temps réel via les flux </span><code style="font-family:monospace;
+      color:var(--accent);background:rgba(0,255,136,.08);padding:1px 5px">
+      aggTrade</code> <span data-i18n="semantique.txt3">Binance.</span>
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+                gap:16px;margin-top:28px">
+      <div>
+        <h3 style="font-family:'Syne',sans-serif;font-size:13px;
+                   color:var(--text);margin-bottom:8px"><span data-i18n="semantique.Stitre1">Analyse multi-graphiques</span></h3>
+        <p style="font-size:11px;color:var(--muted);line-height:1.7">
+          <span data-i18n="semantique.Stxt1">Comparez jusqu'à 9 actifs simultanément avec 8 layouts différents : 
+          grille 2×2, 3×3, vues verticales et asymétriques.</span>
+        </p>
+      </div>
+      <div>
+        <h3 style="font-family:'Syne',sans-serif;font-size:13px;
+                   color:var(--text);margin-bottom:8px"><span data-i18n="semantique.Stitre2">Alertes de prix natives</span></h3>
+        <p style="font-size:11px;color:var(--muted);line-height:1.7">
+          <span data-i18n="semantique.Stxt2">Posez une alerte en deux clics depuis le graphique. 
+          Notification OS native et signal audio via Web Audio API.</span>
+        </p>
+      </div>
+      <div>
+        <h3 style="font-family:'Syne',sans-serif;font-size:13px;
+                   color:var(--text);margin-bottom:8px"><span data-i18n="semantique.Stitre3">Support DEX & CEX</span></h3>
+        <p style="font-size:11px;color:var(--muted);line-height:1.7">
+          <span data-i18n="semantique.Stxt3">Visualisez les pools DEX sur Ethereum, Solana, Arbitrum et Base 
+          via l'API GeckoTerminal, sans clé API.</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Liens internes thématiques (signal de pertinence pour Google) -->
+    <nav style="margin-top:32px;display:flex;gap:16px;flex-wrap:wrap"
+         aria-label="Ressources CrypView">
+      <a href="wiki.html" 
+         style="font-size:11px;color:var(--accent);text-decoration:none;
+                border-bottom:1px solid rgba(0,255,136,.3)"
+         title="Documentation complète CrypView — indicateurs, raccourcis, multi-charts">
+         <span data-i18n="semantique.link1">Documentation complète →</span>
+      </a>
+      <a href="faq.html" 
+         style="font-size:11px;color:var(--muted);text-decoration:none;
+                border-bottom:1px solid rgba(100,100,100,.3)"
+         title="FAQ CrypView — questions fréquentes">
+         <span data-i18n="semantique.link2">Questions fréquentes→</span>
+      </a>
+      <a href="changelog.html"
+         style="font-size:11px;color:var(--muted);text-decoration:none;
+                border-bottom:1px solid rgba(100,100,100,.3)">
+        <span data-i18n="semantique.link3">Changelog v4.8 →</span>
+      </a>
+      <a href="guides/"
+         style="font-size:11px;color:var(--muted);text-decoration:none;
+                border-bottom:1px solid rgba(100,100,100,.3)"
+         title="Guides trading crypto — RSI, MACD, Ichimoku, Footprint">
+         <span data-i18n="semantique.link4">Guides trading →</span>
+      </a>
+    </nav>
+  </div>
+</section>
+
 <!-- ══════════════════════════════════════════════════════════
      DISCLAIMER
 ══════════════════════════════════════════════════════════ -->
@@ -874,7 +1021,7 @@
       </a>
       <p class="footer-tagline">
         <span data-i18n="footer.u1">Graphiques crypto professionnels.<br>
-          <span data-i18n="footer.u2">Sans inscription, sans limite.
+          <span data-i18n="footer.u2">Sans inscription obligatoire, sans limite.
       </p>
 
       <!-- Status indicator -->
@@ -885,7 +1032,7 @@
 
       <!-- Version -->
       <div class="footer-version">
-        <span class="footer-version__badge">v4.0</span>
+        <span class="footer-version__badge">v4.8</span>
         <span class="footer-version__note" data-i18n="footer.u4">Stable · MIT License</span>
       </div>
     </div>
@@ -931,7 +1078,7 @@
             <span class="footer-link__icon" aria-hidden="true">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </span>
-            <span data-i18n="footer.nav4">Changelog v4.0 </span>
+            <span data-i18n="footer.nav4">Changelog v4.8 </span>
           </a>
         </li>
         <li>
@@ -1108,7 +1255,7 @@
         "name": "CrypView est-il gratuit ?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Oui, CrypView est entièrement gratuit, sans inscription ni limite d'utilisation. L'application est open-source sous licence MIT."
+          "text": "Oui, CrypView est entièrement gratuit, sans inscription obligatoire ni limite d'utilisation. L'application est open-source sous licence MIT."
         }
       },
       {
@@ -1140,144 +1287,564 @@
   </script>
 
 <!-- ═══════════════════════════════════════════════════════════
-     DRAWER IA — Overlay + Panneau latéral
+     ASSISTANT IA — Drawer Gemini 2.5 Flash-Lite
+     Textes traduits via data-i18n / data-i18n-aria / data-i18n-placeholder
+     Chaînes dynamiques gérées par le dictionnaire inline du script.
 ═══════════════════════════════════════════════════════════ -->
 
-<!-- Overlay sombre -->
+<!-- Drawer HTML -->
 <div id="ai-overlay" role="presentation" aria-hidden="true"></div>
 
-<!-- Panneau drawer -->
-<aside
-  id="ai-drawer"
-  role="complementary"
+<aside id="ai-drawer"
+  role="dialog"
+  aria-modal="true"
+  data-i18n-aria="ai.drawerLabel"
   aria-label="Assistant IA CrypView"
-  aria-hidden="true"
->
+  aria-hidden="true">
+
   <!-- En-tête -->
   <div class="ai-drawer-header">
     <div class="ai-drawer-title">
       <div class="ai-drawer-title-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2a1 1 0 01.894.553l2.618 5.302 5.85.85a1 1 0 01.555
-                   1.705l-4.234 4.126.999 5.825a1 1 0 01-1.451 1.054L12
-                   18.902l-5.231 2.513a1 1 0 01-1.451-1.054l.999-5.825L2.083
-                   10.41a1 1 0 01.555-1.705l5.85-.85L11.106
-                   2.553A1 1 0 0112 2z"/>
-        </svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a1 1 0 01.894.553l2.618 5.302 5.85.85a1 1 0 01.555 1.705l-4.234 4.126.999 5.825a1 1 0 01-1.451 1.054L12 18.902l-5.231 2.513a1 1 0 01-1.451-1.054l.999-5.825L2.083 10.41a1 1 0 01.555-1.705l5.85-.85L11.106 2.553A1 1 0 0112 2z"/></svg>
       </div>
       <div class="ai-drawer-title-text">
-        <span class="ai-drawer-name">Assistant IA</span>
-        <span class="ai-drawer-sub">CrypView · Powered by AI</span>
+        <span class="ai-drawer-name">CrypView AI</span>
+        <span class="ai-drawer-sub" data-i18n="ai.drawerSub">Gemini 2.5 Flash-Lite</span>
       </div>
     </div>
-
-    <div class="ai-drawer-live" aria-hidden="true">
+    <span class="ai-drawer-live" aria-hidden="true">
       <span class="ai-drawer-live-dot"></span>
-      LIVE
-    </div>
-
-    <button
-      class="ai-drawer-close"
-      id="ai-drawer-close-btn"
-      aria-label="Fermer l'assistant IA"
-    >&#x2715;</button>
+      <span data-i18n="ai.live">LIVE</span>
+    </span>
+    <button class="ai-drawer-close" id="ai-drawer-close"
+      data-i18n-aria="ai.closeBtn"
+      aria-label="Fermer l'assistant">✕</button>
   </div>
 
-  <!-- Corps : iframe Chatwoot -->
+  <!-- Corps : messages -->
   <div class="ai-drawer-body">
-    <div class="ai-drawer-loading" id="ai-drawer-loading" aria-hidden="true">
-      <div class="ai-loading-spinner"></div>
-      <span class="ai-loading-text">Chargement&#8230;</span>
+    <div class="ai-chat-messages" id="ai-chat-messages"
+      role="log"
+      aria-live="polite"
+      data-i18n-aria="ai.messagesLabel"
+      aria-label="Messages du chat"></div>
+
+    <!-- Suggestions rapides (disparaissent après 1er envoi) -->
+    <!-- Les chips sont rendus dynamiquement par le script pour traduire data-q -->
+    <div class="ai-suggestions" id="ai-suggestions">
+      <button class="ai-suggestion-chip" data-q-key="rsi"      data-q="Comment fonctionne le RSI ?">RSI</button>
+      <button class="ai-suggestion-chip" data-q-key="bb"       data-q="Explique les Bandes de Bollinger">Bollinger</button>
+      <button class="ai-suggestion-chip" data-q-key="macd"     data-q="Comment utiliser le MACD ?">MACD</button>
+      <button class="ai-suggestion-chip" data-q-key="ichimoku" data-q="Qu'est-ce que l'Ichimoku ?">Ichimoku</button>
+      <button class="ai-suggestion-chip" data-q-key="start"    data-q="Comment lancer CrypView ?">Démarrer</button>
     </div>
-    <iframe
-      id="ai-chatbot-iframe"
-      src="about:blank"
-      data-src="https://app.chatwoot.com/widget?website_token=69f25dded7f0fea2c6c006d2"
-      title="Assistant IA CrypView"
-      allow="microphone"
-      loading="lazy"
-    ></iframe>
+
+    <!-- Zone de saisie -->
+    <div class="ai-chat-input-area">
+      <div class="ai-input-wrapper">
+        <textarea
+          id="ai-chat-input"
+          class="ai-chat-input"
+          data-i18n-placeholder="ai.placeholder"
+          placeholder="Pose ta question sur CrypView ou le trading…"
+          rows="1"
+          data-i18n-aria="ai.placeholder"
+          aria-label="Message à l'assistant"
+          autocomplete="off"
+        ></textarea>
+        <button class="ai-send-btn" id="ai-send-btn"
+          data-i18n-aria="ai.sendLabel"
+          aria-label="Envoyer" disabled>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <div class="ai-drawer-footer" aria-hidden="true">
-    Propuls&#233; par Chatwoot &#183; CrypView &#169; 2026
-  </div>
+  <!-- Pied -->
+  <div class="ai-drawer-footer" data-i18n="ai.footer">Alimenté par Gemini · Ne constitue pas un conseil financier</div>
 </aside>
 
-<!-- CHATWOOT — SDK (bulle native masquée, on utilise notre drawer) -->
+<!-- Script principal Gemini — i18n ready -->
 <script>
-  window.chatwootSettings = {
-    hideMessageBubble : true,   /* on gère l'ouverture via notre bouton nav */
-    position          : 'right',
-    locale            : 'fr',
-    type              : 'standard'
-  };
+  (function () {
+    'use strict';
 
-  (function (d, t) {
-    var BASE_URL = 'https://app.chatwoot.com';
-    var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
-    g.src   = BASE_URL + '/packs/js/sdk.js';
-    g.defer = true;
-    g.async = true;
-    s.parentNode.insertBefore(g, s);
+    /* ── Proxy Vercel — clés gérées côté serveur ────────────── */
+    const PROXY_URL          = 'https://crypview-proxy.vercel.app/api/proxy';
+    const PROXY_ORIGIN_TOKEN = 'cv_origin_XXXXXXXXXXXXXXXX'; // identique à CRYPVIEW_ORIGIN_SECRET dans Vercel
+    const GEMINI_MODEL       = 'gemini-2.5-flash-lite';
+    const MISTRAL_MODEL      = 'mistral-small-latest';
 
-    g.onload = function () {
-      window.chatwootSDK.run({
-        websiteToken : '69f25dded7f0fea2c6c006d2',
-        baseUrl      : BASE_URL
-      });
+    /* ── Dictionnaire i18n inline ────────────────────────────── */
+    // Couvre uniquement les chaînes construites en JS (welcome, system prompt,
+    // erreurs, questions des chips). Les textes statiques HTML sont gérés
+    // par data-i18n / data-i18n-aria / data-i18n-placeholder du moteur existant.
+    const AI_T = {
+      fr: {
+        welcomeMorning: 'Bonjour',
+        welcomeEvening: 'Bonsoir',
+        welcomeBody:    'Je suis l\'assistant IA de **CrypView**.\nPose-moi une question sur les indicateurs techniques, l\'analyse crypto ou l\'utilisation de l\'application.',
+        footer:         'Alimenté par Gemini · Ne constitue pas un conseil financier',
+        footerMistral:  'Alimenté par Mistral AI · Ne constitue pas un conseil financier',
+        errorBoth:      '⚠ Les deux services IA sont indisponibles.',
+        systemLang:     'français',
+        chips: {
+          rsi:      { label: 'RSI',       q: 'Comment fonctionne le RSI ?' },
+          bb:       { label: 'Bollinger', q: 'Explique les Bandes de Bollinger' },
+          macd:     { label: 'MACD',      q: 'Comment utiliser le MACD ?' },
+          ichimoku: { label: 'Ichimoku',  q: 'Qu\'est-ce que l\'Ichimoku ?' },
+          start:    { label: 'Démarrer',  q: 'Comment lancer CrypView ?' },
+        },
+      },
+      en: {
+        welcomeMorning: 'Good morning',
+        welcomeEvening: 'Good evening',
+        welcomeBody:    'I am the **CrypView** AI assistant.\nFeel free to ask about technical indicators, crypto analysis or how to use the app.',
+        footer:         'Powered by Gemini · Not financial advice',
+        footerMistral:  'Powered by Mistral AI · Not financial advice',
+        errorBoth:      '⚠ Both AI services are unavailable.',
+        systemLang:     'English',
+        chips: {
+          rsi:      { label: 'RSI',         q: 'How does RSI work?' },
+          bb:       { label: 'Bollinger',   q: 'Explain Bollinger Bands' },
+          macd:     { label: 'MACD',        q: 'How to use MACD?' },
+          ichimoku: { label: 'Ichimoku',    q: 'What is the Ichimoku Cloud?' },
+          start:    { label: 'Get started', q: 'How do I launch CrypView?' },
+        },
+      },
+      zh: {
+        welcomeMorning: '早上好',
+        welcomeEvening: '晚上好',
+        welcomeBody:    '我是 **CrypView** AI 助手。\n请向我提问有关技术指标、加密货币分析或应用使用的问题。',
+        footer:         '由 Gemini 提供支持 · 非投资建议',
+        footerMistral:  '由 Mistral AI 提供支持 · 非投资建议',
+        errorBoth:      '⚠ 两个 AI 服务均不可用。',
+        systemLang:     '中文',
+        chips: {
+          rsi:      { label: 'RSI',     q: 'RSI 指标如何运作？' },
+          bb:       { label: '布林带',   q: '解释一下布林带' },
+          macd:     { label: 'MACD',    q: '如何使用 MACD？' },
+          ichimoku: { label: '一目均衡', q: '什么是一目均衡表？' },
+          start:    { label: '开始使用', q: '如何启动 CrypView？' },
+        },
+      },
+      ar: {
+        welcomeMorning: 'صباح الخير',
+        welcomeEvening: 'مساء الخير',
+        welcomeBody:    'أنا مساعد **CrypView** الذكي.\nاسألني عن المؤشرات التقنية أو تحليل العملات الرقمية أو كيفية استخدام التطبيق.',
+        footer:         'مدعوم بـ Gemini · ليس نصيحة مالية',
+        footerMistral:  'مدعوم بـ Mistral AI · ليس نصيحة مالية',
+        errorBoth:      '⚠ كلا خدمتَي الذكاء الاصطناعي غير متاحتَين.',
+        systemLang:     'العربية',
+        chips: {
+          rsi:      { label: 'RSI',        q: 'كيف يعمل مؤشر RSI؟' },
+          bb:       { label: 'بولينجر',    q: 'اشرح نطاقات بولينجر' },
+          macd:     { label: 'MACD',       q: 'كيف يُستخدم MACD؟' },
+          ichimoku: { label: 'إيشيموكو',   q: 'ما هو مؤشر إيشيموكو؟' },
+          start:    { label: 'ابدأ',       q: 'كيف أبدأ في استخدام CrypView؟' },
+        },
+      },
     };
-  })(document, 'script');
-</script>
+    const AI_DEFAULT = 'fr';
 
-<!-- Bouton nav "Assistant IA" → toggle drawer custom -->
-<script>
-(function () {
-  'use strict';
-
-  var btn          = document.getElementById('ai-chat-btn');
-  var overlay      = document.getElementById('ai-overlay');
-  var drawer       = document.getElementById('ai-drawer');
-  var closeBtn     = document.getElementById('ai-drawer-close-btn');
-  var loading      = document.getElementById('ai-drawer-loading');
-  var iframe       = document.getElementById('ai-chatbot-iframe');
-  var iframeLoaded = false;
-
-  function openDrawer() {
-    if (!iframeLoaded) {
-      iframe.src = iframe.dataset.src;
-      iframeLoaded = true;
-      iframe.addEventListener('load', function () {
-        loading.classList.add('hidden');
-      }, { once: true });
+    /** Retourne le code langue à 2 lettres, avec fallback sur AI_DEFAULT */
+    function getLocale() {
+      const lang = document.documentElement.lang || AI_DEFAULT;
+      const code = lang.split('-')[0].toLowerCase();
+      return AI_T[code] ? code : AI_DEFAULT;
     }
-    overlay.classList.add('open');
-    requestAnimationFrame(function () { overlay.classList.add('visible'); });
-    drawer.classList.add('open');
-    drawer.setAttribute('aria-hidden', 'false');
-    btn.setAttribute('aria-expanded', 'true');
-    document.body.style.overflow = 'hidden';
-  }
 
-  function closeDrawer() {
-    overlay.classList.remove('visible');
-    drawer.classList.remove('open');
-    drawer.setAttribute('aria-hidden', 'true');
-    btn.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-    overlay.addEventListener('transitionend', function h() {
-      overlay.classList.remove('open');
-      overlay.removeEventListener('transitionend', h);
+    /** Accesseur de traduction pour les chaînes dynamiques */
+    function aiT(key) {
+      const tr = AI_T[getLocale()] || AI_T[AI_DEFAULT];
+      return key.split('.').reduce((o, k) => (o != null ? o[k] : undefined), tr)
+          ?? key.split('.').reduce((o, k) => (o != null ? o[k] : undefined), AI_T[AI_DEFAULT])
+          ?? key;
+    }
+
+    /* ── System Prompt (langue dynamique) ────────────────────── */
+    function getSystemPrompt() {
+      const lang = aiT('systemLang');
+      return `You are the AI assistant for CrypView, a real-time crypto trading app.
+You help users understand:
+- Technical indicators (RSI, MACD, Bollinger, Ichimoku)
+- Crypto market analysis
+- How to use the CrypView application
+Always respond in ${lang}, concisely and clearly.
+Never give financial advice or encourage buying or selling.
+If you don't know, say so honestly.`;
+    }
+
+    /* ── Éléments DOM ────────────────────────────────────────── */
+    const overlay       = document.getElementById('ai-overlay');
+    const drawer        = document.getElementById('ai-drawer');
+    const openBtn       = document.getElementById('ai-chat-btn');
+    const closeBtn      = document.getElementById('ai-drawer-close');
+    const messagesEl    = document.getElementById('ai-chat-messages');
+    const inputEl       = document.getElementById('ai-chat-input');
+    const sendBtn       = document.getElementById('ai-send-btn');
+    const suggestionsEl = document.getElementById('ai-suggestions');
+    const footerEl      = document.querySelector('.ai-drawer-footer');
+
+    /* ── État ────────────────────────────────────────────────── */
+    let isOpen              = false;
+    let isLoading           = false;
+    let conversationHistory = [];   // [{role, parts:[{text}]}] pour Gemini
+    let suggestionsHidden   = false;
+    let activeBackend       = null; // 'gemini' | 'mistral'
+
+    /* ── Init chips (textes + questions traduits) ────────────── */
+    function initChips() {
+      const chips = suggestionsEl.querySelectorAll('.ai-suggestion-chip[data-q-key]');
+      chips.forEach(chip => {
+        const key  = chip.dataset.qKey;
+        const data = aiT(`chips.${key}`);
+        if (data && typeof data === 'object') {
+          chip.textContent  = data.label;
+          chip.dataset.q    = data.q;
+        }
+      });
+    }
+
+    /* ── Ouvrir / Fermer ─────────────────────────────────────── */
+    function openDrawer() {
+      isOpen = true;
+      overlay.classList.add('open');
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      openBtn.setAttribute('aria-expanded', 'true');
+      requestAnimationFrame(() => {
+        overlay.classList.add('visible');
+        if (!conversationHistory.length) {
+          initChips();
+          addBotMessage(getWelcomeMessage());
+        }
+        inputEl.focus();
+      });
+    }
+
+    function closeDrawer() {
+      isOpen = false;
+      overlay.classList.remove('visible');
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      openBtn.setAttribute('aria-expanded', 'false');
+      setTimeout(() => overlay.classList.remove('open'), 300);
+    }
+
+    openBtn.addEventListener('click', () => isOpen ? closeDrawer() : openDrawer());
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closeDrawer(); });
+
+    /* ── Contexte de la page ─────────────────────────────────── */
+    function getPageContext() {
+      const sections = [];
+      const title    = document.title;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (title)    sections.push(`Page : ${title}`);
+      if (metaDesc) sections.push(`Description : ${metaDesc.content}`);
+
+      const headings = [...document.querySelectorAll('h1, h2, h3')]
+        .map(h => h.innerText.trim())
+        .filter(t => t.length > 0 && t.length < 120)
+        .slice(0, 20);
+      if (headings.length) sections.push('Sections de la page :\n' + headings.join('\n'));
+
+      const featureTexts = [...document.querySelectorAll('.feature-card, .feat-item, .indicator-tag, [data-feature]')]
+        .map(el => el.innerText.trim().replace(/\s+/g, ' '))
+        .filter(t => t.length > 2 && t.length < 200)
+        .slice(0, 30);
+      if (featureTexts.length) sections.push('Fonctionnalités détectées :\n' + featureTexts.join(' · '));
+
+      const faqQs = [...document.querySelectorAll('.faq-q, .faq-question, [data-faq-q]')]
+        .map(el => el.innerText.trim())
+        .slice(0, 10);
+      if (faqQs.length) sections.push('FAQ :\n' + faqQs.join('\n'));
+
+      return sections.join('\n\n');
+    }
+
+    /* ── Message de bienvenue ────────────────────────────────── */
+    function getWelcomeMessage() {
+      const h    = new Date().getHours();
+      const salut = h < 12 ? aiT('welcomeMorning') : aiT('welcomeEvening');
+      return `${salut} ! ${aiT('welcomeBody')}`;
+    }
+
+    /* ── Rendu markdown léger ────────────────────────────────── */
+    function renderMarkdown(text) {
+  // Échappement HTML d'abord, PUIS balisage markdown — ordre critique
+      const escaped = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+      return escaped
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>');
+    }
+
+    /* ── Mettre à jour le footer avec le backend actif ───────── */
+    function updateFooterBackend(backend) {
+      if (!footerEl) return;
+      // Retire l'attribut data-i18n statique pour prise en charge manuelle
+      footerEl.removeAttribute('data-i18n');
+      footerEl.textContent = backend === 'mistral'
+        ? aiT('footerMistral')
+        : aiT('footer');
+    }
+
+    /* ── Ajouter des messages ────────────────────────────────── */
+    function addBotMessage(text) {
+      const now = new Date().toLocaleTimeString(document.documentElement.lang || 'fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const div = document.createElement('div');
+      div.className = 'ai-msg ai-msg--bot';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-msg-bubble';
+      bubble.innerHTML = renderMarkdown(text); // renderMarkdown échappe déjà les balises
+
+      const time = document.createElement('span');
+      time.className = 'ai-msg-time';
+      time.textContent = now; // textContent — pas de risque XSS
+
+      div.appendChild(bubble);
+      div.appendChild(time);
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
+    }
+
+    function addUserMessage(text) {
+      const now = new Date().toLocaleTimeString(document.documentElement.lang || 'fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const div = document.createElement('div');
+      div.className = 'ai-msg ai-msg--user';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'ai-msg-bubble';
+      bubble.innerHTML = renderMarkdown(text);
+
+      const time = document.createElement('span');
+      time.className = 'ai-msg-time';
+      time.textContent = now;
+
+      div.appendChild(bubble);
+      div.appendChild(time);
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function addTypingIndicator() {
+      const div = document.createElement('div');
+      div.className = 'ai-msg ai-msg--bot ai-msg--typing';
+      div.id = 'ai-typing';
+      div.innerHTML = `<div class="ai-msg-bubble"><div class="ai-typing-dots"><span></span><span></span><span></span></div></div>`;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
+    }
+
+    function removeTypingIndicator() {
+      const el = document.getElementById('ai-typing');
+      if (el) el.remove();
+    }
+
+    function addErrorMessage(msg, detail) {
+      const div    = document.createElement('div');
+      div.className = 'ai-msg ai-msg--bot ai-msg--error';
+
+      const bubble  = document.createElement('div');
+      bubble.className = 'ai-msg-bubble';
+      bubble.textContent = msg;           // sûr — textContent échappe tout
+
+      if (detail) {
+        const small = document.createElement('small');
+        small.textContent = detail;       // sûr
+        bubble.appendChild(document.createElement('br'));
+        bubble.appendChild(small);
+      }
+
+      div.appendChild(bubble);
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    /* ── Appel Gemini (via proxy Vercel) ────────────────────── */
+    async function callGemini(userText, systemWithContext) {
+      const body = {
+        system_instruction: { parts: [{ text: systemWithContext }] },
+        contents: conversationHistory,
+        generationConfig: { temperature: 0.7, maxOutputTokens: 800, topP: 0.9 },
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+        ],
+      };
+
+      const res = await fetch(PROXY_URL, {
+        method  : 'POST',
+        headers : {
+          'Content-Type'     : 'application/json',
+          'X-CrypView-Origin': PROXY_ORIGIN_TOKEN,
+        },
+        body    : JSON.stringify({ backend: 'gemini', payload: body }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || `Proxy Gemini HTTP ${res.status}`);
+      }
+
+      const data  = await res.json();
+      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!reply) throw new Error('Réponse vide de Gemini.');
+      return reply;
+    }
+
+    /* ── Appel Mistral (via proxy Vercel) ───────────────────── */
+    async function callMistral(userText, systemWithContext) {
+      const messages = [
+        { role: 'system', content: systemWithContext },
+        ...conversationHistory.map(m => ({
+          role   : m.role === 'model' ? 'assistant' : 'user',
+          content: m.parts?.[0]?.text ?? '',
+        })),
+      ];
+
+      const res = await fetch(PROXY_URL, {
+        method  : 'POST',
+        headers : {
+          'Content-Type'     : 'application/json',
+          'X-CrypView-Origin': PROXY_ORIGIN_TOKEN,
+        },
+        body    : JSON.stringify({
+          backend: 'mistral',
+          payload: {
+            model      : MISTRAL_MODEL,
+            messages,
+            temperature: 0.7,
+            max_tokens : 800,
+            top_p      : 0.9,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || `Proxy Mistral HTTP ${res.status}`);
+      }
+
+      const data  = await res.json();
+      const reply = data?.choices?.[0]?.message?.content || '';
+      if (!reply) throw new Error('Réponse vide de Mistral.');
+      return reply;
+    }
+
+    /* ── Orchestrateur : Gemini → Mistral fallback ───────────── */
+    async function callAI(userText) {
+      const pageCtx           = getPageContext();
+      const systemWithContext = getSystemPrompt() +
+        (pageCtx ? `\n\nPage context:\n${pageCtx}` : '');
+
+      conversationHistory.push({ role: 'user', parts: [{ text: userText }] });
+
+      let reply   = null;
+      let backend = null;
+
+      /* 1️⃣ Tentative Gemini */
+      try {
+        reply   = await callGemini(userText, systemWithContext);
+        backend = 'gemini';
+      } catch (geminiErr) {
+        console.warn('[CrypView AI] Gemini indisponible :', geminiErr.message, '→ bascule Mistral');
+
+        /* 2️⃣ Fallback Mistral */
+        try {
+          reply   = await callMistral(userText, systemWithContext);
+          backend = 'mistral';
+        } catch (mistralErr) {
+          conversationHistory.pop();
+          throw new Error(`Gemini : ${geminiErr.message} | Mistral : ${mistralErr.message}`);
+        }
+      }
+
+      conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
+
+      if (backend !== activeBackend) {
+        activeBackend = backend;
+        updateFooterBackend(backend);
+      }
+
+      return reply;
+    }
+
+    /* ── Envoyer un message ──────────────────────────────────── */
+    async function sendMessage(text) {
+      text = text.trim();
+      if (!text || isLoading) return;
+
+      if (!suggestionsHidden) {
+        suggestionsEl.style.display = 'none';
+        suggestionsHidden = true;
+      }
+
+      isLoading        = true;
+      sendBtn.disabled = true;
+      inputEl.disabled = true;
+
+      addUserMessage(text);
+      inputEl.value        = '';
+      inputEl.style.height = 'auto';
+
+      addTypingIndicator();
+
+      try {
+        const reply = await callAI(text);
+        removeTypingIndicator();
+        addBotMessage(reply);
+      } catch (err) {
+        removeTypingIndicator();
+        addErrorMessage(aiT('errorBoth'), err.message);
+      } finally {
+        isLoading        = false;
+        sendBtn.disabled = false;
+        inputEl.disabled = false;
+        inputEl.focus();
+      }
+    }
+
+    /* ── Input ───────────────────────────────────────────────── */
+    inputEl.addEventListener('input', function () {
+      sendBtn.disabled    = this.value.trim().length === 0;
+      this.style.height   = 'auto';
+      this.style.height   = Math.min(this.scrollHeight, 120) + 'px';
     });
-  }
 
-  btn.addEventListener('click', openDrawer);
-  closeBtn.addEventListener('click', closeDrawer);
-  overlay.addEventListener('click', closeDrawer);
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
-  });
-})();
+    inputEl.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(this.value);
+      }
+    });
+
+    sendBtn.addEventListener('click', () => sendMessage(inputEl.value));
+
+    /* ── Suggestions rapides ─────────────────────────────────── */
+    suggestionsEl.addEventListener('click', function (e) {
+      const chip = e.target.closest('.ai-suggestion-chip');
+      if (chip) sendMessage(chip.dataset.q);
+    });
+
+  })();
 </script>
 
 <script type="module" src="src/pages/index.js"></script>

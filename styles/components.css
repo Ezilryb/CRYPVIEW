@@ -437,3 +437,85 @@ a.logo:hover { opacity: .7; }
 .trade-row.sell .t-price { color: var(--red); }
 .t-price  { font-weight: 700; }
 .t-qty, .t-time { color: var(--muted); text-align: right; font-size: 9px; }
+
+/* ============================================================
+   PATCH — components.css
+   À ajouter À LA FIN de styles/components.css
+   ── Tabs discrets : Sentiment / News / Fondamentaux / Order Book ──
+   Positionnés dans le header, juste à gauche du prix.
+   ============================================================ */
+
+/* ── Conteneur des onglets ───────────────────────────────────── */
+.panel-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: auto;       /* pousse vers la droite, contre le prix */
+  flex-shrink: 0;
+  /* Séparateur visuel léger à gauche */
+  border-left: 1px solid var(--border);
+  padding-left: 10px;
+}
+
+/* ── Bouton individuel ───────────────────────────────────────── */
+.panel-tab {
+  /* Reset hérité de button */
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 4px 9px;
+  min-height: unset;
+
+  font-family: 'Space Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);           /* gris discret par défaut */
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.55;                 /* encore plus effacé */
+  transition: color 0.15s, opacity 0.15s, border-color 0.15s;
+
+  /* Soulignement d'activation (invisible par défaut) */
+  border-bottom: 1px solid transparent;
+  position: relative;
+  top: 1px;                      /* aligne avec la bordure basse du header */
+}
+
+.panel-tab:hover {
+  color: var(--text);
+  opacity: 0.85;
+  border-color: transparent;     /* pas de soulignement au hover */
+}
+
+/* ── Tab actif ───────────────────────────────────────────────── */
+.panel-tab.active {
+  color: var(--accent);
+  opacity: 1;
+  border-bottom-color: var(--accent);
+  background: none;
+}
+
+/* ── Thème clair ─────────────────────────────────────────────── */
+.light-theme .panel-tabs {
+  border-left-color: #d0d7e3;
+}
+
+.light-theme .panel-tab {
+  color: var(--muted);
+}
+
+.light-theme .panel-tab:hover {
+  color: var(--text);
+}
+
+.light-theme .panel-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Responsive : masqué sur très petit mobile ───────────────── */
+@media (max-width: 768px) {
+  .panel-tabs {
+    display: none;   /* le header mobile est déjà surchargé */
+  }
+}

@@ -16,6 +16,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="canonical" href="https://ezilryb.github.io/CRYPVIEW/risk-disclaimer.html">
+  <meta name="robots" content="noindex, follow">
   <style>
     :root {
       --bg:     #070a0f;
@@ -104,7 +106,6 @@
     }
     .risk-item:hover { border-color: rgba(255,61,90,.25); }
     .risk-item-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-    .risk-item-body {}
     .risk-item-title { font-size: 11px; color: var(--text); letter-spacing: .04em; margin-bottom: 4px; }
     .risk-item-desc { font-size: 11px; color: var(--muted); line-height: 1.75; letter-spacing: .03em; }
 
@@ -151,19 +152,44 @@
   <link rel="shortcut icon" 
     href="https://ezilryb.github.io/CRYPVIEW/public/favicon.ico">
 
+<!-- Breadcrumb structuré — à personnaliser par page -->
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "CrypView — Tracker Crypto Temps Réel",
+        "item": "https://ezilryb.github.io/CRYPVIEW/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "FAQ",  /* ← adapter : Wiki / Risques / Cookies / Conditions */
+        "item": "https://ezilryb.github.io/CRYPVIEW/faq.html"
+      }
+    ]
+  }
+</script>
+
 </head>
 <body>
 
 <nav>
   <a class="nav-logo" href="index.html">CRYP<span class="accent">VIEW</span></a>
-  <a class="nav-back" href="index.html">← Retour à l'accueil</a>
+  <a class="nav-back" href="index.html" 
+    title="CrypView — Tracker crypto en temps réel">
+    ← CrypView
+  </a>
 </nav>
 
 <div class="page-wrap">
 
   <div class="page-tag">⚠ Légal</div>
   <h1>Avertissement sur les risques</h1>
-  <p class="page-meta">Dernière mise à jour : Juin 2025 &nbsp;·&nbsp; CrypView — Beta Capital Enterprise</p>
+  <p class="page-meta">Dernière mise à jour : Avril 2026 &nbsp;·&nbsp; CrypView — Beta Capital Enterprise</p>
 
   <div class="risk-banner">
     <span class="risk-banner-icon">⚠</span>
@@ -290,14 +316,29 @@
 </div><!-- /page-wrap -->
 
 <footer>
-  <span>© 2025 CrypView — Beta Capital Enterprise</span>
-  <nav style="display:flex;gap:16px">
-    <a href="faq.html">FAQ</a>
-    <a href="cookies.html">Cookies</a>
-    <a href="privacy.html">Confidentialité</a>
-    <a href="terms.html">Conditions</a>
-    <a href="index.html">Accueil</a>
-  </nav>
+  <div style="max-width:760px;margin:0 auto;padding:0 0 16px">
+    <!-- Lien principal vers l'accueil — ancre riche -->
+    <div style="margin-bottom:12px;font-size:11px;color:var(--muted)">
+      <a href="index.html" 
+         style="color:var(--accent);text-decoration:none;font-weight:500"
+         title="CrypView — Graphiques crypto en temps réel, 34 indicateurs techniques">
+        ← CrypView — Tracker Crypto Temps Réel
+      </a>
+    </div>
+    <!-- Liens contextuels vers d'autres pages clés -->
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <a href="index.html"    style="color:var(--muted);text-decoration:none;font-size:10px" 
+         title="Lancer CrypView — Graphiques crypto Binance live">Accueil</a>
+      <a href="wiki.html"     style="color:var(--muted);text-decoration:none;font-size:10px"
+         title="Documentation CrypView — Guide complet des indicateurs">Documentation</a>
+      <a href="changelog.html"style="color:var(--muted);text-decoration:none;font-size:10px">Changelog</a>
+      <a href="cookies.html"  style="color:var(--muted);text-decoration:none;font-size:10px">Cookies</a>
+      <a href="privacy.html"  style="color:var(--muted);text-decoration:none;font-size:10px">Confidentialité</a>
+      <a href="terms.html"    style="color:var(--muted);text-decoration:none;font-size:10px">Conditions</a>
+      <a href="risks.html"    style="color:var(--muted);text-decoration:none;font-size:10px">Risques</a>
+    </div>
+  </div>
+  <span>© 2026 CrypView — Beta Capital Enterprise</span>
 </footer>
 
 </body>

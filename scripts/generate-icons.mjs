@@ -23,7 +23,7 @@ const sizes = [
   { size: 32,   name: 'favicon-32.png'  },
   { size: 192,  name: 'icon-192.png'    },
   { size: 512,  name: 'icon-512.png'    },
-  { size: 180,  name: 'apple-touch-icon.png' }, // Apple
+  { size: 180,  name: 'apple-touch-icon.png' },
 ];
 
 for (const { size, name } of sizes) {
@@ -34,7 +34,6 @@ for (const { size, name } of sizes) {
   console.log(`✅  public/icons/${name}  (${size}×${size})`);
 }
 
-// Favicon classique 32x32 à la racine
 await sharp(svgBuffer)
   .resize(32, 32)
   .png()

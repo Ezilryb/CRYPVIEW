@@ -24,12 +24,6 @@ import { calcVWAP }                               from '../src/indicators/vwap.j
 import { calcIchimoku }                           from '../src/indicators/ichimoku.js';
 import { calcBB, calcATR }                        from '../src/indicators/volatility.js';
 
-// ── Fabrique de bougies synthétiques ─────────────────────────
-
-/**
- * Génère N bougies avec un prix linéaire de `start` à `end`.
- * time = i * 3600 (1h par bougie), volume constant.
- */
 function makeCandles(n, start = 100, end = 100, volume = 1000) {
   return Array.from({ length: n }, (_, i) => {
     const close = start + (end - start) * (i / Math.max(n - 1, 1));
@@ -40,10 +34,6 @@ function makeCandles(n, start = 100, end = 100, volume = 1000) {
   });
 }
 
-/**
- * Génère N bougies alternant hausse / baisse autour d'une base.
- * Utile pour RSI : produit gains ET pertes non nuls.
- */
 function makeOscillatingCandles(n, base = 100, amplitude = 5) {
   return Array.from({ length: n }, (_, i) => {
     const close = base + (i % 2 === 0 ? amplitude : -amplitude);
@@ -58,13 +48,9 @@ function makeOscillatingCandles(n, base = 100, amplitude = 5) {
   });
 }
 
-// ══════════════════════════════════════════════════════════════
-//  calcRSI
-// ══════════════════════════════════════════════════════════════
-
 describe('calcRSI', () => {
   it('retourne un tableau vide si moins de (period+1) bougies', () => {
-    const candles = makeCandles(14); // exactement period, pas assez
+    const candles = makeCandles(14);
     const result  = calcRSI(candles, 14);
     expect(result).toHaveLength(0);
   });
@@ -74,7 +60,6 @@ describe('calcRSI', () => {
     const period  = 14;
     const candles = makeOscillatingCandles(n);
     const result  = calcRSI(candles, period);
-    // La boucle démarre à i=period et va jusqu'à n-1 → n-period valeurs
     expect(result).toHaveLength(n - period);
   });
 
@@ -97,11 +82,8 @@ describe('calcRSI', () => {
   });
 
   it('RSI = 100 quand avgLoss = 0 (prix toujours croissants)', () => {
-    // Bougies strictement croissantes → avgLoss=0 → RSI=100
     const candles = makeCandles(30, 100, 200);
     const result  = calcRSI(candles, 14);
-    // Les premières valeurs peuvent être < 100 si la période initiale contient
-    // un léger plateau ; on vérifie au moins que le résultat ne plante pas
     expect(result.length).toBeGreaterThan(0);
     result.forEach(({ value }) => {
       expect(isNaN(value)).toBe(false);
@@ -112,7 +94,6 @@ describe('calcRSI', () => {
   it('RSI ≈ 50 avec des oscillations symétriques', () => {
     const candles = makeOscillatingCandles(200, 100, 5);
     const result  = calcRSI(candles, 14);
-    // Après stabilisation (derniers points), le RSI doit tendre vers 50
     const last = result.at(-1).value;
     expect(last).toBeGreaterThan(40);
     expect(last).toBeLessThan(60);
@@ -125,10 +106,6 @@ describe('calcRSI', () => {
     expect(result).toHaveLength(n - period);
   });
 });
-
-// ══════════════════════════════════════════════════════════════
-//  calcMACD
-// ══════════════════════════════════════════════════════════════
 
 describe('calcMACD', () => {
   it('retourne les 3 séries macd / signal / hist', () => {
@@ -147,7 +124,6 @@ describe('calcMACD', () => {
   });
 
   it('retourne des tableaux vides si données insuffisantes (< slow+signal)', () => {
-    // slow=26, signal=9 → besoin de 26+9=35 bougies au minimum
     const candles = makeOscillatingCandles(20);
     const { macd, signal, hist } = calcMACD(candles);
     expect(macd).toHaveLength(0);
@@ -182,10 +158,6 @@ describe('calcMACD', () => {
   });
 });
 
-// ══════════════════════════════════════════════════════════════
-//  calcVWAP
-// ══════════════════════════════════════════════════════════════
-
 describe('calcVWAP', () => {
   it('retourne autant de points que de bougies', () => {
     const candles = makeCandles(50);
@@ -213,22 +185,16 @@ describe('calcVWAP', () => {
   });
 
   it('reset journalier : VWAP repart de zéro le lendemain UTC', () => {
-    // Bougie J1 : time=0 (00:00 UTC jour 0)
-    // Bougie J2 : time=86400 (00:00 UTC jour 1)
     const j1 = { time: 0,     open: 100, high: 110, low: 90,  close: 100, volume: 1000 };
     const j2 = { time: 86400, open: 200, high: 220, low: 180, close: 200, volume: 1000 };
 
     const [pt1, pt2] = calcVWAP([j1, j2]);
 
-    // pt1 : TP_j1 = (110+90+100)/3 = 100
     expect(pt1.value).toBeCloseTo(100, 6);
-
-    // pt2 doit être calculé depuis zéro (reset) — TP_j2 = (220+180+200)/3 = 200
     expect(pt2.value).toBeCloseTo(200, 6);
   });
 
   it('accumulation correcte sur 3 bougies du même jour', () => {
-    // Toutes dans le même jour (time < 86400)
     const candles = [
       { time: 0,    open: 100, high: 110, low: 90,  close: 100, volume: 100 },
       { time: 3600, open: 102, high: 112, low: 92,  close: 102, volume: 200 },
@@ -236,22 +202,14 @@ describe('calcVWAP', () => {
     ];
     const result = calcVWAP(candles);
 
-    // Calcul manuel :
-    // TP0 = (110+90+100)/3 = 100  → cumulPV=10000, cumulV=100
-    // TP1 = (112+92+102)/3 = 102  → cumulPV=10000+20400=30400, cumulV=300
-    // TP2 = (114+94+104)/3 = 104  → cumulPV=30400+31200=61600, cumulV=600
     expect(result[0].value).toBeCloseTo(100,    6);
     expect(result[1].value).toBeCloseTo(30400 / 300, 6);
     expect(result[2].value).toBeCloseTo(61600 / 600, 6);
   });
 });
 
-// ══════════════════════════════════════════════════════════════
-//  calcIchimoku
-// ══════════════════════════════════════════════════════════════
-
 describe('calcIchimoku', () => {
-  const N = 120; // >= 52 pour avoir tous les composants
+  const N = 120;
 
   it('retourne les 5 composants attendus', () => {
     const result = calcIchimoku(makeCandles(N));
@@ -263,7 +221,6 @@ describe('calcIchimoku', () => {
   });
 
   it('tenkan a (N - 8) points', () => {
-    // max9[j] démarre à j=0, s'arrête à j=N-9 → N-8 points
     expect(calcIchimoku(makeCandles(N)).tenkan).toHaveLength(N - 8);
   });
 
@@ -272,7 +229,6 @@ describe('calcIchimoku', () => {
   });
 
   it('senkouB a (N - 51) points', () => {
-    // max52 produit N-51 éléments
     expect(calcIchimoku(makeCandles(N)).senkouB).toHaveLength(N - 51);
   });
 
@@ -284,7 +240,6 @@ describe('calcIchimoku', () => {
     const candles = makeCandles(20, 100, 200);
     const { tenkan } = calcIchimoku(candles);
 
-    // Premier point : fenêtre [0..8], 9 bougies
     const window9 = candles.slice(0, 9);
     const h = Math.max(...window9.map(c => c.high));
     const l = Math.min(...window9.map(c => c.low));
@@ -302,12 +257,9 @@ describe('calcIchimoku', () => {
   });
 
   it('senkouA[i].value = (tenkan + kijun) / 2 sur les valeurs recoupées', () => {
-    // Pour i=25, tenkan_num = (max9[17] + min9[17]) / 2
-    //                 kijun_num = (max26[0] + min26[0]) / 2
     const candles = makeCandles(60, 100, 160);
     const { senkouA } = calcIchimoku(candles);
 
-    // senkouA[0] correspond à i=25
     const t = (candles.slice(17, 26).reduce((m, c) => Math.max(m, c.high), -Infinity) +
                candles.slice(17, 26).reduce((m, c) => Math.min(m, c.low),   Infinity)) / 2;
     const k = (candles.slice(0, 26).reduce((m, c) => Math.max(m, c.high), -Infinity) +
@@ -315,10 +267,6 @@ describe('calcIchimoku', () => {
     expect(senkouA[0].value).toBeCloseTo((t + k) / 2, 4);
   });
 });
-
-// ══════════════════════════════════════════════════════════════
-//  calcBB (Bollinger Bands)
-// ══════════════════════════════════════════════════════════════
 
 describe('calcBB', () => {
   it('retourne mid / upper / lower de même longueur', () => {
@@ -354,15 +302,10 @@ describe('calcBB', () => {
     const candles = makeOscillatingCandles(30);
     const period  = 20;
     const { mid } = calcBB(candles, period);
-    // mid[0] = moyenne des period premiers closes
     const expectedMid0 = candles.slice(0, period).reduce((s, c) => s + c.close, 0) / period;
     expect(mid[0].value).toBeCloseTo(expectedMid0, 6);
   });
 });
-
-// ══════════════════════════════════════════════════════════════
-//  calcStoch
-// ══════════════════════════════════════════════════════════════
 
 describe('calcStoch', () => {
   it('retourne k et d', () => {
@@ -392,7 +335,6 @@ describe('calcStoch', () => {
   });
 
   it('%K = 50 quand high === low (protection division par zéro)', () => {
-    // Bougies plates : high = low = close
     const candles = Array.from({ length: 20 }, (_, i) => ({
       time: i * 3600, open: 100, high: 100, low: 100, close: 100, volume: 500,
     }));
@@ -401,15 +343,8 @@ describe('calcStoch', () => {
   });
 });
 
-// ══════════════════════════════════════════════════════════════
-//  calcATR
-// ══════════════════════════════════════════════════════════════
-
 describe('calcATR', () => {
   it('retourne (N - period - 1) points', () => {
-    // trueRange a N-1 valeurs ; ATR démarre à i=period → tr.length - period - 1 + 1 iterations
-    // out.push pour i in [period, tr.length - 1] → tr.length - period points
-    // tr.length = N-1 → out.length = N-1-period
     const n = 50, period = 14;
     const result = calcATR(makeOscillatingCandles(n), period);
     expect(result).toHaveLength(n - 1 - period);
@@ -423,7 +358,6 @@ describe('calcATR', () => {
   });
 
   it('ATR est stable sur des bougies identiques (amplitude constante)', () => {
-    // Bougies identiques → TR constant → ATR = TR
     const candles = Array.from({ length: 40 }, (_, i) => ({
       time: i * 3600, open: 99, high: 101, low: 99, close: 100, volume: 1000,
     }));
@@ -440,11 +374,6 @@ describe('calcATR', () => {
     });
   });
 });
-
-// ══════════════════════════════════════════════════════════════
-//  calcCCI — Commodity Channel Index
-//  Optimisé via somme glissante O(n) pour la mean.
-// ══════════════════════════════════════════════════════════════
 
 describe('calcCCI', () => {
   it('retourne (N - period + 1) points', () => {
@@ -469,13 +398,11 @@ describe('calcCCI', () => {
   });
 
   it('retourne un tableau vide si N < period', () => {
-    // 10 bougies, period=20 → aucune fenêtre complète possible
     const result = calcCCI(makeOscillatingCandles(10), 20);
     expect(result).toHaveLength(0);
   });
 
   it('CCI = 0 quand tous les prix sont identiques (md = 0, protection ÷0)', () => {
-    // Bougies entièrement plates → TP constant → mean = TP → md = 0
     const candles = Array.from({ length: 30 }, (_, i) => ({
       time: i * 3600, open: 100, high: 100, low: 100, close: 100, volume: 1000,
     }));
@@ -486,15 +413,6 @@ describe('calcCCI', () => {
   });
 
   it('valeur exacte vérifiée manuellement (period=3, trend linéaire stricte)', () => {
-    // Construction d'un cas déterministe :
-    //   Bougie 0 : H=11, L=9,  C=10 → TP=10
-    //   Bougie 1 : H=12, L=10, C=11 → TP=11
-    //   Bougie 2 : H=13, L=11, C=12 → TP=12
-    //
-    // Fenêtre i=2 (premier point) :
-    //   mean  = (10+11+12)/3 = 11
-    //   md    = (|10-11| + |11-11| + |12-11|) / 3 = 2/3
-    //   CCI   = (12-11) / (0.015 × 2/3) = 1 / 0.01 = 100
     const candles = [
       { time: 0,    open: 10, high: 11, low: 9,  close: 10, volume: 500 },
       { time: 3600, open: 11, high: 12, low: 10, close: 11, volume: 500 },
@@ -512,10 +430,6 @@ describe('calcCCI', () => {
   });
 
   it('résultats numériquement identiques à l\'implémentation naïve de référence', () => {
-    // Ce test est la clé de la refactorisation :
-    // l'optimisation ne doit pas modifier les valeurs, seulement la vitesse.
-    //
-    // Implémentation naïve de référence (ancienne version O(n × period)) :
     const naiveCCI = (candles, period = 20) => {
       const out = [];
       for (let i = period - 1; i < candles.length; i++) {
@@ -541,7 +455,6 @@ describe('calcCCI', () => {
 
     optimized.forEach((pt, i) => {
       expect(pt.time).toBe(reference[i].time);
-      // Précision à 10 décimales — Float64Array vs Number ont la même précision
       expect(pt.value).toBeCloseTo(reference[i].value, 10);
     });
   });
