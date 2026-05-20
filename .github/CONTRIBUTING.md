@@ -1,4 +1,4 @@
-# 🤝 Guide de Contribution — CrypView v4.8
+# 🤝 Guide de Contribution — CrypView v4.8.0
 
 Merci de l'intérêt que vous portez à **CrypView** ! En contribuant à ce projet, vous participez à la création d'un outil de charting et d'orderflow 100% décentralisé, gratuit et accessible à tous, sans l'infrastructure lourde d'un backend.
 
