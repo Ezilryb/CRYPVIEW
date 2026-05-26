@@ -2,7 +2,7 @@
   "name": "CrypView — Graphiques Crypto Temps Réel",
   "short_name": "CrypView",
   "description": "Tracker crypto en temps réel : 32 indicateurs, Footprint, Orderflow, alertes. Données live Binance.",
-  "start_url": "https://ezilryb.github.io/CRYPVIEW/returning.html?utm_source=pwa&utm_medium=homescreen",
+  "start_url": "/CRYPVIEW/returning.html?utm_source=pwa&utm_medium=homescreen",
   "id": "/CRYPVIEW/",
   "scope": "/CRYPVIEW/",
   "display": "standalone",
