@@ -41,7 +41,7 @@
       "name": "Vue Simple",
       "short_name": "Simple",
       "description": "Graphique simple BTC/USDT",
-      "url": "/CRYPVIEW/page.html?sym=btcusdt&utm_source=pwa_shortcut",
+      "url": "/CRYPVIEW/index.html?sym=btcusdt&utm_source=pwa_shortcut",
       "icons": [{ "src": "/CRYPVIEW/public/icons/icon-96.png", "sizes": "96x96" }]
     },
     {
