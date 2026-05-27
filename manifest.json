@@ -1,7 +1,7 @@
 {
   "name": "CrypView — Graphiques Crypto Temps Réel",
   "short_name": "CrypView",
-  "description": "Tracker crypto en temps réel : 32 indicateurs, Footprint, Orderflow, alertes. Données live Binance.",
+  "description": "Tracker crypto en temps réel.",
   "start_url": "/crypview/returning.html?utm_source=pwa&utm_medium=homescreen",
   "id": "/crypview/",
   "scope": "/crypview/",
@@ -40,7 +40,7 @@
     {
       "name": "Vue Simple",
       "short_name": "Simple",
-      "description": "Graphique simple BTC/USDT",
+      "description": "Graphique simple",
       "url": "/crypview/index.html?sym=btcusdt&utm_source=pwa_shortcut",
       "icons": [{ "src": "/crypview/public/icons/icon-96.png", "sizes": "96x96" }]
     },
